@@ -1,0 +1,58 @@
+program pr2;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  SysUtils;
+
+var
+  n, i, j: Integer;
+  data: array of array of Integer;
+  first, second: Integer;
+  fin: textfile;
+  f_name: string;
+
+begin
+  writeln('Введите имя файла чтения');
+  Readln(f_name);
+  assignfile(fin, f_name + '.txt');
+  reset(fin);
+  Readln(fin, n);
+  // Инициализация двумерного массива
+  SetLength(data, n, 2);
+
+  // Ввод данных
+  for i := 0 to n - 1 do
+  begin
+    Write('Введите пару ', i + 1, ' через пробел: ');
+    Readln(fin, first, second);
+    data[i][0] := first;
+    data[i][1] := second;
+  end;
+
+  // Обнуление дубликатов
+  for i := 0 to n - 1 do
+  begin
+    for j := i + 1 to n - 1 do
+    begin
+      if data[i][0] = data[j][0] then
+      begin
+        data[i][0] := 0;
+        data[i][1] := 0;
+        Break;
+      end;
+    end;
+  end;
+
+  // Вывод результата
+  writeln('Результат:');
+  for i := 0 to n - 1 do
+  begin
+    if (data[i][0] <> 0) or (data[i][1] <> 0) then
+      writeln(data[i][0], ' ', data[i][1]);
+  end;
+
+  Readln; // Удержание консоли
+
+end.

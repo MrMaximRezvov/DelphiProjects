@@ -1,0 +1,126 @@
+﻿program Project2;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+type
+  myint = int8;
+
+var
+  a, b, i: myint;
+  rez : real;
+  nop: uint8;
+  minus: boolean;
+  c, c1: char;
+  s, s1: string;
+
+begin
+  repeat
+    try
+      writeln('Введитеп1_символ оп.(+-*/%^)_оп2');
+      nop := 1;
+      readln(s);
+      // s1 := '';
+      // i := 1;
+      // // while s[i] in [' ', '+','-','*','/','%'] do
+      // // begin
+      // // s1:= s1 + s[i];
+      // // inc(i);
+      // // end;
+      // // s1:= '';
+      // while not(s[i] in ['+', '-', '*', '/', '%', '^']) do
+      // begin
+      // s1 := s1 + s[i];
+      // inc(i);
+      // end;
+      // s1 := trim(s1);
+      // a := strtoint(s1);
+      // // while s[i] = ' ' do
+      // // inc(i);
+      // c := s[i];
+      // inc(i);
+      // s1 := '';
+      // nop := 2;
+      // while i <= length(s) do
+      // begin
+      // s1 := s1 + s[i];
+      // inc(i);
+      // end;
+      // s1 := trim(s1);
+      // b := strtoint(s1);
+      // //
+      // nop := 3;
+      s1 := ' ';
+      i := 1;
+      s := trim(s);
+      while not(s[i] in ['+', '-', '*', '/', '%', '^']) or (s1 = ' ') do
+      begin
+        s1 := s1 + s[i];
+        inc(i);
+      end;
+      s1 := trim(s1);
+      a := strtoint(s1);
+      c := s[i];
+      inc(i);
+      s1 := '';
+      nop := 2;
+      while i <= length(s) do
+      begin
+        s1 := s1 + s[i];
+        inc(i);
+      end;
+      s1 := trim(s1);
+      b := strtoint(s1);
+      nop := 3;
+      case c of
+        '+':
+          rez := a + b;
+        '-':
+          rez := a - b;
+        '*':
+          rez := a * b;
+        '/':
+          rez := a div b;
+        '%':
+          rez := a mod b;
+        '^':
+          begin
+            rez := 1;
+            for i := 1 to abs(b) do
+              rez := rez * a;
+            if b < 0 then
+              rez := 1 / rez;
+
+          end;
+
+      else
+        begin
+          writeln('ошибка в вводе операции');
+          continue;
+        end;
+      end; // case
+      writeln(s + ' = ', rez, #10);
+    except
+      on EDivByZero do
+        writeln('ошибка деления на ноль  в операции "', c, '"');
+      on EconvertError do
+        writeln('ошибка преобразования ', nop);
+      on ERangeError do
+        writeln('ошибка переполнения ', nop);
+      on EInOutError do
+      begin
+        writeln('ошибка в операнде ', nop);
+        if nop = 1 then
+          readln;
+      end;
+      on cl1: Exception do
+      begin
+        writeln(cl1.ClassName, ': ', cl1.Message);
+      end;
+    end;
+  until false;
+
+end.

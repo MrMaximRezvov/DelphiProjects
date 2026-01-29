@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2025/01/30 18:05:02.000.267,D:\Delphi project\kon\Project1.dproj=C:\Users\Maxim\Documents\Embarcadero\Studio\Projects\Project1.dproj</Transaction>
+    <Transaction>2025/02/03 19:35:03.000.616,D:\Delphi project\kon\Project1.dproj=D:\Delphi project\rubber\Project1.dproj</Transaction>
+    <Transaction>2025/02/10 18:00:27.000.799,D:\Delphi project\rubber\Project1.dproj=D:\Delphi project\rubber\project2.dproj</Transaction>
+    <Transaction>2025/02/10 18:46:43.000.820,D:\Delphi project\rubber\project2.dproj=D:\Delphi project\rubber\project3.dproj</Transaction>
+    <Transaction>2025/02/13 18:02:55.000.790,D:\Delphi project\rubber\project4.dproj=D:\Delphi project\rubber\project3.dproj</Transaction>
+    <Transaction>2025/02/13 22:09:55.411,D:\Delphi project\rubber\project5.dproj=D:\Delphi project\rubber\project4.dproj</Transaction>
+  </Transactions>
+</BorlandProject>

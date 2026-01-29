@@ -1,0 +1,28 @@
+﻿program evklid1;
+
+{$APPTYPE CONSOLE}
+
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+var i, a, b: uint16;
+
+begin
+repeat
+  a:= 0;
+  b:= 0;
+  writeln('Введите значение a, b');
+  while a = b do
+  begin
+  if a>b then a:= a-b else b:= b-a;
+  end;
+  writeln('Ответ a', a)
+
+
+
+
+
+until (false);
+end.

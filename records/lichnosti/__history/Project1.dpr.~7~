@@ -1,0 +1,44 @@
+program Project1;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+type
+  tstudents = record
+    fname, name: string[50];
+    weight, age: uint8;
+  end;
+
+  tar = array [0 .. 10] of tstudents;
+
+var
+  rec: tstudents;
+  students: tar;
+  i: int32;
+
+begin
+  for i := 1 to 10 do
+  begin
+    writeln('Введите данные ученика ', i, '/10:');
+    writeln('Фамилия:');
+    readln(rec.fname);
+    writeln('Имя:');
+    readln(rec.name);
+    writeln('Вес:');
+    readln(rec.weight);
+    writeln('Возвраст:');
+    readln(rec.age);
+    students[i] := rec;
+  end;
+  writeln(#10, '     Фамилия      Имя    Вес   Возраст');
+  writeln(stringofchar('=', 50));
+  for i := 1 to 10 do
+  begin
+    rec := students[i];
+    writeln(rec.fname:10, rec.name:10	, rec.weight :5, rec.age:5 );
+  end;
+readln;
+end.

@@ -1,0 +1,54 @@
+program project2;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+// begin
+// try
+// { TODO -oUser -cConsole Main : Insert code here }
+// except
+// on E: Exception do
+// Writeln(E.ClassName, ': ', E.Message);
+// end;
+//
+// end.
+
+var
+  i, j: uint16;
+  r1, r2: real;
+  c1, c2: ansichar;
+  s1, s2: string[20];
+  s3, s4: shortstring;
+  s5, s6: string;
+
+type
+  trec = record
+     i, j: int32;
+     a, b: real;
+     s:string[20];
+  end;
+var rec1, rec2:trec;
+begin
+
+
+  j := 5;
+  i := j; // i=?
+
+  r2 := pi;
+  r1 := 2; // r1=?, @r1 ≠ @r2
+
+  s2 := 'abcdqwerty';
+  s1 := s2; // s1 = ?, @51 [1] ≠ @s2[1]
+
+  s4 := 'Хочу все знать!';
+  s3 := s4;
+
+    s6 := 'I d like know all ! ';
+  s5 := s6;
+  rec2.i:= 3; rec2.s:= 'Привет от короткой строки';
+  rec1 := rec2;
+  writeln('@rec2.s = ', uintptr(@rec2.s), ' @rec1.s= ', uintptr(@rec1.s));
+end

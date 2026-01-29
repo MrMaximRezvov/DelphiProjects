@@ -1,0 +1,137 @@
+program Project1;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+type
+  PSt = ^TSt; // указательнатипTStudent
+
+  TSt = record
+    f_name: string[20]; // фамилия
+    l_name: string[20]; // имя
+    next: PSt; // следующийэлементсписка
+  end;
+
+var
+  head: PSt = nil; // начало (голова) списка
+  Last: PSt = nil; // последний элемент сптска
+  curr: PSt;
+  ans: char;
+  count: integer = 0; // количество элементов списка
+  num, i, n_p: integer;
+  reccom: THeapStatus; // !!
+
+  //
+
+function count_elements(head: PSt): integer;
+var
+  curr: PSt;
+  count: integer;
+begin
+  count := 0; // Инициализация счетчика
+  curr := head; // Начинаем с головы списка
+
+  // Проходим по списку и считаем элементы
+  while curr <> nil do
+  begin
+    Inc(count); // Увеличиваем счетчик
+    curr := curr^.next; // Переходим к следующему элементу
+  end;
+
+  Result := count; // Возвращаем количество элементов
+end;
+
+function new_rec: PSt;
+var
+  curr: PSt;
+begin
+  new(curr);
+  result := curr;
+  write('Фамилия : ');
+  readln(curr^.f_name);
+  write('Имя : ');
+  readln(curr^.l_name);
+  // подготовка
+  curr^.next := nil;
+  result := curr;
+end;
+
+// Добавление элемента в конец
+procedure add(var head: PSt; var Last: PSt; var count: integer);
+var
+  curr: PSt;
+begin
+  curr := new_rec;
+  if head = nil then
+    head := curr
+  else
+    Last^.next := curr;
+  Last := curr;
+  inc(count);
+end;
+
+// Просмотр списка с печатью содержимого
+procedure view_list(curr: PSt);
+var
+  i: integer;
+begin
+  i := 0;
+  writeln('Size_record=', sizeof(curr^));
+  while curr <> nil do
+  begin
+    inc(i);
+    with curr^ do
+      writeln(i:5, ' адр=', uintptr(curr):11, f_name:8, l_name:8, ' адр.next=',
+        uintptr(next):11);
+    curr := curr^.next;
+  end;
+  writeln('Count =', i);
+end;
+
+//
+function service: string;
+begin
+  reccom := GetHeapStatus;
+  with reccom do
+    service := 'Общий размер кучи = ' + TotalAddrSpace.toString + ' Занято = ' + TotalAllocated.toString;
+end;
+
+//
+begin
+  repeat
+    try
+      writeln;
+      writeln('---Меню--------');
+      writeln('1. Добавить элемент');
+      writeln('2. Сервис');
+      writeln('3. Просмотр списка');
+      writeln('4. Число элементов в списке');
+      writeln('5. Перейти к элементу');
+      writeln('6. Удалить элемент по номеру');
+      writeln('7. Вставить элемент по номеру');
+      writeln('8. Очистить список');
+      writeln('-----------------');
+      writeln('Ваш выбор : ');
+      readln(n_p);
+      writeln;
+      case n_p of
+        1:
+          add(head, Last, count);
+        2:
+          writeln(service);
+        3:
+          view_list(head);
+        4:
+          writeln('Count = ', count_elements(head));
+      end;
+      { TODO -oUser -cConsole Main : Insert code here }
+    except
+      on E: Exception do
+        writeln(E.ClassName, ': ', E.Message);
+    end;
+  until false;
+
+end.

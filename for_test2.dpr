@@ -1,0 +1,42 @@
+﻿program for_test2;
+
+{$APPTYPE CONSOLE}
+
+{$R *.res}
+
+uses
+  System.SysUtils, windows;
+
+var
+  sum, i, nach, kon: int32;
+  c: ansichar;
+  s: ansistring;
+
+
+
+
+
+
+begin
+
+begin
+  setconsoleoutputCP(1251);
+
+s:= '';
+for c := 'a' to 'z' do
+  if ord(c) mod 2 = 0 then
+   s:= s+c;
+   writeln('s=', s);
+
+
+
+
+
+
+end;
+
+
+
+
+readln
+end.

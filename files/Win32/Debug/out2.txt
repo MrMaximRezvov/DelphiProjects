@@ -1,0 +1,36 @@
+sumstr= 78 cstr= 3
+sumstr= 52 cstr= 12
+sumstr= 166 cstr= 5
+sumstr= 3 cstr= 2
+sumstr= 0 cstr= 0
+sumstr= 14 cstr= 5
+sumstr= -24 cstr= 3
+sumstr= 27 cstr= 1
+sumstr= -3 cstr= 2
+sumstr= 108 cstr= 36
+sumstr= 78 cstr= 3
+sumstr= 52 cstr= 12
+sumstr= 166 cstr= 5
+sumstr= 3 cstr= 2
+allstr sum = 720 count= 91
+sumstr= 78 cstr= 3
+sumstr= 52 cstr= 12
+sumstr= 166 cstr= 5
+sumstr= 3 cstr= 2
+sumstr= 0 cstr= 0
+sumstr= 14 cstr= 5
+sumstr= -24 cstr= 3
+sumstr= 27 cstr= 1
+sumstr= -3 cstr= 2
+sumstr= 108 cstr= 36
+sumstr= 78 cstr= 3
+sumstr= 52 cstr= 12
+sumstr= 166 cstr= 5
+sumstr= 3 cstr= 2
+allstr sum = 720 count= 91
+sumstr= 17 cstr= 4
+sumstr= 6 cstr= 2
+sumstr= 16 cstr= 3
+sumstr= 54 cstr= 5
+sumstr= 33 cstr= 1
+allstr sum = 126 count= 15

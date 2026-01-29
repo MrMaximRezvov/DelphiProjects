@@ -1,0 +1,51 @@
+program randtask7;
+
+{$APPTYPE CONSOLE}
+
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+var  i, j, count, sum: int32;
+
+begin
+randseed:= 11;
+for i := 1 to 1000 do
+begin
+  j:= random(500)+1;
+  if j mod 3 = 0 then
+    sum:= sum + j;
+end;
+writeln('sum= ', sum);
+
+sum:= 0;
+j:= 0;
+i:= 0;
+
+while count <= 1000 do
+begin
+  inc(count);
+  j:= random(500)+1;
+  if j mod 3 = 0 then
+    sum:= sum + j;
+end;
+writeln('sum= ', sum);
+
+sum:= 0;
+j:= 0;
+i:= 0;
+
+
+repeat
+j:= random(500)+1;
+  if j mod 3 = 0 then
+    sum:= sum + j;
+until 1000;
+
+writeln('sum= ', sum);
+
+
+
+readln;
+end.

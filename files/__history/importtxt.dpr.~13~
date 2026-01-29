@@ -1,0 +1,85 @@
+﻿program importtxt;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  sysutils;
+
+type
+  twin1251 = type ansistring(1251);
+
+var
+  fin, fout: textfile;
+  a, b, c, cold: int8;
+  sum, sumold, i, j: int32;
+  f_name, f_name2: ansistring;
+  words, strings { , ban } : array of twin1251;
+  str, word, ban: twin1251;
+
+begin
+  repeat
+    try
+      // ban := ['.', ' ', ','];
+      ban := ' ,.';
+      writeln('Введите имя файла чтения');
+      readln(f_name);
+      assignfile(fin, f_name + '.txt');
+      writeln('Введите имя файла вывода');
+      readln(f_name2);
+      assignfile(fout, f_name2 + '.txt');
+{$I-}
+      reset(fin);
+{$I+}
+      if IOResult <> 0 then
+      begin
+        writeln('Файл ' + f_name + ' отсутствует:');
+        continue;
+      end;
+      append(fout); // rewrite
+      //
+      writeln('check');
+      while not Eof(fin) do
+      begin
+        while not Eoln(fin) do
+        begin
+          read(fin, str);
+          setlength(strings, length(strings) + 1);
+          strings[length(strings) - 1] := str;
+        end;
+        readln(fin);
+      end;
+      writeln('check');
+//      for i := 0 to length(strings) - 1 do
+//      begin
+//        str := strings[i];
+//        for j := 0 to length(str) - 1 do
+//        begin
+//          if str[j] = ' ' then
+//          begin
+//            setlength(words, length(words) + 1);
+//            words[length(words) - 1] := word;
+//            word := '';
+//            continue;
+//          end;
+//          word := word + str[j];
+//        end;
+//      end;
+      writeln('check');
+      for i := 0 to length(words) - 1 do
+      begin
+        write(words[i], ' ');
+      end;
+      //
+
+      flush(fout);
+      readln;
+      closefile(fout);
+      readln;
+    except
+      on E: Exception do
+        writeln(E.ClassName, ': ', E.Message);
+    end;
+  until false;
+
+end.

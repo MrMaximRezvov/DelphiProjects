@@ -1,0 +1,6 @@
+sumstr= 17 cstr= 4
+sumstr= 6 cstr= 2
+sumstr= 16 cstr= 3
+sumstr= 54 cstr= 5
+sumstr= 33 cstr= 1
+allstr sum = 126 count= 15

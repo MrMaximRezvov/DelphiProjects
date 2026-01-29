@@ -1,0 +1,34 @@
+program Project1;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+type
+  myint = uint64;
+
+var
+  f0, f1, fr: myint;
+  i, n: uint32;
+
+begin
+  repeat
+    write('Enter n: ');
+    readln(n);
+    f0 := 0;
+    f1 := 1;
+    for i := 2 to n do
+    begin
+      fr := (f0 + f1);
+      if (fr mod 1000 = i) or (fr mod 100 = i) or (fr mod 10 = i) then
+        write(i:5);
+      f0 := f1 mod 1000;
+      f1 := fr mod 1000;
+    end;
+    writeln;
+    readln;
+  until false;
+
+end.

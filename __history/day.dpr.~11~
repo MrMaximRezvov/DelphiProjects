@@ -1,0 +1,80 @@
+program day;
+
+{$APPTYPE CONSOLE}
+
+{$R *.res}
+
+uses
+  System.SysUtils, System.DateUtils;
+
+type ten1 = (jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec);
+    arrs = array of string;
+var en1: ten1;
+  arrh: arrs;
+  mes, date, i, sum, g, sumjan, sumfeb, summar, sumapr, summay, sumjun, sumjul, sumaug, sumsep, sumoct, sumnov, sumdec: uint16;
+begin
+//readln(date, mes);
+randomize;
+sum:=0;
+arrh:= ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+for en1 := jan to aug do
+  case en1 of
+  jan, mar, may, jul, aug: sum:= sum+31;
+  feb: sum:= sum+29;
+  apr,jun: sum:= sum+30;
+  end;
+g:= dayoftheyear(now);
+writeln(sum+12);
+writeln(g);
+for i := 0 to 999 do
+  //en1:= random(ord(en1));
+  en1:=ten1(random(12));
+  //write(arrh[ord(en1)], ' ');
+  case en1 of
+  jan: inc(sumjan);
+  feb: inc(sumfeb);
+  mar: inc(summar);
+  apr: inc(sumapr);
+  may: inc(summay);
+  jun: inc(sumjun);
+  jul: inc(sumjul);
+  aug: inc(sumaug);
+  sep: inc(sumsep);
+  oct: inc(sumoct);
+  nov: inc(sumnov);
+  dec: inc(sumdec);
+  end;
+
+
+
+
+
+
+
+
+
+
+for i := 0 to 11 do
+  write(arrh[i], ': ');
+  for en1 := jan to dec do
+    case en1 of
+    jan: write(sumjan);
+    feb: write(sumfeb);
+    mar: write(summar);
+    apr: write(sumapr);
+    may: write(summay);
+    jun: write(sumjun);
+    jul: write(sumjul);
+    aug: write(sumaug);
+    sep: write(sumsep);
+    oct: write(sumoct);
+    nov: write(sumnov);
+    dec: write(sumdec);
+    end;
+  writeln;
+
+
+
+
+readln
+end.

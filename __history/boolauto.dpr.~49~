@@ -1,0 +1,76 @@
+﻿program boolauto;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+var
+  x, y, f: boolean;
+  r, s: uint16;
+  c: int16;
+  str: ansistring;
+
+begin
+  repeat
+    writeln('ТИ для функции:');
+    writeln('F= ');
+    writeln(' X Y  F');
+    c := 3;
+    s := 0;
+    r := 0;
+    for x := false to true do
+    begin
+      for y := false to true do
+      begin
+
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        f := not x;
+        ////////////////////////////////////////////////////////////////////////////////////////////
+
+        s := s + ord(f) * (1 shl c);
+        dec(c);
+        writeln(ord(x):2, ord(y):2, ord(f):3);
+      end;
+    end;
+    writeln('F=', s);
+    case s of
+      0:
+        str := 'Const 0';
+      1:
+        str := 'X * Y';
+      2:
+        str := 'X and not Y';
+      3:
+        str := 'X';
+      4:
+        str := 'Y and not X';
+      5:
+        str := 'Y';
+      6:
+        str := 'X xor Y    ( not X and Y or X and not Y )';
+      7:
+        str := 'X or Y';
+      8:
+        str := 'not (X or Y)';
+      9:
+        str := 'not (X xor Y)';
+      10:
+        str := 'not Y';
+      11:
+        str := 'not Y or X';
+      12:
+        str := 'not X';
+      13:
+        str := 'not X or Y';
+      14:
+        str := 'not (X and Y)';
+      15:
+        str := 'Const 1';
+    end;
+    writeln(str);
+    readln;
+  until false;
+
+end.

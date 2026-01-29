@@ -1,0 +1,64 @@
+program pr2;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  SysUtils;
+
+var
+  n, i, j: Integer;
+  data: array of array of Integer;
+  order, max_values: array of Integer;
+  first, second: Integer;
+  found: Boolean;
+  f_name: string;
+  fin: textfile;
+
+begin
+  SetLength(data, n, 2);
+  writeln('Введите имя файла чтения');
+  Readln(f_name);
+  assignfile(fin, f_name + '.txt');
+  reset(fin);
+  Readln(fin, n);
+  for i := 0 to n - 1 do
+  begin
+    Readln(fin, data[i, 0], data[i, 1]);
+  end;
+
+  SetLength(order, 0);
+  SetLength(max_values, 0);
+
+  for i := 0 to n - 1 do
+  begin
+    first := data[i][0];
+    second := data[i][1];
+
+    found := False;
+    for j := 0 to Length(order) - 1 do
+    begin
+      if order[j] = first then
+      begin
+        if second > max_values[j] then
+          max_values[j] := second;
+        found := True;
+        Break;
+      end;
+    end;
+
+    if not found then
+    begin
+      SetLength(order, Length(order) + 1);
+      SetLength(max_values, Length(max_values) + 1);
+      order[Length(order) - 1] := first;
+      max_values[Length(max_values) - 1] := second;
+    end;
+  end;
+
+  writeln('Результат:');
+  for i := 0 to Length(order) - 1 do
+    writeln(order[i], ' ', max_values[i]);
+
+  Readln;
+end.

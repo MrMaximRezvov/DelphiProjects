@@ -1,0 +1,76 @@
+﻿program priceways;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.Sysutils;
+
+// windows;
+
+type
+  myt = uint64;
+
+var
+  i, j, n, m: myt; // uint32
+  matr: array of array of myt;
+
+begin
+  repeat
+    try
+      write('Input n,m(колонки, строки) = ');
+      readln(n, m);
+      write('Input RandSeed = ');
+      readln(randseed);
+      setlength(matr, m, n);
+      for i := 0 to m-1 do
+      begin
+        for j := 0 to n-1 do
+        begin
+          matr[i, j] := random(100);
+        end;
+      end;
+      for i := 0 to m-1 do
+      begin
+        for j := 0 to n-1 do
+        begin
+          write(matr[i, j]:5);
+        end;
+        writeln;
+      end;
+      writeln('price point');
+      for i := 1 to n-1 do
+      begin
+        inc(matr[0, i], matr[0, i-1]);
+      end;
+      for i := 1 to m-1 do
+      begin
+        inc(matr[i, 0], matr[i-1, 0]);
+      end;
+      for i := 1 to m-1 do
+      begin
+        for j := 1 to n-1 do
+        begin
+          if matr[i, j-1] < matr[i-1, j] then inc(matr[i, j], matr[i, j-1]) else inc(matr[i, j], matr[i-1, j]);
+        end;
+      end;
+      for i := 0 to m-1 do
+      begin
+        for j := 0 to n-1 do
+        begin
+          write(matr[i, j]:5);
+        end;
+        writeln;
+      end;
+      //////
+      readln;
+
+    except
+      on E: Exception do
+        writeln(E.ClassName, ': ', E.Message);
+    end;
+    //
+  until false;
+
+  //
+end.

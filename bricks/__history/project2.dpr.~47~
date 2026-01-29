@@ -1,0 +1,581 @@
+﻿program project2;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+// uses
+// SysUtils;
+//
+/// / Функция для проверки симметрии ряда
+// function IsSymmetric(s: string): Boolean;
+// var
+// i, len: Integer;
+// begin
+// len := Length(s);
+// for i := 1 to len div 2 do
+// if s[i] <> s[len - i + 1] then
+// Exit(False);
+// Exit(True);
+// end;
+//
+/// / Рекурсивная функция для генерации всех возможных рядов
+// function GenerateRows(L: Integer; currentRow: string; var count: Integer): integer;
+// begin
+// if Length(currentRow) = L then
+// begin
+// if IsSymmetric(currentRow) then
+// Inc(count);
+// Result := count;
+// end;
+//
+// if Length(currentRow) + 3 <= L then
+// GenerateRows(L, currentRow + '3', count);
+//
+// if Length(currentRow) + 4 <= L then
+// GenerateRows(L, currentRow + '4', count);
+// end;
+//
+// var
+// L, H: Integer;
+//
+// begin
+// repeat
+// // Ввод длины стены
+// Write('Введите длину стены L (5 <= L <= 50): ');
+// ReadLn(L);
+//
+// if (L < 5) or (L > 50) then
+// begin
+// WriteLn('Некорректная длина стены.');
+// continue;
+// end;
+//
+// // Вычисление максимальной высоты
+// H := 0;
+// GenerateRows(L, '', H);
+//
+// // Вывод результата
+// WriteLn('Максимальная высота стены H: ', H);
+//
+// until False;
+//
+// end.
+
+// uses
+// SysUtils;
+//
+// const
+// MaxRows = 1000; // Максимальное количество рядов, которое можно получить
+//
+// type
+// TArrayInt = array[0..MaxRows - 1] of Integer;
+//
+// var
+// Results: array[0..MaxRows - 1] of TArrayInt;
+// RowCount: Integer;
+//
+// function IsSymmetric(const Row: TArrayInt; Length: Integer): Boolean;
+// var
+// i: Integer;
+// begin
+// for i := 0 to Length div 2 - 1 do
+// if Row[i] <> Row[Length - 1 - i] then
+// Exit(False);
+// Result := True;
+// end;
+//
+// procedure GenerateRows(Length: Integer; CurrentRow: TArrayInt; CurrentLength, Position: Integer);
+// begin
+// if CurrentLength > Length then
+// Exit;
+//
+// if CurrentLength = Length then
+// begin
+// if IsSymmetric(CurrentRow, Length) then
+// begin
+// Results[RowCount] := CurrentRow;
+// Inc(RowCount);
+// if RowCount >= MaxRows then
+// Exit;
+// end;
+// Exit;
+// end;
+//
+// // Добавление кирпича длиной 3
+// CurrentRow[Position] := 3;
+// GenerateRows(Length, CurrentRow, CurrentLength + 3, Position + 1);
+//
+// // Добавление кирпича длиной 4
+// CurrentRow[Position] := 4;
+// GenerateRows(Length, CurrentRow, CurrentLength + 4, Position + 1);
+// end;
+//
+// function CountUniqueSymmetricRows(L: Integer): Integer;
+// var
+// CurrentRow: TArrayInt;
+// begin
+// RowCount := 0;
+// GenerateRows(L, CurrentRow, 0, 0);
+// Result := RowCount;
+// end;
+//
+// var
+// L, H: Integer;
+// begin
+// repeat
+// Write('Введите длину стены L (5 <= L <= 50): ');
+// ReadLn(L);
+// if (L < 5) or (L > 50) then
+// begin
+// Writeln('Длина стены должна быть в диапазоне от 5 до 50.');
+// Exit;
+// end;
+//
+// H := CountUniqueSymmetricRows(L);
+// Writeln('Максимальная высота стены H: ', H);
+// until false;
+// end.
+
+// uses
+// SysUtils, Generics.Collections;
+//
+// function IsSymmetric(const Row: TArray<Integer>): Boolean;
+// var
+// i: Integer;
+// begin
+// for i := 0 to Length(Row) div 2 - 1 do
+// if Row[i] <> Row[Length(Row) - 1 - i] then
+// Exit(False);
+// Result := True;
+// end;
+//
+// procedure GenerateRows(Length: Integer; CurrentRow: TList<Integer>; CurrentLength: Integer; Results: TList<TArray<Integer>>);
+// var
+// i: Integer;
+// NewRow: TArray<Integer>;
+// begin
+// if CurrentLength > Length then
+// Exit;
+// if CurrentLength = Length then
+// begin
+// if IsSymmetric(CurrentRow.ToArray) then
+// begin
+// NewRow := CurrentRow.ToArray;
+// Results.Add(NewRow);
+// end;
+// Exit;
+// end;
+//
+// // Добавление кирпича длиной 3
+// CurrentRow.Add(3);
+// GenerateRows(Length, CurrentRow, CurrentLength + 3, Results);
+// CurrentRow.Delete(CurrentRow.Count - 1);
+//
+// // Добавление кирпича длиной 4
+// CurrentRow.Add(4);
+// GenerateRows(Length, CurrentRow, CurrentLength + 4, Results);
+// CurrentRow.Delete(CurrentRow.Count - 1);
+// end;
+//
+// function CountUniqueSymmetricRows(L: Integer): Integer;
+// var
+// Results: TList<TArray<Integer>>;
+// CurrentRow: TList<Integer>;
+// begin
+// Results := TList<TArray<Integer>>.Create;
+// CurrentRow := TList<Integer>.Create;
+//
+// try
+// GenerateRows(L, CurrentRow, 0, Results);
+// Result := Results.Count;
+// finally
+// Results.Free;
+// CurrentRow.Free;
+// end;
+// end;
+//
+// var
+// L, H: Integer;
+// begin
+// repeat
+// Write('Введите длину стены L (5 <= L <= 50): ');
+// ReadLn(L);
+// if (L < 5) or (L > 50) then
+// begin
+// Writeln('Длина стены должна быть в диапазоне от 5 до 50.');
+// Exit;
+// end;
+//
+// H := CountUniqueSymmetricRows(L);
+// Writeln('Максимальная высота стены H: ', H);
+// until false;
+// end.
+
+// uses
+// SysUtils;
+//
+// type
+// TIntegerArray = array of Integer;
+//
+// function IsSymmetric(const Row: TIntegerArray): Boolean;
+// var
+// i: Integer;
+// begin
+// for i := 0 to High(Row) div 2 do
+// if Row[i] <> Row[High(Row) - i] then
+// Exit(False);
+// Result := True;
+// end;
+//
+// procedure GenerateRows(Len: Integer; var CurrentRow: TIntegerArray;
+// CurrentLength: Integer; var Results: array of TIntegerArray;
+// var ResultCount: Integer);
+// var
+// i: Integer;
+// NewRow: TIntegerArray;
+// begin
+// if CurrentLength > Len then
+// Exit;
+// if CurrentLength = Len then
+// begin
+// if IsSymmetric(CurrentRow) then
+// begin
+// SetLength(NewRow, Len);
+// for i := 0 to High(CurrentRow) do
+// NewRow[i] := CurrentRow[i];
+// Results[ResultCount] := NewRow;
+// Inc(ResultCount);
+// end;
+// Exit;
+// end;
+//
+// SetLength(CurrentRow, Length(CurrentRow) + 1);
+// CurrentRow[High(CurrentRow)] := 3;
+// GenerateRows(Len, CurrentRow, CurrentLength + 3, Results, ResultCount);
+// SetLength(CurrentRow, Length(CurrentRow) - 1);
+//
+// SetLength(CurrentRow, Length(CurrentRow) + 1);
+// CurrentRow[High(CurrentRow)] := 4;
+// GenerateRows(Len, CurrentRow, CurrentLength + 4, Results, ResultCount);
+// SetLength(CurrentRow, Length(CurrentRow) - 1);
+// end;
+//
+// function CountUniqueSymmetricRows(L: Integer): Integer;
+// var
+// Results: array [0 .. 4] of TIntegerArray;
+// CurrentRow: TIntegerArray;
+// ResultCount: Integer;
+// begin
+// ResultCount := 0;
+// GenerateRows(L, CurrentRow, 0, Results, ResultCount);
+// Result := ResultCount;
+// end;
+//
+// var
+// L, H, i: Integer;
+//
+// begin
+// repeat
+// // Write('Введите длину стены L (5 <= L <= 50): ');
+// // ReadLn(L);
+// // if (L < 5) or (L > 50) then
+// // begin
+// // Writeln('Длина стены должна быть в диапазоне от 5 до 50.');
+// // Exit;
+// // end;
+// writeln('Wall:', #10);
+// for i := 5 to 15 do
+// write(i:3);
+// writeln;
+// for i := 5 to 15 do
+// begin
+// H := CountUniqueSymmetricRows(i);
+// write(H:3);
+// //writeln('Максимальная высота стены H: ', H);
+// end;
+// readln;
+// until False;
+//
+// end.
+
+
+// uses
+// SysUtils;
+//
+// type
+// TIntegerArray = array of Integer;
+//
+// function IsSymmetric(const Row: TIntegerArray): Boolean;
+// var
+// i: Integer;
+// begin
+// for i := 0 to High(Row) div 2 do
+// if Row[i] <> Row[High(Row) - i] then
+// Exit(False);
+// Result := True;
+// end;
+//
+// procedure GenerateRows(Len: Integer; var CurrentRow: TIntegerArray;
+// CurrentLength: Integer; var Results: array of TIntegerArray;
+// var ResultCount: Integer);
+// var
+// i: Integer;
+// NewRow: TIntegerArray;
+// begin
+// if CurrentLength > Len then
+// Exit;
+// if CurrentLength = Len then
+// begin
+// if IsSymmetric(CurrentRow) then
+// begin
+// SetLength(NewRow, Len);
+// for i := 0 to High(CurrentRow) do
+// NewRow[i] := CurrentRow[i];
+// Results[ResultCount] := NewRow;
+// Inc(ResultCount);
+// end;
+// Exit;
+// end;
+//
+// SetLength(CurrentRow, Length(CurrentRow) + 1);
+// CurrentRow[High(CurrentRow)] := 3;
+// GenerateRows(Len, CurrentRow, CurrentLength + 3, Results, ResultCount);
+// SetLength(CurrentRow, Length(CurrentRow) - 1);
+//
+// SetLength(CurrentRow, Length(CurrentRow) + 1);
+// CurrentRow[High(CurrentRow)] := 4;
+// GenerateRows(Len, CurrentRow, CurrentLength + 4, Results, ResultCount);
+// SetLength(CurrentRow, Length(CurrentRow) - 1);
+// end;
+//
+// function CountUniqueSymmetricRows(L: Integer): Integer;
+// var
+// Results: array [0 .. 4] of TIntegerArray;
+// CurrentRow: TIntegerArray;
+// ResultCount: Integer;
+// begin
+// ResultCount := 0;
+// GenerateRows(L, CurrentRow, 0, Results, ResultCount);
+// Result := ResultCount;
+// end;
+//
+// var
+// L, H, i: Integer;
+//
+// begin
+// repeat
+// writeln('Wall:', #10);
+// for i := 5 to 15 do
+// write(i:3);
+// writeln;
+// for i := 5 to 15 do
+// begin
+// H := CountUniqueSymmetricRows(i);
+// write(H:3);
+// end;
+// readln;
+// until False;
+// end.
+
+
+//uses System.Sysutils;
+//
+//const k1=3; k2=4;
+//var i, L,L1,L2: int32;
+//    h:uint32;
+////
+//function cnt(n:uint16):uint32;
+//var i,j:uint16;
+//    ar:array [1..4] of uint32;
+//begin
+//ar[1]:=0; ar[2]:=0; ar[3]:=1; ar[4]:=1;
+//if n<=4 then
+//  begin
+//  if n=0 then result:=0 else result:=ar[n];
+//  exit;
+//  end;
+//for i := 5 to n do
+//  begin
+//  result:=ar[1]+ar[2];
+//  ar[1]:=ar[2];
+//  ar[2]:=ar[3];
+//  ar[3]:=ar[4];
+//  ar[4]:=result;
+//  end;
+//end;
+////
+//begin
+//  repeat
+//  try
+//    write('Введите L>=0 : ');
+//    readln(L);
+//    if L<0 then continue;
+//    case L of
+//    0..2 :h:=0;
+//    3,4  :h:=1;
+//    else begin
+//         L2:=0;
+//         if odd(L) then L1:=(L-k1) div 2
+//             else
+//              begin
+//              L1:=L div 2;
+//              L2:=L1-2;//L2:=(L-4) div 2
+//              end;
+//         h:=cnt(L1)+cnt(L2);
+//         end;
+//    end;
+//    writeln('Количество рядов=',h);
+//  except
+//  on E : Exception do writeln(E.ClassName);
+//  end;
+//  until false;
+//end.
+
+
+//uses System.Sysutils;
+//
+//const
+//  k1 = 2;
+//  k2 = 4;
+//
+//var
+//  i, L, L1, L2: int32;
+//  h: uint32;
+//
+//  //
+//function cnt(n: uint16): uint32;
+//var
+//  i, j: uint16;
+//  ar: array [1 .. 4] of uint32;
+//begin
+//  ar[1] := 0;
+//  ar[2] := 1;
+//  ar[3] := 0;
+//  ar[4] := 2;
+//  if n <= 4 then
+//  begin
+//    if n = 0 then
+//      result := 0
+//    else
+//      result := ar[n];
+//    exit;
+//  end;
+//  for i := 5 to n do
+//  begin
+//    result := ar[1] + ar[2];
+//    ar[1] := ar[2];
+//    ar[2] := ar[3];
+//    ar[3] := ar[4];
+//    ar[4] := result;
+//  end;
+//end;
+//
+////
+//begin
+//  repeat
+//    try
+//      write('Введите L>=0 : ');
+//      readln(L);
+//      if L < 0 then
+//        continue;
+//      case L of
+//        0 .. 1, 3, 5:
+//          h := 0;
+//        2, 4:
+//          h := 1;
+//      else
+//        begin
+//          L2 := 0;
+//          if odd(L) then
+//            L1 := (L - k1) div 2
+//          else
+//          begin
+//            L1 := L div 2;
+//            L2 := L1 - 3; // L2:=(L-4) div 2
+//          end;
+//          h := cnt(L1) + cnt(L2);
+//        end;
+//      end;
+//      writeln('Количество рядов=',h);
+//    except
+//      on E: Exception do
+//        writeln(E.ClassName);
+//    end;
+//  until false;
+//
+//end.
+
+uses System.Sysutils;
+
+const
+  k1 = 2; // Новый вес 2
+  k2 = 4; // Вес 4 остаётся
+var
+  i, L, L1, L2: int32;
+  h: uint32;
+
+//
+function cnt(n: uint16): uint32;
+var
+  i, j: uint16;
+  ar: array [1..4] of uint32;
+begin
+  // Инициализация массива для длин 1, 2, 3, 4
+  ar[1] := 0; // Для длины 1 нет решений
+  ar[2] := 1; // Для длины 2 одно решение: [2]
+  ar[3] := 0; // Для длины 3 нет решений
+  ar[4] := 1; // Для длины 4 одно решение: [2, 2] или [4]
+
+  if n <= 4 then
+  begin
+    if n = 0 then
+      result := 0
+    else
+      result := ar[n];
+    exit;
+  end;
+
+  // Динамическое программирование для n > 4
+  for i := 5 to n do
+  begin
+    result := ar[1] + ar[3]; // Используем веса 2 и 4
+    ar[1] := ar[2];
+    ar[2] := ar[3];
+    ar[3] := ar[4];
+    ar[4] := result;
+  end;
+end;
+
+//
+begin
+  repeat
+    try
+      write('Введите L >= 0 : ');
+      readln(L);
+      if L < 0 then
+        continue;
+
+      case L of
+        0..1:
+          h := 0; // Для длин 0 и 1 нет решений
+        2, 4:
+          h := 1; // Для длин 2 и 4 одно решение
+      else
+        begin
+          L2 := 0;
+          if odd(L) then
+            L1 := (L - k1) div 2 // Для нечётных L
+          else
+          begin
+            L1 := L div 2; // Для чётных L
+            L2 := L1 - 2;  // Учитываем возможность использования веса 4
+          end;
+          h := cnt(L1) + cnt(L2); // Суммируем результаты
+        end;
+      end;
+      writeln('Количество рядов = ', h);
+    except
+      on E: Exception do
+        writeln(E.ClassName);
+    end;
+  until false;
+end.

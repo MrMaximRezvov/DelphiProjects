@@ -1,0 +1,1365 @@
+﻿program Project1;
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+type
+  Trow_arr = array of real;
+  Tmatr_arr = array of Trow_arr;
+  Tmatr_many_arr = array [1 .. 15] of Tmatr_arr;
+
+var
+  social_counter_sys: integer;
+  heavy_ops_counter: integer;
+  A, B: Tmatr_arr;
+  main_matr: Tmatr_many_arr;
+  i, j, c: integer;
+  S_COM: ansistring =
+    'help     cin      load     print    plus     minus    multi    Gensmatr Gen_matr Gen_vec  Gen_row  trans    scale    save     det      submatr  minor    recdet   invmatr   cramer   gauss   lu_solve   lu_det   swap   exit     ';
+
+function swap(A: Tmatr_arr; i1, i2: integer): Tmatr_arr;
+var
+  n, m, j: integer;
+  result_matr: Tmatr_arr;
+begin
+  n := length(A);
+  if n = 0 then
+    raise Exception.Create('Matrix A is empty');
+  m := length(A[0]);
+  setlength(result_matr, n, m);
+  for var i := 0 to n - 1 do
+    for j := 0 to m - 1 do
+      result_matr[i, j] := A[i, j];
+  if (i1 < 0) or (i1 >= n) then
+    raise Exception.Create('Index i1 is out of bounds');
+  if (i2 < 0) or (i2 >= n) then
+    raise Exception.Create('Index i2 is out of bounds');
+  for j := 0 to m - 1 do
+  begin
+    var
+    temp_val := result_matr[i1, j];
+    result_matr[i1, j] := result_matr[i2, j];
+    result_matr[i2, j] := temp_val;
+  end;
+  result := result_matr;
+end;
+
+function lu_no_pivot(const A: Tmatr_arr; out L: Tmatr_arr): Tmatr_arr;
+var
+  n, i, j, k: integer;
+  factor: real;
+  U: Tmatr_arr;
+begin
+  n := length(A);
+  if (n = 0) or (n <> length(A[0])) then
+    raise Exception.Create('Matrix A must be square and non-empty');
+  setlength(L, n, n);
+  for i := 0 to n - 1 do
+    for j := 0 to n - 1 do
+      if i = j then
+        L[i, j] := 1.0
+      else
+        L[i, j] := 0.0;
+  setlength(U, n, n);
+  for i := 0 to n - 1 do
+    for j := 0 to n - 1 do
+      U[i, j] := A[i, j];
+  for i := 0 to n - 2 do
+  begin
+    if Abs(U[i, i]) < 1E-10 then
+      raise Exception.Create
+        ('Leading element (pivot) is zero or near-zero at row ' +
+        IntToStr(i + 1) + '. LU decomposition without pivoting failed.');
+    for j := i + 1 to n - 1 do
+    begin
+      if Abs(U[j, i]) > 1E-10 then
+      begin
+        factor := U[j, i] / U[i, i];
+        inc(heavy_ops_counter);
+        L[j, i] := factor;
+        for k := i to n - 1 do
+        begin
+          U[j, k] := U[j, k] - factor * U[i, k];
+          inc(heavy_ops_counter);
+        end;
+      end;
+    end;
+  end;
+  result := U;
+end;
+
+function lu_pivot(const A: Tmatr_arr; out L: Tmatr_arr; out swap_count: integer)
+  : Tmatr_arr;
+var
+  n, i, j, k, max_row: integer;
+  factor: real;
+  temp_val: real;
+  U: Tmatr_arr;
+begin
+  n := length(A);
+  if (n = 0) or (n <> length(A[0])) then
+    raise Exception.Create('Matrix A must be square and non-empty');
+  setlength(L, n, n);
+  for i := 0 to n - 1 do
+    for j := 0 to n - 1 do
+      if i = j then
+        L[i, j] := 1.0
+      else
+        L[i, j] := 0.0;
+  setlength(U, n, n);
+  for i := 0 to n - 1 do
+    for j := 0 to n - 1 do
+      U[i, j] := A[i, j];
+  swap_count := 0;
+  for i := 0 to n - 2 do
+  begin
+    max_row := i;
+    for j := i + 1 to n - 1 do
+    begin
+      if Abs(U[j, i]) > Abs(U[max_row, i]) then
+        max_row := j;
+    end;
+    if Abs(U[max_row, i]) < 1E-10 then
+      raise Exception.Create
+        ('Matrix is singular or near-singular. LU decomposition failed.');
+    if max_row <> i then
+    begin
+      inc(swap_count);
+      for k := 0 to n - 1 do
+      begin
+        temp_val := U[i, k];
+        U[i, k] := U[max_row, k];
+        U[max_row, k] := temp_val;
+      end;
+      for k := 0 to i - 1 do
+      begin
+        temp_val := L[i, k];
+        L[i, k] := L[max_row, k];
+        L[max_row, k] := temp_val;
+      end;
+    end;
+    for j := i + 1 to n - 1 do
+    begin
+      if Abs(U[j, i]) > 1E-10 then
+      begin
+        factor := U[j, i] / U[i, i];
+        inc(heavy_ops_counter);
+        L[j, i] := factor;
+        for k := i to n - 1 do
+        begin
+          U[j, k] := U[j, k] - factor * U[i, k];
+          inc(heavy_ops_counter);
+        end;
+      end;
+    end;
+  end;
+  result := U;
+end;
+
+function det_u(U: Tmatr_arr): real;
+var
+  n, i: integer;
+  result_det: real;
+begin
+  n := length(U);
+  if n <> length(U[0]) then
+    raise Exception.Create('Matrix U must be square');
+  result_det := 1.0;
+  for i := 0 to n - 1 do
+  begin
+    result_det := result_det * U[i, i];
+    inc(heavy_ops_counter);
+  end;
+  result := result_det;
+end;
+
+function LU(A: Tmatr_arr; out L: Tmatr_arr): Tmatr_arr;
+var
+  n, i, j, k: integer;
+  factor: real;
+begin
+  n := length(A);
+  if n <> length(A[0]) then
+    raise Exception.Create('Matrix A must be square');
+  heavy_ops_counter := 0;
+  setlength(L, n, n);
+  setlength(result, n, n);
+  for i := 0 to n - 1 do
+    for j := 0 to n - 1 do
+    begin
+      result[i, j] := A[i, j];
+      if i = j then
+        L[i, j] := 1
+      else
+        L[i, j] := 0;
+    end;
+  for i := 0 to n - 2 do
+    for j := i + 1 to n - 1 do
+    begin
+      if Abs(result[j, i]) < 1E-10 then
+        raise Exception.Create('Leading element is zero or near-zero at row' +
+          IntToStr(i + 1))
+      else
+      begin
+        factor := result[j, i] / result[i, i];
+        inc(heavy_ops_counter);
+        L[j, i] := factor;
+        result[j, i] := 0;
+        for k := i + 1 to n - 1 do
+        begin
+          result[j, k] := result[j, k] - factor * result[i, k];
+          inc(heavy_ops_counter);
+        end;
+      end;
+    end;
+end;
+
+function direct_sub(L: Tmatr_arr; B: Tmatr_arr): Tmatr_arr;
+var
+  n, i, j: integer;
+  sum: real;
+begin
+  n := length(L);
+  if n <> length(B) then
+    raise Exception.Create
+      ('Matrix L and vector B must have the same number of rows');
+  if length(B[0]) <> 1 then
+    raise Exception.Create('Vector B must be a column vector (size n x 1)');
+  setlength(result, n, 1);
+  for i := 0 to n - 1 do
+  begin
+    sum := B[i, 0];
+    for j := 0 to i - 1 do
+    begin
+      sum := sum - L[i, j] * result[j, 0];
+      inc(heavy_ops_counter);
+    end;
+    result[i, 0] := sum;
+  end;
+end;
+
+function revers_sub(U: Tmatr_arr; Y: Tmatr_arr): Tmatr_arr;
+var
+  n, i, j: integer;
+  sum: real;
+begin
+  n := length(U);
+  if n <> length(Y) then
+    raise Exception.Create
+      ('Matrix U and vector Y must have the same number of rows');
+  if length(Y[0]) <> 1 then
+    raise Exception.Create('Vector Y must be a column vector (size n x 1)');
+  setlength(result, n, 1);
+  for i := n - 1 downto 0 do
+  begin
+    sum := Y[i, 0];
+    for j := i + 1 to n - 1 do
+    begin
+      sum := sum - U[i, j] * result[j, 0];
+      inc(heavy_ops_counter);
+    end;
+    if Abs(U[i, i]) < 1E-10 then
+      raise Exception.Create('Diagonal element U[' + IntToStr(i + 1) + ',' +
+        IntToStr(i + 1) + '] is zero or near-zero');
+    result[i, 0] := sum / U[i, i];
+    inc(heavy_ops_counter);
+  end;
+end;
+
+function concat(A: Tmatr_arr; B: Tmatr_arr): Tmatr_arr;
+var
+  n, i, j: integer;
+begin
+  n := length(A);
+  if n <> length(B) then
+    raise Exception.Create
+      ('Matrix A and vector B must have the same number of rows');
+  if length(B[0]) <> 1 then
+    raise Exception.Create('Vector B must be a column vector (size n x 1)');
+  setlength(result, n, n + 1);
+  for i := 0 to n - 1 do
+    for j := 0 to n - 1 do
+      result[i, j] := A[i, j];
+  for i := 0 to n - 1 do
+    result[i, n] := B[i, 0];
+end;
+
+procedure slice(T_star: Tmatr_arr; var A_star: Tmatr_arr;
+  var B_star: Tmatr_arr);
+var
+  n, i, j: integer;
+begin
+  n := length(T_star);
+  if length(T_star[0]) <> n + 1 then
+    raise Exception.Create('Input matrix T* must be n x (n+1)');
+  setlength(A_star, n, n);
+  setlength(B_star, n, 1);
+  for i := 0 to n - 1 do
+    for j := 0 to n - 1 do
+      A_star[i, j] := T_star[i, j];
+  for i := 0 to n - 1 do
+    B_star[i, 0] := T_star[i, n];
+end;
+
+function gausse(A: Tmatr_arr; B: Tmatr_arr; var B_star: Tmatr_arr): Tmatr_arr;
+var
+  n, i, j, k: integer;
+  factor: real;
+  T: Tmatr_arr;
+  A_star: Tmatr_arr;
+begin
+  n := length(A);
+  if n <> length(B) then
+    raise Exception.Create
+      ('Matrix A and vector B must have the same number of rows');
+  if length(B[0]) <> 1 then
+    raise Exception.Create('Vector B must be a column vector (size n x 1)');
+  T := concat(A, B);
+  for i := 0 to n - 2 do
+  begin
+    if Abs(T[i, i]) < 1E-10 then
+      raise Exception.Create('Leading element is zero or near-zero at row ' +
+        IntToStr(i + 1));
+    for j := i + 1 to n - 1 do
+    begin
+      if Abs(T[j, i]) > 1E-10 then
+      begin
+        factor := T[j, i] / T[i, i];
+        inc(heavy_ops_counter);
+        for k := i to n do
+        begin
+          T[j, k] := T[j, k] - factor * T[i, k];
+          inc(heavy_ops_counter);
+        end;
+      end;
+    end;
+  end;
+  slice(T, A_star, B_star);
+  result := A_star;
+end;
+
+function get_submatrix(matr: Tmatr_arr; row_to_skip, col_to_skip: integer)
+  : Tmatr_arr;
+var
+  n, m, i, j, new_i, new_j: integer;
+begin
+  n := length(matr);
+  m := length(matr[0]);
+  if (n <= 1) or (m <= 1) then
+    raise Exception.Create('Submatrix requires at least 2x2 source');
+  setlength(result, n - 1, m - 1);
+  new_i := 0;
+  for i := 0 to n - 1 do
+  begin
+    if i = row_to_skip then
+      continue;
+    new_j := 0;
+    for j := 0 to m - 1 do
+    begin
+      if j = col_to_skip then
+        continue;
+      result[new_i, new_j] := matr[i, j];
+      inc(new_j);
+    end;
+    inc(new_i);
+  end;
+end;
+
+function trans(matr: Tmatr_arr): Tmatr_arr;
+var
+  i, j: int16;
+begin
+  if matr = nil then
+    raise Exception.Create('Cannot transpose empty matrix');
+  setlength(result, length(matr[0]), length(matr));
+  for i := 0 to length(matr) - 1 do
+    for j := 0 to length(matr[0]) - 1 do
+      result[j, i] := matr[i, j];
+end;
+
+function replace_column(A: Tmatr_arr; B: Tmatr_arr; j: integer): Tmatr_arr;
+var
+  n, i: integer;
+begin
+  n := length(A);
+  if n <> length(B) then
+    raise Exception.Create('Matrix and vector dimensions mismatch');
+  setlength(result, n, n);
+  for i := 0 to n - 1 do
+  begin
+    for var col := 0 to n - 1 do
+    begin
+      if col = j then
+        result[i, col] := B[i, 0]
+      else
+        result[i, col] := A[i, col];
+    end;
+  end;
+end;
+
+function elementwise_divide_scalar(matr: Tmatr_arr; scalar: real): Tmatr_arr;
+var
+  i, j: int16;
+begin
+  if Abs(scalar) < 1E-4 then
+    raise Exception.Create('Division by zero or near-zero scalar');
+  setlength(result, length(matr), length(matr[0]));
+  for i := 0 to length(matr) - 1 do
+    for j := 0 to length(matr[0]) - 1 do
+    begin
+      result[i, j] := matr[i, j] / scalar;
+      inc(heavy_ops_counter);
+    end;
+end;
+
+function minor_mattr(matr: Tmatr_arr; i, j: integer): Tmatr_arr;
+begin
+  result := get_submatrix(matr, i, j);
+end;
+
+function rec_det(matr: Tmatr_arr; i: int8 = 0): real;
+var
+  j, n: integer;
+  sub_det: real;
+  product: real;
+begin
+  n := length(matr);
+  if n = 1 then
+  begin
+    inc(social_counter_sys);
+    result := matr[0, 0];
+    exit;
+  end;
+  if n = 2 then
+  begin
+    inc(social_counter_sys, 2);
+    inc(heavy_ops_counter, 2);
+    result := matr[0, 0] * matr[1, 1] - matr[0, 1] * matr[1, 0];
+    exit;
+  end;
+  result := 0;
+  for j := 0 to n - 1 do
+  begin
+    if Abs(matr[i, j]) < 1E-4 then
+      continue;
+    inc(social_counter_sys);
+    sub_det := rec_det(minor_mattr(matr, i, j), 0);
+    product := matr[i, j] * sub_det;
+    inc(heavy_ops_counter);
+    if odd(i + j) then
+      result := result - product
+    else
+      result := result + product;
+  end;
+end;
+
+function calc_algebraic_complements(matr: Tmatr_arr): Tmatr_arr;
+var
+  n, i, j: integer;
+  submatr: Tmatr_arr;
+  det_sub: real;
+begin
+  n := length(matr);
+  if n <> length(matr[0]) then
+    raise Exception.Create('Matrix must be square');
+  setlength(result, n, n);
+  for i := 0 to n - 1 do
+  begin
+    for j := 0 to n - 1 do
+    begin
+      submatr := get_submatrix(matr, i, j);
+      det_sub := rec_det(submatr);
+      if odd(i + j) then
+        result[i, j] := -det_sub
+      else
+        result[i, j] := det_sub;
+    end;
+  end;
+end;
+
+function inverse_matrix(matr: Tmatr_arr): Tmatr_arr;
+var
+  n, i, j: integer;
+  det: real;
+  algebraic_complements, transposed: Tmatr_arr;
+begin
+  n := length(matr);
+  if n <> length(matr[0]) then
+    raise Exception.Create('Matrix must be square');
+  social_counter_sys := 0;
+  heavy_ops_counter := 0;
+  det := rec_det(matr);
+  if Abs(det) < 1E-4 then
+    raise Exception.Create('Матрица вырождена (determinant = 0)');
+  algebraic_complements := calc_algebraic_complements(matr);
+  transposed := trans(algebraic_complements);
+  setlength(result, n, n);
+  for i := 0 to n - 1 do
+  begin
+    for j := 0 to n - 1 do
+    begin
+      result[i, j] := transposed[i, j] / det;
+      inc(heavy_ops_counter);
+    end;
+  end;
+end;
+
+function generate_single_minor_matrix(original_matr: Tmatr_arr;
+  row_idx, col_idx: integer): Tmatr_arr;
+begin
+  if (row_idx < 1) or (row_idx > length(original_matr)) then
+    raise Exception.Create
+      ('Row index out of bounds for minor matrix generation');
+  if (col_idx < 1) or (col_idx > length(original_matr[0])) then
+    raise Exception.Create
+      ('Column index out of bounds for minor matrix generation');
+  result := get_submatrix(original_matr, row_idx - 1, col_idx - 1);
+end;
+
+function S_det(matr: Tmatr_arr): real;
+var
+  n: integer;
+begin
+  n := length(matr);
+  if n <> length(matr[0]) then
+    raise Exception.Create('Matrix must be square');
+  case n of
+    2:
+      begin
+        inc(heavy_ops_counter, 2);
+        result := matr[0, 0] * matr[1, 1] - matr[0, 1] * matr[1, 0];
+      end;
+    3:
+      begin
+        inc(heavy_ops_counter, 9);
+        result := matr[0, 0] * (matr[1, 1] * matr[2, 2] - matr[1, 2] * matr[2,
+          1]) - matr[0, 1] * (matr[1, 0] * matr[2, 2] - matr[1, 2] * matr[2, 0])
+          + matr[0, 2] * (matr[1, 0] * matr[2, 1] - matr[1, 1] * matr[2, 0]);
+      end;
+  else
+    raise Exception.Create('Determinant only for 2x2 and 3x3 matrices');
+  end;
+end;
+
+function gen_minor_matrix(matr: Tmatr_arr): Tmatr_arr;
+var
+  n, i, j: integer;
+  submatr: Tmatr_arr;
+begin
+  n := length(matr);
+  if n <> length(matr[0]) then
+    raise Exception.Create('Matrix must be square');
+  if not((n - 1 = 2) or (n - 1 = 3)) then
+    raise Exception.Create
+      ('Minor matrix supported only for 3x3 and 4x4 matrices');
+  setlength(result, n, n);
+  for i := 0 to n - 1 do
+    for j := 0 to n - 1 do
+    begin
+      submatr := get_submatrix(matr, i, j);
+      result[i, j] := S_det(submatr);
+    end;
+end;
+
+function add_matr(name: ansistring): Tmatr_arr;
+var
+  i, j, row, column: int16;
+  matr: Tmatr_arr;
+  txt: text;
+begin
+  if name = '' then
+  begin
+    writeln('Enter file name: ');
+    readln(name);
+  end;
+  assignFile(txt, name);
+  reset(txt);
+  readln(txt, row, column);
+  setlength(matr, row, column);
+  for i := 0 to row - 1 do
+  begin
+    for j := 0 to column - 1 do
+      read(txt, matr[i, j]);
+    readln(txt);
+  end;
+  closeFile(txt);
+  result := matr;
+end;
+
+function read_matr_from_keyboard: Tmatr_arr;
+var
+  n, m, i, j: integer;
+  matr: Tmatr_arr;
+  input: string;
+  values: array of string;
+  count, pos: integer;
+begin
+  write('Enter rows and columns: ');
+  readln(n, m);
+  setlength(matr, n, m);
+  for i := 0 to n - 1 do
+  begin
+    writeln('Row ', i + 1, ':');
+    repeat
+      readln(input);
+      setlength(values, 0);
+      pos := 1;
+      count := 0;
+      for j := 1 to length(input) do
+      begin
+        if (input[j] = ' ') or (j = length(input)) then
+        begin
+          setlength(values, count + 1);
+          if j = length(input) then
+            values[count] := copy(input, pos, j - pos + 1)
+          else
+            values[count] := copy(input, pos, j - pos);
+          pos := j + 1;
+          inc(count);
+        end;
+      end;
+    until count >= m;
+    for j := 0 to m - 1 do
+      matr[i, j] := StrToFloat(values[j]);
+  end;
+  result := matr;
+end;
+
+procedure save_matr_to_file(matr: Tmatr_arr; filename: ansistring);
+var
+  i, j: integer;
+  txt: text;
+begin
+  if matr = nil then
+  begin
+    writeln('Matrix is empty');
+    exit;
+  end;
+  assignFile(txt, filename);
+  rewrite(txt);
+  writeln(txt, length(matr), ' ', length(matr[0]));
+  for i := 0 to length(matr) - 1 do
+  begin
+    for j := 0 to length(matr[i]) - 1 do
+      write(txt, matr[i, j]:0:3, ' ');
+    writeln(txt);
+  end;
+  closeFile(txt);
+  writeln('Matrix saved to ', filename);
+end;
+
+procedure print_matr(matr: Tmatr_arr);
+var
+  i, j: int16;
+  row, column: integer;
+begin
+  if matr = nil then
+  begin
+    writeln('(empty)');
+    exit;
+  end;
+  row := length(matr);
+  column := length(matr[0]);
+  for i := 0 to row - 1 do
+  begin
+    write(' | ');
+    for j := 0 to column - 1 do
+      write(matr[i, j]:8:3);
+    writeln(' |');
+  end;
+end;
+
+function plus_matr(matr1, matr2: Tmatr_arr): Tmatr_arr;
+var
+  i, j, row, column: int16;
+begin
+  row := length(matr1);
+  column := length(matr1[0]);
+  if (row <> length(matr2)) or (column <> length(matr2[0])) then
+    raise Exception.Create('Matrix dimensions mismatch');
+  setlength(result, row, column);
+  for i := 0 to row - 1 do
+    for j := 0 to column - 1 do
+      result[i, j] := matr1[i, j] + matr2[i, j];
+end;
+
+function minus_matr(matr1, matr2: Tmatr_arr): Tmatr_arr;
+var
+  i, j, row, column: int16;
+begin
+  row := length(matr1);
+  column := length(matr1[0]);
+  if (row <> length(matr2)) or (column <> length(matr2[0])) then
+    raise Exception.Create('Matrix dimensions mismatch');
+  setlength(result, row, column);
+  for i := 0 to row - 1 do
+    for j := 0 to column - 1 do
+      result[i, j] := matr1[i, j] - matr2[i, j];
+end;
+
+function mylti_matr(matr1, matr2: Tmatr_arr): Tmatr_arr;
+var
+  i, j, k, row1, col1, row2, col2: int16;
+  sum: real;
+begin
+  row1 := length(matr1);
+  col1 := length(matr1[0]);
+  row2 := length(matr2);
+  col2 := length(matr2[0]);
+  if col1 <> row2 then
+    raise Exception.Create('Matrix dimensions mismatch for multiplication');
+  setlength(result, row1, col2);
+  for i := 0 to row1 - 1 do
+    for j := 0 to col2 - 1 do
+    begin
+      sum := 0;
+      for k := 0 to col1 - 1 do
+      begin
+        if (Abs(matr1[i, k]) < 1E-10) or (Abs(matr2[k, j]) < 1E-10) then
+          continue;
+        sum := sum + matr1[i, k] * matr2[k, j];
+        inc(heavy_ops_counter);
+      end;
+      result[i, j] := sum;
+    end;
+end;
+
+function genmconst(n, m: integer; simple: real): Tmatr_arr;
+var
+  i, j: int16;
+begin
+  setlength(result, n, m);
+  for i := 0 to n - 1 do
+    for j := 0 to m - 1 do
+      result[i, j] := simple;
+end;
+
+function gen_random_matr(n, m: integer; diap, offset: real; seed: integer)
+  : Tmatr_arr;
+var
+  i, j: int16;
+begin
+  randseed := seed;
+  setlength(result, n, m);
+  for i := 0 to n - 1 do
+    for j := 0 to m - 1 do
+      result[i, j] := random * diap - offset;
+end;
+
+function gen_ed(n, pos: integer): Tmatr_arr;
+begin
+  result := genmconst(n, 1, 0.0);
+  if (pos < 1) or (pos > n) then
+    raise Exception.Create('Invalid position for unit vector')
+  else
+    result[pos - 1, 0] := 1.0;
+end;
+
+function gen_ed_row(n, pos: integer): Tmatr_arr;
+begin
+  result := genmconst(1, n, 0.0);
+  if (pos < 1) or (pos > n) then
+    raise Exception.Create('Invalid position for unit vector')
+  else
+    result[0, pos - 1] := 1.0;
+end;
+
+function multi_calc(matr: Tmatr_arr; scalar: real): Tmatr_arr;
+var
+  i, j: int16;
+begin
+  setlength(result, length(matr), length(matr[0]));
+  for i := 0 to length(matr) - 1 do
+    for j := 0 to length(matr[0]) - 1 do
+    begin
+      if Abs(scalar) < 1E-4 then
+        result[i, j] := 0
+      else
+      begin
+        result[i, j] := matr[i, j] * scalar;
+        inc(heavy_ops_counter);
+      end;
+    end;
+end;
+
+begin
+  for i := 1 to 7 do
+    main_matr[i] := nil;
+  writeln('Matrix Calculator. Type "help" for commands.');
+  writeln('Available commands: ', S_COM);
+  repeat
+    try
+      case c of
+        0:
+          begin
+            writeln('Available commands:');
+            writeln('help  - Show this help');
+            writeln('cin   - Input matrix from keyboard');
+            writeln('load  - Load matrix from file');
+            writeln('print - Print matrices');
+            writeln('plus  - Add two matrices');
+            writeln('minus - Subtract two matrices');
+            writeln('multi - Multiply two matrices');
+            writeln('Gensmatr - Generate constant matrix');
+            writeln('Gen_matr - Generate random matrix');
+            writeln('Gen_vec - Generate column vector');
+            writeln('Gen_row - Generate row vector');
+            writeln('trans - Transpose matrix');
+            writeln('scale - Multiply matrix by scalar');
+            writeln('save  - Save matrix to file');
+            writeln('det   - Calculate determinant (2x2, 3x3)');
+            writeln('submatr - Get submatrix by i,j indices');
+            writeln('minor - Generate minor matrix (for 3x3/4x4)');
+            writeln('recdet - Calculate determinant recursively');
+            writeln('invmatr - Calculate inverse matrix');
+            writeln('cramer - metod Cramers');
+            writeln('gauss - metod Gauss');
+            writeln('lu_solve');
+            writeln('lu_det');
+            writeln('swap');
+            writeln('exit  - Exit program');
+            writeln;
+            writeln('Heavy operations counter includes multiplications and divisions.');
+          end;
+      end;
+      write(#10'>>> ');
+      var
+        ent_com: ansistring;
+      readln(ent_com);
+      c := pos(trim(ent_com), S_COM) div 9;
+      case c of
+        1:
+          begin
+            i := 1;
+            while (i <= 7) and (main_matr[i] <> nil) do
+              inc(i);
+            if i > 7 then
+              raise Exception.Create('No free matrix slots');
+            main_matr[i] := read_matr_from_keyboard;
+            writeln('Matrix stored in slot ', i);
+          end;
+        2:
+          begin
+            var
+              filename: ansistring;
+            writeln('Enter filename: ');
+            readln(filename);
+            i := 1;
+            while (i <= 7) and (main_matr[i] <> nil) do
+              inc(i);
+            if i > 7 then
+              raise Exception.Create('No free matrix slots');
+            main_matr[i] := add_matr(filename);
+            writeln('Loaded into slot ', i);
+          end;
+        3:
+          begin
+            for i := 1 to 7 do
+            begin
+              writeln('Matrix ', i, ':');
+              print_matr(main_matr[i]);
+            end;
+          end;
+        4:
+          begin
+            var
+              k: integer;
+            writeln('Enter matrix indices i j k (result in k): ');
+            readln(i, j, k);
+            main_matr[k] := plus_matr(main_matr[i], main_matr[j]);
+            writeln('Result stored in slot ', k);
+          end;
+        5:
+          begin
+            var
+              k: integer;
+            writeln('Enter matrix indices i j k (result in k): ');
+            readln(i, j, k);
+            main_matr[k] := minus_matr(main_matr[i], main_matr[j]);
+            writeln('Result stored in slot ', k);
+          end;
+        6:
+          begin
+            var
+              k: integer;
+            writeln('Enter matrix indices i j k (result in k): ');
+            readln(i, j, k);
+            heavy_ops_counter := 0;
+            main_matr[k] := mylti_matr(main_matr[i], main_matr[j]);
+            writeln('Result stored in slot ', k);
+            writeln('Heavy operations (multiplications): ', heavy_ops_counter);
+          end;
+        7:
+          begin
+            var
+              n, m: integer;
+            var
+              val: real;
+            writeln('Enter rows, columns, value: ');
+            readln(n, m, val);
+            i := 1;
+            while (i <= 7) and (main_matr[i] <> nil) do
+              inc(i);
+            if i > 7 then
+              raise Exception.Create('No free matrix slots');
+            main_matr[i] := genmconst(n, m, val);
+            writeln('Constant matrix in slot ', i);
+          end;
+        8:
+          begin
+            var
+              n, m, seed: integer;
+            var
+              diap, offset: real;
+            writeln('Enter rows, cols, diap, offset, seed: ');
+            readln(n, m, diap, offset, seed);
+            i := 1;
+            while (i <= 7) and (main_matr[i] <> nil) do
+              inc(i);
+            if i > 7 then
+              raise Exception.Create('No free matrix slots');
+            main_matr[i] := gen_random_matr(n, m, diap, offset, seed);
+            writeln('Random matrix in slot ', i);
+          end;
+        9:
+          begin
+            var
+              n, k: integer;
+            writeln('Enter size and position of 1: ');
+            readln(n, k);
+            i := 1;
+            while (i <= 7) and (main_matr[i] <> nil) do
+              inc(i);
+            if i > 7 then
+              raise Exception.Create('No free matrix slots');
+            main_matr[i] := gen_ed(n, k);
+            writeln('Column vector in slot ', i);
+          end;
+        10:
+          begin
+            var
+              n, k: integer;
+            writeln('Enter size and position of 1: ');
+            readln(n, k);
+            i := 1;
+            while (i <= 7) and (main_matr[i] <> nil) do
+              inc(i);
+            if i > 7 then
+              raise Exception.Create('No free matrix slots');
+            main_matr[i] := gen_ed_row(n, k);
+            writeln('Row vector in slot ', i);
+          end;
+        11:
+          begin
+            var
+              k: integer;
+            writeln('Enter source and target slots (i k): ');
+            readln(i, k);
+            main_matr[k] := trans(main_matr[i]);
+            writeln('Transposed matrix in slot ', k);
+          end;
+        12:
+          begin
+            var
+              k: integer;
+            var
+              scalar: real;
+            writeln('Enter source slot, scalar, target slot (i scalar k): ');
+            readln(i, scalar, k);
+            heavy_ops_counter := 0;
+            main_matr[k] := multi_calc(main_matr[i], scalar);
+            writeln('Scaled matrix in slot ', k);
+            writeln('Heavy operations (multiplications): ', heavy_ops_counter);
+          end;
+        13:
+          begin
+            var
+              filename: ansistring;
+            var
+              idx: integer;
+            writeln('Enter slot index and filename: ');
+            readln(idx, filename);
+            save_matr_to_file(main_matr[idx], filename);
+          end;
+        14:
+          begin
+            var
+              idx: integer;
+            writeln('Enter matrix slot: ');
+            readln(idx);
+            heavy_ops_counter := 0;
+            writeln('Determinant = ', S_det(main_matr[idx]):0:3);
+            writeln('Heavy operations (multiplications/divisions): ',
+              heavy_ops_counter);
+          end;
+        15:
+          begin
+            var
+              source_idx, target_idx, row_idx, col_idx: integer;
+            writeln('Enter source slot, target slot, row index, column index (i k row col): ');
+            readln(source_idx, target_idx, row_idx, col_idx);
+            main_matr[target_idx] := get_submatrix(main_matr[source_idx],
+              row_idx - 1, col_idx - 1);
+            writeln('Submatrix stored in slot ', target_idx);
+            writeln('Submatrix (excluding row ', row_idx, ' and column ',
+              col_idx, '):');
+            print_matr(main_matr[target_idx]);
+          end;
+        16:
+          begin
+            var
+              idx, target_idx: integer;
+            writeln('Enter source slot and target slot (i k): ');
+            readln(idx, target_idx);
+            heavy_ops_counter := 0;
+            main_matr[target_idx] := gen_minor_matrix(main_matr[idx]);
+            writeln('Minor matrix stored in slot ', target_idx);
+            writeln('Heavy operations (multiplications): ', heavy_ops_counter);
+          end;
+        17:
+          begin
+            var
+              idx: integer;
+            writeln('Enter matrix slot for recursive determinant calculation: ');
+            readln(idx);
+            social_counter_sys := 0;
+            heavy_ops_counter := 0;
+            try
+              var
+                det: real;
+              det := rec_det(main_matr[idx]);
+              writeln('Recursive determinant = ', det:0:3);
+              writeln('Number of recursive calls: ', social_counter_sys);
+              writeln('Heavy operations (multiplications/divisions): ',
+                heavy_ops_counter);
+            except
+              on E: Exception do
+                writeln('Error calculating determinant: ', E.Message);
+            end;
+          end;
+        18:
+          begin
+            var
+              idx, target_idx: integer;
+            writeln('Enter source slot and target slot for inverse matrix (i k): ');
+            readln(idx, target_idx);
+            try
+              var
+              old_social := social_counter_sys;
+              var
+              old_heavy := heavy_ops_counter;
+              main_matr[target_idx] := inverse_matrix(main_matr[idx]);
+              writeln('Inverse matrix stored in slot ', target_idx);
+              print_matr(main_matr[target_idx]);
+              writeln('Operations for inverse matrix calculation:');
+              writeln('  Recursive calls: ', social_counter_sys);
+              writeln('  Heavy operations (multiplications/divisions): ',
+                heavy_ops_counter);
+            except
+              on E: Exception do
+                writeln('Error calculating inverse matrix: ', E.Message);
+            end;
+          end;
+        19:
+          begin
+            writeln('=== METHOD OF CRAMER FOR SOLVING SLAE ===');
+            writeln('Solves A * X = B, where A is a square matrix, B is a column vector.');
+            var
+              A_idx, B_idx, X_idx: integer;
+            writeln('Enter slot index of matrix A (square): ');
+            readln(A_idx);
+            writeln('Enter slot index of vector B (column, same size as A): ');
+            readln(B_idx);
+            writeln('Enter slot index to store solution vector X: ');
+            readln(X_idx);
+            A := main_matr[A_idx];
+            B := main_matr[B_idx];
+            if A = nil then
+              raise Exception.Create('Matrix A is not loaded');
+            if B = nil then
+              raise Exception.Create('Vector B is not loaded');
+            var
+            n := length(A);
+            if n <> length(A[0]) then
+              raise Exception.Create('Matrix A must be square');
+            if n <> length(B) then
+              raise Exception.Create
+                ('Vector B must have the same number of rows as matrix A');
+            if length(B[0]) <> 1 then
+              raise Exception.Create
+                ('Vector B must be a column vector (size n x 1)');
+            social_counter_sys := 0;
+            heavy_ops_counter := 0;
+            try
+              var
+              d := rec_det(A);
+              if Abs(d) < 1E-4 then
+                raise Exception.Create
+                  ('Matrix A is singular (determinant = 0). No unique solution.');
+              writeln(#10'Step 1: Determinant of A (d) = ', d:0:6);
+              setlength(main_matr[X_idx], n, 1);
+              for j := 0 to n - 1 do
+              begin
+                var
+                Aj := replace_column(A, B, j);
+                writeln(#10'Step 3.', j + 1, ': Matrix A', j + 1,
+                  ' (replacing column ', j + 1, ' with B):');
+                print_matr(Aj);
+                var
+                dj := rec_det(Aj);
+                writeln('Determinant of A', j + 1, ' (d', j + 1,
+                  ') = ', dj:0:6);
+                main_matr[X_idx][j, 0] := dj / d;
+                inc(heavy_ops_counter);
+                writeln('X[', j + 1, ',1] = d', j + 1, ' / d = ',
+                  main_matr[X_idx][j, 0]:0:6);
+              end;
+              writeln(#10'=== SOLUTION FOUND ===');
+              writeln('Solution vector X stored in slot ', X_idx, ':');
+              print_matr(main_matr[X_idx]);
+              writeln('Total Heavy Operations (multiplications/divisions): ',
+                heavy_ops_counter);
+              writeln('Total Recursive Calls: ', social_counter_sys);
+            except
+              on E: Exception do
+                writeln('Error solving SLAE by Cramer''s method: ', E.Message);
+            end;
+          end;
+        20:
+          begin
+            writeln('=== GAUSS ELIMINATION METHOD ===');
+            writeln('Converts system A*X=B to upper triangular form A*|B*.');
+            var
+              A_idx, B_idx, A_star_idx, B_star_idx: integer;
+            writeln('Enter slot index of matrix A (square): ');
+            readln(A_idx);
+            writeln('Enter slot index of vector B (column, same size as A): ');
+            readln(B_idx);
+            writeln('Enter slot index to store upper triangular matrix A*: ');
+            readln(A_star_idx);
+            writeln('Enter slot index to store transformed vector B*: ');
+            readln(B_star_idx);
+            A := main_matr[A_idx];
+            B := main_matr[B_idx];
+            if A = nil then
+              raise Exception.Create('Matrix A is not loaded');
+            if B = nil then
+              raise Exception.Create('Vector B is not loaded');
+            var
+            n := length(A);
+            if n <> length(A[0]) then
+              raise Exception.Create('Matrix A must be square');
+            if n <> length(B) then
+              raise Exception.Create
+                ('Vector B must have the same number of rows as matrix A');
+            if length(B[0]) <> 1 then
+              raise Exception.Create
+                ('Vector B must be a column vector (size n x 1)');
+            social_counter_sys := 0;
+            heavy_ops_counter := 0;
+            try
+              var
+                B_star: Tmatr_arr;
+              var
+              A_star := gausse(A, B, B_star);
+              main_matr[A_star_idx] := A_star;
+              main_matr[B_star_idx] := B_star;
+              writeln(#10'=== RESULTS ===');
+              writeln('Upper triangular matrix A* stored in slot ',
+                A_star_idx, ':');
+              print_matr(main_matr[A_star_idx]);
+              writeln(#10'Transformed vector B* stored in slot ',
+                B_star_idx, ':');
+              print_matr(main_matr[B_star_idx]);
+              writeln(#10'Total Heavy Operations (multiplications/divisions): ',
+                heavy_ops_counter);
+            except
+              on E: Exception do
+                writeln('Error applying Gauss elimination: ', E.Message);
+            end;
+          end;
+        21:
+          begin
+            writeln('=== LU DECOMPOSITION AND SOLVING SLAE ===');
+            writeln('Solves A * X = B using LU decomposition.');
+            var
+              A_idx, B_idx, L_idx, U_idx, Y_idx, X_idx: integer;
+            writeln('Enter slot index of matrix A (square): ');
+            readln(A_idx);
+            writeln('Enter slot index of vector B (column, same size as A): ');
+            readln(B_idx);
+            writeln('Enter slot index to store lower triangular matrix L: ');
+            readln(L_idx);
+            writeln('Enter slot index to store upper triangular matrix U: ');
+            readln(U_idx);
+            writeln('Enter slot index to store intermediate vector Y (L*Y=B): ');
+            readln(Y_idx);
+            writeln('Enter slot index to store solution vector X (U*X=Y): ');
+            readln(X_idx);
+            A := main_matr[A_idx];
+            B := main_matr[B_idx];
+            if A = nil then
+              raise Exception.Create('Matrix A is not loaded');
+            if B = nil then
+              raise Exception.Create('Vector B is not loaded');
+            var
+            n := length(A);
+            if n <> length(A[0]) then
+              raise Exception.Create('Matrix A must be square');
+            if n <> length(B) then
+              raise Exception.Create
+                ('Vector B must have the same number of rows as matrix A');
+            if length(B[0]) <> 1 then
+              raise Exception.Create
+                ('Vector B must be a column vector (size n x 1)');
+            social_counter_sys := 0;
+            heavy_ops_counter := 0;
+            try
+              var
+                L: Tmatr_arr;
+              var
+              U := LU(A, L);
+              main_matr[L_idx] := L;
+              main_matr[U_idx] := U;
+              writeln(#10'=== LU DECOMPOSITION RESULTS ===');
+              writeln('Lower triangular matrix L stored in slot ', L_idx, ':');
+              print_matr(main_matr[L_idx]);
+              writeln(#10'Upper triangular matrix U stored in slot ',
+                U_idx, ':');
+              print_matr(main_matr[U_idx]);
+              writeln(#10'Heavy Operations (multiplications/divisions): ',
+                heavy_ops_counter);
+              heavy_ops_counter := 0;
+              var
+              Y := direct_sub(L, B);
+              main_matr[Y_idx] := Y;
+              writeln(#10'Intermediate vector Y (solution of L*Y=B) stored in slot ',
+                Y_idx, ':');
+              print_matr(main_matr[Y_idx]);
+              writeln(#10'Heavy Operations (multiplications/divisions): ',
+                heavy_ops_counter);
+              heavy_ops_counter := 0;
+              var
+              X := revers_sub(U, Y);
+              main_matr[X_idx] := X;
+              writeln(#10'Solution vector X (solution of U*X=Y) stored in slot ',
+                X_idx, ':');
+              print_matr(main_matr[X_idx]);
+              writeln(#10'Heavy Operations (multiplications/divisions): ',
+                heavy_ops_counter);
+              heavy_ops_counter := 0;
+            except
+              on E: Exception do
+                writeln('Error solving SLAE by LU method: ', E.Message);
+            end;
+          end;
+        22:
+          begin
+            writeln('=== CALCULATE DETERMINANT USING LU DECOMPOSITION (NO PIVOTING) ===');
+            writeln('This method guarantees A = L * U.');
+            var
+              A_idx, L_idx, U_idx: integer;
+            writeln('Enter slot index of matrix A (square): ');
+            readln(A_idx);
+            writeln('Enter slot index to store L: ');
+            readln(L_idx);
+            writeln('Enter slot index to store U: ');
+            readln(U_idx);
+            A := main_matr[A_idx];
+            if A = nil then
+              raise Exception.Create('Matrix A is not loaded');
+            var
+            n := length(A);
+            if n <> length(A[0]) then
+              raise Exception.Create('Matrix A must be square');
+            heavy_ops_counter := 0;
+            social_counter_sys := 0;
+            try
+              var
+                L: Tmatr_arr;
+              var
+                U: Tmatr_arr;
+              U := lu_no_pivot(A, L);
+              main_matr[L_idx] := L;
+              main_matr[U_idx] := U;
+              writeln(#10'Lower triangular matrix L stored in slot ',
+                L_idx, ':');
+              print_matr(main_matr[L_idx]);
+              writeln(#10'Upper triangular matrix U stored in slot ',
+                U_idx, ':');
+              print_matr(main_matr[U_idx]);
+              var
+              deter_u := det_u(U);
+              var
+              det_A_LU := deter_u;
+              writeln('Determinant via LU (det(U)): ', det_A_LU:0:6);
+              var
+              ops_lu_and_detu := heavy_ops_counter;
+              writeln('Calculating recursive determinant...');
+              var
+              det_A_rec := rec_det(A);
+              writeln('Recursive determinant: ', det_A_rec:0:6);
+              var
+              ops_rec_det := heavy_ops_counter - ops_lu_and_detu;
+              writeln('Heavy Ops LU + det(U): ', ops_lu_and_detu);
+              writeln('Heavy Ops recursive: ', ops_rec_det);
+              writeln('Rec Calls recursive: ', social_counter_sys);
+            except
+              on E: Exception do
+                writeln('Error: ', E.Message);
+            end;
+          end;
+        23:
+          begin
+            writeln('=== SWAP ROWS IN MATRIX ===');
+            var
+              A_idx, B_idx: integer;
+            writeln('Enter slot index of matrix A: ');
+            readln(A_idx);
+            writeln('Enter slot index to store result matrix B: ');
+            readln(B_idx);
+            A := main_matr[A_idx];
+            if A = nil then
+              raise Exception.Create('Matrix A is not loaded');
+            var
+            n := length(A);
+            if n = 0 then
+              raise Exception.Create('Matrix A is empty');
+            writeln('Enter row index i1 (0-based): ');
+            var
+              i1: integer;
+            readln(i1);
+            dec(i1);
+            writeln('Enter row index i2 (0-based): ');
+            var
+              i2: integer;
+            readln(i2);
+            dec(i2);
+            try
+              B := swap(A, i1, i2);
+              main_matr[B_idx] := B;
+              writeln(#10'Matrix A (slot ', A_idx, '):');
+              print_matr(A);
+              writeln(#10'Matrix B (A with rows ', i1, ' and ', i2,
+                ' swapped, stored in slot ', B_idx, '):');
+              print_matr(B);
+            except
+              on E: Exception do
+                writeln('Error in swap operation: ', E.Message);
+            end;
+          end;
+        24:
+          begin
+            writeln('Exiting...');
+            halt;
+          end;
+      end;
+    except
+      on E: Exception do
+        writeln(E.ClassName, ': ', E.Message, ' in command block: ', c);
+    end;
+  until false;
+
+end.

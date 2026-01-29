@@ -1,0 +1,57 @@
+﻿program monkeykeyboard;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils, Windows;
+
+var
+  i, j, r: int32;
+  c, c1, c2, c3, x, x1, x2, x3: ansichar;
+  word, cstr: ansistring;
+
+
+begin
+  setconsoleoutputCP(1251);
+  repeat
+
+    i := 0;
+    j := 0;
+    c := ' ';
+    c1 := ' ';
+    c2 := ' ';
+    c3 := ' ';
+    cstr := ' ';
+
+    writeln('Введите randseed');
+    readln(r);
+    randseed := r;
+    writeln('Введите ожидаемое слово');
+    readln(word);
+
+
+
+    while c3+c2+c1+c <> word do
+    begin
+      j := random(26) + 97;
+      c := ansichar(j);
+      write(c);
+      inc(i);
+      cstr:= cstr+c;
+      //if c3+c2+c1+c = word then break;
+
+      c3 := c2;
+      c2 := c1;
+      c1 := c;
+
+    end;
+
+
+
+
+    writeln(#10, #10, 'Количество символов напечатанных monkey для слова ',
+      word, ' при randseed=', r, ' = ', i, #10);
+  until false;
+
+end.

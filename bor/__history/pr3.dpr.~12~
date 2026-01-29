@@ -1,0 +1,61 @@
+﻿program pr3;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils, windows;
+  
+
+type
+  PEl = ^TEl;
+
+  TEl = record
+    f: boolean;
+    Link: array ['а' .. 'я'] of PEl;
+  end;
+//
+procedure Insert(s: string; var root: PEl);
+var
+  i: integer;
+  curr: PEl;
+  c: ansichar;
+  s1:ansistring;
+begin
+  if root = nil then
+    New(root);
+
+  curr := root;
+  s1:=utf8toansi(s);//s1:=s//s1:=s;
+  for i := 1 to Length(s) do
+  begin
+     c :=s1[i];
+     writeln('я','  ',ord('я'),'  ',c);
+     readln;
+    if not(c in ['а' .. 'я']) then
+      writeln('Недопустимый символ: ' + c);
+
+    if curr^.Link[c] = nil then
+      New(curr^.Link[c]);
+
+    curr := curr^.Link[c];
+  end;
+end;
+
+var
+  root: PEl = nil;
+  s: string;
+
+begin
+  try
+    setconsoleCP(1251);
+    repeat
+      writeln('s');
+      readln(s);
+      Insert(s, root);
+      readln;
+    until false;
+  except
+
+  end;
+end.

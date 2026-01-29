@@ -1,0 +1,32 @@
+program task2;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+var
+  a, b, c, a1, b1, otvet: int32;
+
+begin
+  repeat
+    a := 168;
+    b := 180;
+    a1:= a;
+    b1:= b;
+
+
+    while b <> 0 do
+    begin
+      c := b;
+      b := a mod b;
+      a := c;
+    end;
+
+    otvet:= a1*b1 div a*a;
+    writeln(otvet);
+    readln;
+  until false;
+
+end.

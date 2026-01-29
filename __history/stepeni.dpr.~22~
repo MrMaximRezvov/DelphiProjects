@@ -1,0 +1,36 @@
+﻿program stepeni;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils, windows;
+
+var
+  rez,n, a, n1: int64;
+  b: boolean;
+
+begin
+  setconsoleoutputCP(1251);
+  repeat
+    rez := 1;
+    writeln('Введите значение a(основание степени), n(степень)');
+    readln(a, n);
+    if n>0 then b:= true;
+
+      n:= abs(n);
+      while n > 0 do
+      begin
+        if odd(n) then
+          rez := rez * a;
+        a := a * a;
+        n := n shr 1;
+      end;
+      if b = True then  writeln('Результат= ', rez) else  writeln('Результат= 1/', rez)
+
+
+
+
+  until false;
+
+end.

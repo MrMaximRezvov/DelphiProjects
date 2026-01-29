@@ -1,0 +1,31 @@
+program testtask;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+var
+  n, k, h, nas, hom: int32;
+
+begin
+  readln(n, k);
+  while nas >= 0 do
+  begin
+
+    readln(h);
+
+  if k < h then
+    inc(hom);
+    nas := h - k;
+
+  if h < k then
+    nas := k - h;
+    hom:=0;
+
+  if nas < 0 then
+    break;
+  end;
+writeln(hom, nas);
+end.

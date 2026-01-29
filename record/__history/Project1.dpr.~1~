@@ -1,0 +1,32 @@
+program Project1;
+
+{$APPTYPE CONSOLE}
+
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+type
+tmydate = packed record
+  year: integer;
+  month: byte;
+  day:byte;
+end;
+tmyrecord = record
+private
+name: string;
+value: integer;
+somechar: char;
+public
+function tostring: string;
+procedure setvalue(newstring: string);
+procedure init(int: integer);
+end;
+var birthdate: tmydate;
+begin
+birthdate.year := 1997;
+birthdate.month:= 12;
+birthdate.day := 29;
+
+end.

@@ -1,0 +1,45 @@
+﻿program randtask3;
+
+{$APPTYPE CONSOLE}
+
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+var i, j, schet, schet1, nomer, nomer1, nomer2:int32;
+
+label m;
+begin
+m:
+writeln('Введите значение RANDSEED');
+readln(randseed);
+
+for i := 1 to 10000 do
+    begin
+      j:= random(21);
+      inc(nomer);
+
+      if j > 0 then
+      begin
+        inc(schet);
+      end;
+      if j = 0 then
+      begin
+      nomer1:= nomer;
+        if schet1 < schet then
+        begin
+        nomer2:= nomer1;
+        schet1:=schet;
+        schet:= 0;
+        end;
+      end;
+
+      //write(j: 5);
+    end;
+    writeln(#10, 'schet= ', schet, ' nomer= ', nomer2);
+    //readln;
+    schet:= 0;
+    nomer:= 0;
+    goto m;
+end.

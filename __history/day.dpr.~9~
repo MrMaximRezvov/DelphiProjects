@@ -1,0 +1,44 @@
+program day;
+
+{$APPTYPE CONSOLE}
+
+{$R *.res}
+
+uses
+  System.SysUtils, System.DateUtils;
+
+type ten1 = (jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec);
+    arrs = array of string;
+var en1: ten1;
+  arrh: arrs;
+  mes, date, i, sum, g: uint16;
+begin
+//readln(date, mes);
+randomize;
+sum:=0;
+arrh:= ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+for en1 := jan to aug do
+  case en1 of
+  jan, mar, may, jul, aug: sum:= sum+31;
+  feb: sum:= sum+29;
+  apr,jun: sum:= sum+30;
+  end;
+g:= dayoftheyear(now);
+writeln(sum+12);
+writeln(g);
+for i := 0 to 11 do
+  //en1:= random(ord(en1));
+  write(arrh[random(12)], ' ');
+
+
+
+
+
+
+
+
+
+
+
+readln
+end.

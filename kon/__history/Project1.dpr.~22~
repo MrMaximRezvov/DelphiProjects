@@ -1,0 +1,58 @@
+program Project1;
+
+uses
+  SysUtils;
+
+// Вариант реализации задачи "ход конем"
+const
+  m = 1000 + 7;
+
+type
+  tchess = array ['a' .. 'с'] of uint32;
+
+var
+  i, k, n: uint32;
+  c: ansichar;
+  a1, a2, a3: tchess;
+
+begin
+  repeat
+    try
+      for c := 'a' to 'c' do
+      begin
+        a1[c] := 0;
+        a2[c] := 0;
+      end;
+      a2['a'] := 1;
+      //a2['e'] := 1;
+      //
+      write('Enter k>0 : ');
+      readln(k);
+      if k < 3 then
+      begin
+        n := 0;
+        writeln('n=', n);
+        continue;
+      end;
+      // main
+      for i := 3 to k do
+      begin
+        a3['a'] := 2*((a1['b'] + a2['c']) mod m);
+        a3['b'] := 2*(((a1['a'] + a1['c']) mod m + a2['d']) mod m);
+        a3['c'] := (((2*a1['b']) mod m + a2['a']) mod m +
+          a2['a']) mod m;
+        //a3['d'] := ((a1['c'] + a1['e']) mod m + a2['b']) mod m;
+        //a3['e'] := (a1['d'] + a2['c']) mod m;
+        a1 := a2;
+        a2 := a3;
+      end;
+      n := a3['c'];
+      writeln('n=', n);
+    except
+      on E: Exception do
+        writeln(E.ClassName, ': ', E.Message);
+    end;
+    // readln;
+  until false;
+
+end.

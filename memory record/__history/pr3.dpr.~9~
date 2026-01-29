@@ -1,0 +1,71 @@
+program pr3;
+
+{$APPTYPE CONSOLE}
+
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+type
+  TParticipant = record
+    Number: Integer;
+    IsActive: Boolean;
+  end;
+  TParticipants = array of TParticipant;
+
+var
+  Participants: TParticipants;
+  N, M, K, i, current, remaining: Integer;
+
+procedure InitializeParticipants;
+begin
+  SetLength(Participants, N);
+  for i := 0 to N - 1 do
+  begin
+    Participants[i].Number := i + 1;
+    Participants[i].IsActive := True;
+  end;
+end;
+
+procedure FindWinners;
+begin
+  current := 0;
+  remaining := N;
+
+  while remaining > K do
+  begin
+    // Находим M-го активного участника
+    for i := 0 to M-1 do
+    begin
+      repeat
+        current := (current + 1) mod N;
+      until Participants[current].IsActive;
+    end;
+
+    // Выбывание участника
+    Participants[current].IsActive := False;
+    Dec(remaining);
+    Writeln('Участник ', Participants[current].Number, ' выбывает');
+  end;
+
+  // Вывод победителей
+  Writeln('Счастливчики:');
+  for i := 0 to N - 1 do
+    if Participants[i].IsActive then
+      Writeln('Участник ', Participants[i].Number);
+end;
+
+begin
+  Write('Введите количество участников (N): ');
+  Readln(N);
+  Write('Введите шаг считалки (M): ');
+  Readln(M);
+  Write('Введите количество победителей (K): ');
+  Readln(K);
+
+  InitializeParticipants;
+  FindWinners;
+
+  Readln;
+end.

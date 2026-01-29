@@ -1,0 +1,105 @@
+program зкщоусе5;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+// test программа для дин.объектов
+var
+  i: integer;
+  pi, pd: ^integer;
+  s, s1: string;
+  sa: ansistring;
+  p, p1, pa: Pointer;
+  pw: ^uint16;
+  pc, pcb, pce: ^Char;
+  pac, pacb, pace: ^ansichar;
+  pr: ^real;
+
+  //
+type
+  tdeskr = record // descriptor
+    cp, size_ch: uint16; // 2+2
+    ref, len: uint32; // 4+4
+  end; // 12 байт
+
+  td = ^tdeskr; // !!!
+
+var
+  rec_d: tdeskr;
+  p_desk: td;
+
+procedure print_deskr(p_d: td);
+var
+  rec: tdeskr;
+  n: uint32;
+begin
+  rec := p_d^;
+  writeln('!Кодовая страница=', rec.cp);
+  writeln('Размер символа=', rec.size_ch);
+  writeln('Колво ссылок=', rec.ref);
+  writeln('!Кол-во символов=', rec.len);
+  n := rec.size_ch * rec.len;
+  writeln('Размер строки =', n);
+  n := n + 12 + rec.size_ch; // 0
+  writeln('Общий размер =', n);
+end;
+
+begin
+  writeln('Новый эксперимент ');
+  s := 'строка S'; // 8
+  s1 := 'строка S1'; // 9
+  sa := 'строка Sa'; // 9
+  p := @s[1];
+  p1 := @s1[1];
+  pa := @sa[1];
+  writeln('Adr S[1]=', uintptr(p), ' Adr S1[1]=', uintptr(p1), ' Adr Sa[1]=',
+    uintptr(pa));
+  p_desk := p;
+  dec(p_desk);
+  writeln(s);
+  print_deskr(p_desk);
+  p_desk := p1;
+  dec(p_desk);
+  writeln(s1);
+  print_deskr(p_desk);
+  p_desk := pa;
+  dec(p_desk);
+  writeln(sa);
+  print_deskr(p_desk);
+
+  writeln('Строка s');
+  pc := p;
+  pcb := pc;
+  writeln('1 = ', pcb^, ' ', ord(pcb^));
+  inc(pc, length(S)-1);
+  pce := pc;
+  writeln('last = ', pce^, ' ', ord(pce^));
+  inc(pc);
+  writeln('symbol after string = ', ord(pc^));
+  writeln('str sa');
+  pac := pa;
+  pacb := pac;
+  writeln('Первая = ', pacb^, ' ', ord(pacb^));
+  inc(pac, length(S)-1);
+  pace := pac;
+  writeln('last ', pace^, ' ', ord(pace^));
+  inc(pac);
+  writeln('symbol after string = ', ord(pc^));
+  // Аналогичная инф-я для строк S1:string на основе
+// методов string
+writeln('SizeOf: ' + SizeOf (S1).ToString);//4
+writeln('Length: ' + S1.Length.ToString);
+writeln('Size_char: ' +  StringElementSize(S1).ToString);
+writeln('RefCount: ' + StringRefCount(S1).ToString);
+writeln('CodePage: ' + StringCodePage(S1).ToString);
+if StringCodePage (S1) = DefaultUnicodeCodePage then
+   writeln('Is Unicode');
+writeln('Size in bytes: ' , Length(S1) * stringElementSize(S1));
+writeln('ByteLength: ', ByteLength(S1));
+
+  readln;
+
+end.

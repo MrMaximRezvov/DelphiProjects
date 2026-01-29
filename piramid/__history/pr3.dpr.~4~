@@ -1,0 +1,74 @@
+program pr3;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  SysUtils;
+
+var
+  n, i, j, sum: Integer;
+  data: array of array of Integer;
+  first, second: Integer;
+  fin: textfile;
+  f_name: string;
+
+begin
+  sum := 0;
+  writeln('Введите имя файла чтения');
+  Readln(f_name);
+  assignfile(fin, f_name + '.txt');
+  reset(fin);
+  Readln(fin, n);
+  SetLength(data, n, 2);
+
+  for i := 0 to n - 1 do
+  begin
+    Readln(fin, first, second);
+    data[i][0] := first;
+    data[i][1] := second;
+  end;
+
+  for i := 0 to n - 1 do
+  begin
+    // Пропускаем обнуленные элементы
+    if (data[i][0] = 0) and (data[i][1] = 0) then
+      Continue;
+
+    for j := 0 to n - 1 do
+    begin
+      if (i <> j) and (data[i][0] = data[j][0]) then
+      begin
+        // Если у j второе значение больше — обнуляем i
+        if data[j][1] > data[i][1] then
+        begin
+          data[i][0] := 0;
+          data[i][1] := 0;
+          Break; // Выходим из внутреннего цикла
+        end
+        // Если значения равны, но j раньше — обнуляем i
+        else if (data[j][1] = data[i][1]) and (j < i) then
+        begin
+          data[i][0] := 0;
+          data[i][1] := 0;
+          Break;
+        end;
+      end;
+    end;
+  end;
+
+  // Вывод результата
+  writeln('Результат:');
+  for i := 0 to n - 1 do
+  begin
+    if (data[i][0] <> 0) or (data[i][1] <> 0) then
+    begin
+      writeln(data[i][0], ' ', data[i][1]);
+      inc(sum, data[i][1]);
+    end;
+  end;
+  writeln('s = ', sum);
+
+  Readln; // Удержание консоли
+
+end.

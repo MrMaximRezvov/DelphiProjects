@@ -1,0 +1,69 @@
+﻿program Project1;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils,
+  Windows, math;
+
+var
+  i, j, k, w, wmax: int32;
+  wk: array of int32 = [9, 1, 3];
+  wa: array of array of int32;
+
+begin
+  repeat
+    try
+      //write('Write wmax: ');
+      //readln(wmax);
+      for i := 0 to length(wk) do
+      begin
+        inc(wmax, wk[i]);
+      end;
+      setlength(wa, length(wk)+1, wmax + 1);
+      // заполнение 1 строки и столбца нулевыми значениями
+      //write('z');
+      for i := 0 to wmax do
+        wa[0, i] := 0;
+      for i := 0 to length(wk) do
+        wa[i, 0] := 0;
+      //write('z');
+//      for i := 1 to wmax do
+//        wa[2, i] := max(wa[1, w], wa[1, wk[1]] + wk[1]);
+      //write('z');
+      for i := 0 to length(wk) do
+      begin
+        for j := 0 to wmax do
+        begin
+          wa[i, j] := max(wa[i, k], wk[1]);
+          //write(wa[i, j]:2);
+        end;
+        //writeln;
+      end;
+      for i := 0 to length(wk) do
+      begin
+        for j := 0 to wmax do
+        begin
+          write(wa[i, j]:2);
+        end;
+        writeln;
+      end;
+
+//      for i := 0 to length(wk) do
+//      begin
+//        for j := 0 to wmax + 1 do
+//        begin
+//          write(wa[i, j]);
+//        end;
+//        writeln;
+//      end;
+
+    except
+      on E: Exception do
+        writeln(E.ClassName, ': ', E.Message);
+    end;
+    // readln;
+  until false;
+
+end.

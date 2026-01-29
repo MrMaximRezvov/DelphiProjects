@@ -1,0 +1,70 @@
+﻿program nokfunc;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils, windows;
+
+var
+  a, b, c, i, r, NOD, NOK: int32;
+
+function GCD(a, b: int32): int32;
+begin
+  while b <> 0 do
+  begin
+    c := b;
+    b := a mod b;
+    a := c;
+  end;
+  NOD := a + b;
+end;
+
+function LCM(a, b: int32): int32;
+begin
+  NOK:= NOK * a div GCD(NOK, a);
+end;
+
+begin
+  setconsoleoutputCP(1251);
+  repeat
+    writeln('Введите НОД и НОК скольки чисел хотите узнать:');
+    readln(r);
+    a := 0;
+    b := 0;
+    for i := 1 to r do
+    begin
+      a := a + b;
+      writeln('Введите одно следующее целое значение: ');
+      readln(b);
+      GCD(a, b);
+      LCM(a, b);
+
+
+
+
+
+      writeln('NOD=', NOD, ' NOK=', NOK, ' Кол-во чисел=', i);
+      {
+        writeln('Введите два целых ненулевых значения: ');
+        readln(a);
+        readln(b);
+        if (a = 0) and (b = 0) then
+        begin
+        writeln('Не должны равняться 0');
+        writeln('#####################################');
+        continue;
+        end;
+        while b <> 0 do
+        begin
+        c := b;
+        b := a mod b;
+        a := c;
+        end;
+        writeln('NOD=', a + b);
+        end;
+        writeln('#####################################') }
+    end;
+  until false;
+
+end.

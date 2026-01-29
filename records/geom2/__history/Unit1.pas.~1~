@@ -1,0 +1,82 @@
+unit Unit1;
+
+
+
+interface
+type trec = record
+            private
+            a : int32;
+            s:string;
+            public
+            z:int32;
+            procedure init(a,b:real);
+            function dist(a:trec):real;
+            function dist1(a:trec):real;
+            procedure show(k:int32;s:string='');
+            procedure line(a,b:trec);
+            procedure line1(a,b:trec);
+            class operator add(a, b: trec): trec;
+            class operator subtract(a, b: trec): trec;
+            private
+            case byte of
+            1:(x,y : real);
+            2:(k,b : real);
+            end;
+implementation
+{ trec }
+class operator trec.add(a, b: trec): trec;
+begin
+  result.x:=a.x+b.x;
+  result.y:=a.y+b.y;
+end;
+//
+function trec.dist(a: trec): real;
+var dx,dy:real;
+begin
+dx:=a.x-self.x;
+dy:=a.y-self.y;
+result:=sqrt(sqr(dx)+sqr(dy));
+end;
+//
+function trec.dist1(a: trec): real;
+var p:trec;
+begin
+p:=a-self;
+result:=sqrt(p.x*p.x+p.y*p.y);
+end;
+
+//
+procedure trec.show(k: int32;s:string='');
+begin
+writeln(s,'(',self.x:0:k,', ',self.y:0:k,')');
+end;
+
+//
+class operator trec.subtract(a, b: trec): trec;
+begin
+  result.x:=a.x-b.x;
+  result.y:=a.y-b.y;
+end;
+//
+
+procedure trec.init(a, b: real);
+begin
+  self.x:=a;
+  self.y:=b;
+end;
+//
+procedure trec.line(a,b:trec);
+begin
+  self.k:=(a.y - b.y) / (a.x - b.x );
+  self.b:= a.y - self.x * a.x;
+end;
+//
+procedure trec.line1(a, b: trec);
+var p:trec;
+begin
+  p:=a-b;
+  self.k:=p.y/p.x;
+  self.b:=a.y-self.k*a.x;
+end;
+//
+end.

@@ -1,0 +1,39 @@
+program testtask;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+var
+  n, k, h, nas, hom, i, nasmax, hommax: int32;
+
+begin
+  readln(n, k);
+  for i := 1 to n do
+
+  begin
+
+    readln(h);
+
+    if k < h then
+      nas := h - k;
+
+    if h < k then
+      nas := k - h;
+    hom := 0;
+    if nas < 0 then
+    begin
+      inc(hom);
+      if nasmax > nas then
+        nasmax := nas;
+      if hommax < hom then
+        hommax := hom;
+    end;
+
+  end;
+  writeln(hommax, nasmax);
+  readln;
+
+end.

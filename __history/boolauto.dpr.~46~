@@ -1,0 +1,35 @@
+﻿program boolauto;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+var
+  x, y, f: boolean;
+  r, s: uint16;
+  c: int16;
+
+begin
+  repeat
+    writeln('ТИ для функции:');
+    writeln('F= not X');
+    writeln(' X Y  F');
+    c := 3;
+    s:= 0;
+    r:= 0;
+    for x := false to true do
+    begin
+      for y := false to true do
+      begin
+        f := not x;
+        s := s + ord(f) * (1 shl c);
+        dec(c);
+        writeln(ord(x):2, ord(y):2, ord(f):3);
+      end;
+    end;
+    writeln('F=',s);
+    readln;
+  until false;
+end.

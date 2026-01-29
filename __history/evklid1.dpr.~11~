@@ -1,0 +1,37 @@
+﻿program evklid1;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+var
+  a, b, NOK, NOD, c: int32;
+
+begin
+  repeat
+    writeln('Введите значение a, b');
+    readln(a, b);
+
+
+
+
+
+
+      NOK:=  a*b div (a+b);
+      a := a + b;
+      while b <> 0 do
+      begin
+        c := b;
+        b := a mod b;
+        a := c;
+      end;
+
+      NOD:= a + b;
+      writeln('NOD=', a+b, ' NOK=', NOK);
+
+
+  until (false);
+  readln;
+end.

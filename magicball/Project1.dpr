@@ -1,0 +1,44 @@
+program Project1;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+type myt = int32;
+
+function CountWays(n: myt): myt;
+begin
+  if n < 0 then
+    Exit(0);
+  if n = 0 then
+    Exit(1);
+  if n = 1 then
+    Exit(1);
+  if n = 2 then
+    Exit(1);
+  if n = 3 then
+    Exit(2);
+  Result := CountWays(n - 1) + CountWays(n - 2) + CountWays(n - 3);
+end;
+
+var
+  stairs, i: myt;
+  c: array[1..4] of myt;
+
+begin
+  repeat
+    Write('Введите количество ступенек: ');
+    ReadLn(stairs);
+    WriteLn('Количество возможных вариантов спусков: ', CountWays(stairs));
+//    c[1]:= 1;
+//    c[2]:= 1;
+//    c[3]:= 2;
+//    for i := 4 to stairs do
+//      c[4] := c[4-1] + c[4-3];
+//    writeln('Count ways= ', c[stairs]);
+
+
+  until false;
+end.

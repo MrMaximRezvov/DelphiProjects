@@ -1,0 +1,75 @@
+program Project1;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+// procedure A(n: integer); forward
+//
+// procedure B(n: integer);
+//
+// моделирование цикла for i:=1 to n do
+procedure Loopup(i, n: integer);
+begin
+  writeln('Hello, ', i); // Здесь любые инструкции
+  if i < n then
+    Loopup(i + 1, n);
+end;
+
+procedure Loopdown(i, n: integer);
+begin
+  writeln('Hello, ', i); // Здесь любые инструкции
+  if i > n then
+    Loopdown(i - 1, n);
+end;
+
+procedure Loopupdown(i, n: integer);
+begin
+  writeln('Hello, ', i);
+  // writeln('Hello, ', n);
+  if i < n then
+    Loopupdown(i + 1, n);
+  if i > 0 then
+    Loopupdown(i - 1, 0);
+end;
+
+//
+var
+  i, n, k: int32;
+
+  //
+begin
+  repeat
+    write('Введите n>=0, i<n : ');
+    readln(i, n);
+    Loopupdown(i, n);
+    readln;
+  until false;
+
+end.
+
+// procedure B(n: integer);
+// begin
+// writeln(n);
+// if n>0 then A(n - 1);
+// end;
+/// /
+// procedure A(n: integer);
+// begin
+// if n>0 then B(n - 1);
+// writeln(n);
+// end;
+/// /
+// var n:uint32;
+/// /
+// begin
+// repeat
+// write('ВВедите n>=0 : ');
+// readln(n);
+// writeln;
+// A(n);
+// readln;
+// until false;
+// end.

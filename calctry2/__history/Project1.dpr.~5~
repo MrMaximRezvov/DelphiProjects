@@ -1,0 +1,59 @@
+program Project1;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+var
+  a, b, rez, i: uint8;
+  nop: int8;
+  c, c1: char;
+
+begin
+  //writeln('Введите : ');
+  repeat
+    try
+      writeln('Введите: Оп1_символ оп.(+-*/%)_Оп2');
+      nop := 1;
+      read(a);
+      nop := 2;
+      readln(c, c, b);
+      case c of
+        '+':
+          rez := a + b;
+        '-':
+          rez := a - b;
+        '*':
+          rez := a * b;
+        '/':
+          rez := a div b;
+        '%':
+          rez := a mod b;
+        //'^':
+          //rez := a^b;
+      else
+        begin
+          writeln('Ошибка в вводе операции');
+          continue;
+        end;
+      end; // case
+      writeln(' = ', rez, #10);
+    except
+      on EDivByZero do
+        writeln('Ошибка деления на ноль  в операции "', c, '"');
+      on EInOutError do
+      begin
+        writeln('Ошибка в операнде ', nop);
+        if nop = 1 then
+          readln;
+      end;
+      on cl1: Exception do
+      begin
+        writeln(cl1.ClassName, ': ', cl1.Message);
+      end;
+    end;
+  until false;
+
+end.

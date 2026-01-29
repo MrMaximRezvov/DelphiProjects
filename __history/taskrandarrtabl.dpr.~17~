@@ -1,0 +1,47 @@
+program taskrandarrtabl;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+type
+  tar = array [1 .. 1000] of int16;
+
+var
+  arr: tar;
+  i, j, k, max, min, maxin, minin, sum, r: int16;
+  sr: real;
+
+begin
+  randseed := 11;
+  for i := Low(arr) to High(arr) div 20 + 1 do
+  begin
+    for j := 1 to 20 do
+    begin
+      arr[j+i*20] := random(2001) - 1000;
+      r:=arr[j+i*20];
+      if r > max  then
+      begin
+        max := r;
+        maxin := j+i*20;
+      end;
+      if min > arr[j+i*20] then
+      begin
+        min := r;
+        minin := i;
+      end;
+      sum := sum + arr[j + i*20];
+      write(arr[j + i * 20]:5);
+    end;
+    writeln;
+
+  end;
+
+  sr := sum / 1000;
+  writeln('Max= ', max, ' index= ', maxin, ' Min= ', min, ' index= ', minin,
+    ' среднее значение=', sr:0:3);
+  readln;
+
+end.

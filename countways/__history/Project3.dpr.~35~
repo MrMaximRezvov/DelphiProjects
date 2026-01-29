@@ -1,0 +1,143 @@
+﻿program Project3;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.Sysutils;
+
+// windows;
+
+type
+  myt = int64;
+  tm = array of myt;
+
+var
+  ku, kr, m, n, k, kf, kuf, krf, rez, ko, vozv, dv: myt;
+  i, j: cardinal; // uint32
+  s, s1: string;
+  mu: tm;
+
+  // t1,t2,fr:int64;
+function IntToBin(ko, ku: myt): myt;
+var
+  i, vozv, rez, rez1: myt;
+begin
+  writeln('ko= ', ko,' ku= ', ku);
+  result:= 0;
+  vozv := 1;
+  for i := 0 to ko + 1 do
+    vozv := vozv shl 1;
+  writeln('vozv= ',vozv);
+  for j := 1 to vozv do
+  begin
+    rez := 0;
+    for i := 0 to ko-1 do
+    begin
+      if j and (1 shl i) > 0 then
+      begin
+        inc(rez);
+        writeln(rez);
+      end;
+    end;
+    if rez = ku then
+    begin
+      inc(result);
+      writeln('True ', ku,' = ', rez);
+    end;
+  end;
+
+
+end;
+
+begin
+  repeat
+    try
+      write('Input n,m = ');
+      readln(n, m);
+      ku := m - 1;
+      kr := n - 1;
+      ko := kr + ku;
+      dv := IntToBin(ko, ku);
+      writeln('dv= ', dv);
+      k := ku + kr;
+      s1 := 'comb1';
+      kf := 1;
+      for i := k to kr + 1 do
+        kf := kf * i;
+      for i := 2 to ku do
+        kf := kf div i;
+      writeln('comb1=', kf);
+
+      // Вариант C
+      s1 := 'dp';
+      SetLength(mu, m);
+      for i := 0 to m - 1 do
+        mu[i] := 1;
+      for j := 1 to n - 1 do
+        for i := 1 to m - 1 do
+          mu[i] := mu[i] + mu[i - 1];
+      // QueryPerformanceCounter(t2);//counter in 1000 units
+      writeln('nc=', mu[m - 1]);
+      // writeln('Динамическое программирование time = ',(t2-t1)*1000/fr:8:3,'ms',#10);
+      mu := nil;
+      // n0=k!/(Ku!*Kr!)=K*(K-1)..(K-Kr+1)/Kr!  K-Kr+1=Ku+1
+      if k > 20 then
+        writeln('Возможно переполнение !!! ');
+      //
+
+      try
+        s1 := 'comb0';
+        ku := m - 1;
+        kr := n - 1;
+        k := ku + kr;
+        kf := 1;
+        for i := 2 to k do
+          kf := kf * i;
+        kuf := 1;
+        for i := 2 to ku do
+          kuf := kuf * i;
+        krf := 1;
+        for i := 2 to kr do
+          krf := krf * i;
+        // count := kf div (krf * kuf);
+        rez := kf div (krf * kuf);
+        writeln(s1, ':', rez);
+      except
+        on E: Exception do
+          writeln(E.ClassName, ': ', E.Message, ' ', s1);
+      end;
+      s1 := 'comb3';
+      kf := ku + 1;
+      j := 2;
+      for i := ku + 2 to k do
+
+      begin
+        kf := kf * i;
+        kf := kf div j;
+        inc(j);
+      end;
+      writeln(s1, ' = ', kf);
+      // writeln('комбинаторика rez =', count]); s1 := 'comb1';
+      // kf := 1;
+      // for i := 2 to k do
+      // kf := kf * i;
+      // kuf := 1;
+      // for i := 2 to ku do
+      // kuf := kuf * i;
+      // krf := 1;
+      // for i := 2 to kr do
+      // krf := krf * i;
+      // kf := kf div (kuf * krf);
+      // writeln('na0=', kf);
+
+
+    except
+      on E: Exception do
+        writeln(E.ClassName, ': ', E.Message, ' ', s1);
+    end;
+    //
+  until false;
+
+  //
+end.

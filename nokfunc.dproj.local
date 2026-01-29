@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2024-03-07 17:33:27.000.709,C:\Users\Maxim\Documents\Embarcadero\Studio\Projects\Project1.dproj=D:\Delphi project\evklid1.dproj</Transaction>
+    <Transaction>2024-03-07 18:56:30.000.745,D:\Delphi project\evklid1.dproj=D:\Delphi project\evklid2.dproj</Transaction>
+    <Transaction>2024-03-14 18:49:48.000.959,D:\Delphi project\evklid2.dproj=D:\Delphi project\evklidfunc.dproj</Transaction>
+    <Transaction>2024-03-14 19:57:38.000.377,D:\Delphi project\nokfunc.dproj=D:\Delphi project\evklidfunc.dproj</Transaction>
+  </Transactions>
+</BorlandProject>

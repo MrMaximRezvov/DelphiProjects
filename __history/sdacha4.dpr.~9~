@@ -1,0 +1,119 @@
+﻿program sdacha4;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+const
+  inf = 50000;
+  km = 4;
+
+var
+  n, n1, i, change, j, k: uint16;
+  arm: array [1 .. km] of uint16 = (
+    2,
+    3,
+    5,
+    10
+  );
+  fm: array of uint16;
+  coins: array [0 .. 4] of int16 = (
+    100,
+    10,
+    5,
+    3,
+    2
+  );
+
+begin
+  repeat
+    try
+      /// //////////////////////
+      // write('Enter n = ');
+      // readln(n);
+      // setlength(fm, n + 1);
+      // fm[0] := 0;
+      // for i := 1 to n do
+      // fm[i] := inf;
+      // for i := 1 to km do
+      // fm[arm[i]] := 1;
+      // // n1-текущая сумма
+      // for n1 := 2 to n do
+      // begin
+      // for i := 1 to km do
+      // if (n1 >= arm[i]) and (fm[n1 - arm[i]] + 1 < fm[n1]) then
+      // fm[n1] := fm[n1 - arm[i]] + 1;
+      // end;
+      // if fm[n] = inf then
+      // writeln('no':4)
+      // else
+      // writeln('fm[n]=', fm[n]);
+      // readln;
+      // fm := nil;
+      ///
+      for i := 1 to 25 do
+        write(i:3);
+            writeln;
+      writeln('Жадный алгоритм');
+      for j := 1 to 25 do
+      begin
+        change := j;
+        k := 0;
+        for i := 0 to High(coins) do
+        begin
+          if change >= coins[i] then
+          begin
+            // WriteLn('Монет по ', coins[i], ' руб.: ', change div coins[i]);
+            inc(k, change div coins[i]);
+            change := change mod coins[i];
+          end;
+        end;
+        if change > 0 then
+          write(' no')
+        else
+          write(k:3);
+      end;
+      writeln(#10, 'Динамическое программирование');
+      writeln;
+      write(' no  1  1  2  1  2  2  2  3 ');
+      for n := 10 to 25 do
+      begin
+        if not(n < 5) then
+          setlength(fm, n + 1)
+        else
+          fm[0] := 0;
+        for i := 1 to n do
+          fm[i] := inf;
+        for i := 1 to km do
+          fm[arm[i]] := 1;
+        // n1-текущая сумма
+//        writeln('fm:');
+//        for i := 0 to 4 do write(fm[i]);
+//        writeln('arm:');
+//        for i := 1 to length(arm) do write(arm[i]);
+        for n1 := 2 to n do
+        begin
+          for i := 1 to km do
+            if (n1 >= arm[i]) and (fm[n1 - arm[i]] + 1 < fm[n1]) then
+            begin
+              fm[n1] := fm[n1 - arm[i]] + 1;
+              //write(fm[n1 - arm[i]]);
+              //write(fm[n1]);
+            end;
+        end;
+        if fm[n] = inf then
+          write('no':4)
+        else
+          write(fm[n]:3);
+        fm := nil;
+      end;
+      readln;
+    except
+      on E: Exception do
+        writeln(E.ClassName, ': ', E.Message);
+    end;
+  until false;
+
+end.

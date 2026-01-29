@@ -1,0 +1,769 @@
+﻿program Project1;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+type
+  td1 = array of real;
+  td2 = array of td1;
+
+var
+  f1, f2: textfile;
+  menu, i, j: int32;
+  r: real;
+  filename1, filename2: string;
+  arr: array of array of real;
+  arrAnySize: td2;
+  arr1: td1;
+  s: string;
+
+procedure readMatrix(filename: string);
+var
+  f: textfile;
+  n, m: uint32;
+  i, j: int32;
+  r: real;
+
+begin
+  arr := nil;
+  setlength(arr, 0, 0);
+  assignfile(f, filename);
+  reset(f);
+  readln(f, n, m);
+  setlength(arr, n, m);
+  for i := 0 to n - 1 do
+  begin
+    for j := 0 to m - 1 do
+    begin
+      read(f, r);
+      arr[i][j] := r;
+    end;
+    readln(f);
+  end;
+  closefile(f);
+end;
+
+procedure calculations(op: string);
+var
+  s: string;
+  statusOfExecution: int8;
+  i: int8;
+  op1, op2, code1, codeReal1, oper, code2, codeReal2: integer;
+  op1real, op2real: real;
+  minusStatus1, minusStatus2: boolean;
+
+begin
+  try
+
+    statusOfExecution := 0; // Обнуление требуемых переменных.
+    op := trim(op);
+    s := '';
+    i := 1;
+
+    statusOfExecution := 1;
+    // Распознование первого операнда //Доработать с отрицательными значениями.
+    minusStatus1 := false;
+    if op[i] = '-' then
+    begin
+      inc(i);
+      minusStatus1 := true;
+    end;
+    while not(op[i] in [' ', '+', '-', '*', '/', 'd', 'm']) do
+    begin
+      s := s + op[i];
+      inc(i);
+      // writeln(i);
+    end;
+    val(s, op1, code1);
+    val(s, op1real, codeReal1);
+    // op1 := strToInt(s);
+    if code1 <> 0 then
+    begin
+      writeln('Не удалось преобразовать первый операнд в целочисленный тип.');
+    end;
+
+    if codeReal1 <> 0 then
+    begin
+      raise Exception.Create('Ошибка преобразования первого операнда.');
+    end;
+
+    s := '';
+
+    statusOfExecution := 2; // Распознование операции.
+    while op[i] = ' ' do
+    begin
+      inc(i);
+    end;
+
+    case op[i] of
+      '+':
+        oper := 0;
+      '-':
+        oper := 1;
+      '*':
+        oper := 2;
+      '/':
+        oper := 3;
+      'd':
+        oper := 4;
+      'm':
+        oper := 5;
+    else
+      raise Exception.Create('Не удалось распознать операцию.');
+    end;
+
+    inc(i);
+
+    s := '';
+
+    statusOfExecution := 3; // Распознование второго операнда.
+
+    while op[i] = ' ' do
+    begin
+      inc(i);
+    end;
+
+    minusStatus2 := false;
+    if op[i] = '-' then
+    begin
+      inc(i);
+      minusStatus2 := true;
+    end;
+
+    for i := i to length(op) do
+    begin
+      s := s + op[i];
+    end;
+
+    // writeln(s);
+    val(s, op2, code2);
+    val(s, op2real, codeReal2);
+    // op1 := strToInt(s);
+    if code2 <> 0 then
+    begin
+      writeln('Не удалось преобразовать второй операнд в целочисленный тип.');
+    end;
+
+    if codeReal2 <> 0 then
+    begin
+      raise Exception.Create('Ошибка преобразования второго операнда.');
+    end;
+
+    statusOfExecution := 4; // Подсчет значений.
+    if minusStatus1 then
+    begin
+      op1 := -op1;
+      op1real := -op1real;
+    end;
+    if minusStatus2 then
+    begin
+      op2 := -op2;
+      op2real := -op2real;
+    end;
+
+    if (code1 = 0) and (code2 = 0) then
+    begin
+      writeln('Операнд 1 = ', op1);
+      writeln('Операнд 2 номер с нуля (+-*/dm) = ', oper);
+      writeln('Операнд 3 = ', op2);
+      case oper of
+        0:
+          writeln(op1, ' + ', op2, ' = ', op1 + op2);
+        1:
+          writeln(op1, ' - ', op2, ' = ', op1 - op2);
+        2:
+          writeln(op1, ' * ', op2, ' = ', op1 * op2);
+        3:
+          writeln(op1, ' / ', op2, ' = ', (op1 / op2):0:2);
+        4:
+          writeln(op1, ' div ', op2, ' = ', op1 div op2);
+        5:
+          writeln(op1, ' mod ', op2, ' = ', op1 mod op2);
+      end;
+    end;
+
+    if (codeReal1 = 0) and (codeReal2 = 0) then
+    begin
+      writeln('Операнд 1 = ', op1real:0:2);
+      writeln('Операнд 2 номер с нуля (+-*/dm) = ', oper);
+      writeln('Операнд 3 = ', op2real:0:2);
+      case oper of
+        0:
+          writeln(op1real:0:2, ' + ', op2real:0:2, ' = ',
+            (op1real + op2real):0:2);
+        1:
+          writeln(op1real:0:2, ' - ', op2real:0:2, ' = ',
+            (op1real - op2real):0:2);
+        2:
+          writeln(op1real:0:2, ' * ', op2real:0:2, ' = ',
+            (op1real * op2real):0:2);
+        3:
+          writeln(op1real:0:2, ' / ', op2real:0:2, ' = ',
+            (op1real / op2real):0:2);
+        4:
+          writeln('Целочисленные операции не поддерживаются с нецелыми числами.');
+        5:
+          writeln('Целочисленные операции не поддерживаются с нецелыми числами.');
+      end;
+    end;
+
+  except
+    on E: Exception do
+    begin
+      case statusOfExecution of
+        0:
+          begin
+            writeln('Ошибка инициализации.');
+          end;
+        1:
+          begin
+            writeln('Ошибка первого операнда.');
+          end;
+        2:
+          begin
+            writeln('Ошибка операции.');
+          end;
+        3:
+          begin
+            writeln('Ошибка второго операнда.');
+          end;
+        4:
+          begin
+            writeln('Ошибка вычислений.');
+          end;
+      end;
+      writeln(E.ClassName, ': ', E.Message);
+    end;
+
+  end;
+end;
+
+procedure readMatrAnySize(filename: string);
+var
+  f: textfile;
+  n, m, maxn, maxm, row, col: uint32;
+  i, j: int32;
+  r: real;
+
+begin
+  arrAnySize := nil;
+  setlength(arrAnySize, 0, 0);
+  assignfile(f, filename);
+  reset(f);
+  arr1 := nil;
+  arrAnySize := nil;
+  while not(Eof(f)) do
+  begin
+    while not(Eoln(f)) do
+    begin
+      read(f, r);
+      arr1 := arr1 + [r];
+    end;
+    readln(f);
+    arrAnySize := arrAnySize + [arr1];
+    arr1 := nil;
+  end;
+  // readln(f, n, m);
+  // setlength(arr, n, m);
+  // row := 0;
+  // col := 0;
+  // while not(Eof(f)) do
+  // begin
+  // setlength(arrAnySize, row + 1);
+  // while not(Eoln(f)) do
+  // begin
+  // setlength(arrAnySize[row], col + 1);
+  // read(f, arrAnySize[row][col]);
+  // inc(col);
+  // end;
+  // inc(row);
+  // readln(f);
+  // // if m > maxm then
+  // // begin
+  // // maxm := m;
+  // // end;
+  // // inc(n);
+  // end;
+  // // reset(f);
+  // // setlength(arr, n, m);
+  // // for i := 0 to n do
+  // // begin
+  // // for j := 0 to maxm do
+  // // begin
+  // // read(f, r);
+  // // arr[i][j] := r;
+  // // end;
+  // // readln(f);
+  // // end;
+  // row := length(arrAnySize);
+  // for i := 0 to row - 1 do
+  // begin
+  // col := length(arrAnySize[i]);
+  // write(row, ' ', col);
+  // for j := 0 to col - 1 do
+  // begin
+  // write(arrAnySize[i][j]:0:2, ' ');
+  // end;
+  // writeln;
+  // end;
+
+  closefile(f);
+end;
+
+procedure readData(filename: string);
+var
+  menuFile: int8;
+begin
+  menuFile := 0;
+  writeln('Какую структуру нужно прочитать?(1 - матрица n, m; 2 - двумерный массив с записями различных размеров)');
+  read(menuFile);
+  case menuFile of
+    1:
+      begin
+        readMatrix(filename);
+      end;
+
+    2:
+      begin
+        readMatrAnySize(filename);
+      end;
+
+  end;
+end;
+
+procedure writeMenu;
+begin
+  writeln('1. Ввод имен файлов.');
+  writeln('2. Чтение файла.');
+  writeln('3. Запись в файл.');
+  writeln('4. Дозапись в файл.');
+  writeln('5. Переименовать файл.');
+  writeln('6. Стереть файл.');
+  writeln('7. Просмотр данных.');
+  writeln('8. Вычисления вида int1 (+, -, *, /, d, m) int2 и real1 (+, -, *, /) real2');
+end;
+
+procedure safeNameOfFiles;
+begin
+  writeln('Введите имя файла 1');
+  readln(filename1);
+  if filename1 <> '' then
+  begin
+    filename1 := filename1 + '.txt';
+  end;
+
+  writeln('Введите имя файла 2');
+  readln(filename2);
+  if filename2 <> '' then
+  begin
+    filename2 := filename2 + '.txt';
+  end;
+end;
+
+procedure readFileString(filename: string; stringNumber: int32);
+var
+  lineCount: int32;
+  str: string;
+  f1: textfile;
+begin
+  writeln(#10, 'result: ', #10);
+  assignfile(f1, filename);
+  reset(f1);
+  lineCount := 0;
+  while not Eof(f1) and (lineCount + 1 < stringNumber) do
+  begin
+    readln(f1);
+    inc(lineCount);
+  end;
+
+  if Eof(f1) then
+    writeln('Достигнут конец документа последний номер строки ', lineCount);
+
+  readln(f1, str);
+  writeln(str, #10);
+
+  closefile(f1);
+end;
+
+procedure readFullFile(filename: string);
+var
+  str: string;
+  f1: textfile;
+  lineCount: int32;
+  menu: int8;
+begin
+  writeln(#10, 'result: ', #10);
+  assignfile(f1, filename);
+  reset(f1);
+  lineCount := 0;
+  while not Eof(f1) do
+  begin
+    readln(f1, str);
+    writeln(str);
+    inc(lineCount);
+    // if lineCount mod 5 = 0 then
+    // begin
+    // writeln(#10, 'Прочитано ', lineCount,
+    // ' строк(Продолжить чтение 1, Выход 2) ');
+    // read(menu);
+    // writeln;
+    // if menu = 2 then
+    // break;
+    //
+    // end;
+  end;
+  writeln(#10, 'Файл прочитан полностью. В нем содержится ', lineCount,
+    ' строк.');
+  closefile(f1);
+end;
+
+procedure writeFullFile(filename: string);
+var
+  str: string;
+  f1: textfile;
+  lineCount: int32;
+  menu: int8;
+begin
+  writeln(#10, 'Напишите exit для выхода. ', #10);
+  assignfile(f1, filename);
+  // if fileexists(filename) then
+  // writeln('')
+  // else
+  rewrite(f1);
+
+  lineCount := 0;
+  readln(str);
+  while str <> 'exit' do
+  begin
+    writeln(f1, str);
+    readln(str);
+    inc(lineCount);
+  end;
+  writeln(#10, 'Файл записан полностью. В нем содержится ', lineCount,
+    ' строк.');
+  closefile(f1);
+end;
+
+procedure writeFiles;
+var
+  menuFile: uint8;
+begin
+  writeln('Выбери с каким файлом хочешь выполнить операцию(1 или 2).');
+  readln(menuFile);
+  case menuFile of
+    1:
+      begin
+        writeln('Выбери какой тип записи тебе надо(1 - полная запись)');
+        readln(menuFile);
+        case menuFile of
+          1:
+            begin
+              writeFullFile(filename1);
+            end;
+        else
+          writeln('Think about it;');
+        end;
+      end;
+    2:
+      begin
+
+        begin
+          writeln('Выбери какой тип записи тебе надо(1 - полная запись)');
+          readln(menuFile);
+          case menuFile of
+            1:
+              begin
+                writeFullFile(filename2);
+              end;
+          else
+            writeln('Think about it;');
+          end;
+        end;
+      end;
+  else
+    writeln('Think about it;');
+  end;
+end;
+
+procedure readFiles;
+var
+  menuFile: uint8;
+begin
+  writeln('Выбери с каким файлом хочешь выполнить операцию(1 или 2).');
+  readln(menuFile);
+  case menuFile of
+    1:
+      begin
+        writeln('Выбери какой тип чтения тебе надо(1 - полное чтение, 2 - чтение по номеру строки, 3 - чтение данных из файла)');
+        readln(menuFile);
+        case menuFile of
+          1:
+            begin
+              readFullFile(filename1);
+            end;
+          2:
+            begin
+              writeln('Введите номер строки.');
+              readln(i);
+              readFileString(filename1, i);
+            end;
+          3:
+            begin
+              readData(filename1);
+            end
+        else
+          writeln('Think about it;');
+        end;
+      end;
+    2:
+      begin
+
+        begin
+          writeln('Выбери какой тип чтения тебе надо(1 - полное чтение, 2 - чтение по номеру строки, 3 - чтение данных из файла)');
+          readln(menuFile);
+          case menuFile of
+            1:
+              begin
+                readFullFile(filename2);
+              end;
+            2:
+              begin
+                writeln('Введите номер строки.');
+                readln(i);
+                readFileString(filename2, i);
+              end;
+            3:
+              begin
+                readData(filename2);
+              end
+          else
+            writeln('Think about it;');
+          end;
+        end;
+      end;
+  else
+    writeln('Think about it;');
+  end;
+
+end;
+
+procedure writeAllVariables;
+var
+  i, j, n, m, row, col: uint32;
+begin
+  try
+    n := length(arr);
+    m := length(arr[0]);
+    writeln('Матрица n, m: ', n, ' ', m);
+    for i := 0 to n - 1 do
+    begin
+      for j := 0 to m - 1 do
+      begin
+        write('':4, arr[i][j]:0:2, ' ');
+      end;
+      writeln;
+    end;
+    writeln(#10);
+  except
+    on E: Exception do
+      // writeln(E.ClassName, ': ', E.Message);
+  end;
+  // write(arrAnySize[0][0]);
+  try
+    row := length(arrAnySize);
+    writeln('Число строк: ', row);
+    for i := 0 to row - 1 do
+    begin
+      col := length(arrAnySize[i]);
+      writeln('Число элементов строки: ', col);
+      for j := 0 to col - 1 do
+      begin
+        write(arrAnySize[i][j]:0:2, ' ');
+      end;
+      writeln;
+    end;
+  except
+    on E: Exception do
+      // writeln(E.ClassName, ': ', E.Message);
+  end;
+end;
+
+procedure appendFile(filename: string);
+var
+  str: string;
+  f1: textfile;
+  lineCount: int32;
+  menu: int8;
+begin
+  writeln(#10, 'Напишите exit для выхода. ', #10);
+  assignfile(f1, filename);
+  // if fileexists(filename) then
+  // writeln('')
+  // else
+  append(f1);
+
+  lineCount := 0;
+  readln(str);
+  while str <> 'exit' do
+  begin
+    writeln(f1, str);
+    readln(str);
+    inc(lineCount);
+  end;
+  writeln(#10, 'Файл дозаписан. Дописано ', lineCount, ' строк.');
+  closefile(f1);
+end;
+
+procedure appendFiles;
+var
+  menuFile: uint8;
+begin
+  writeln('Выбери с каким файлом хочешь выполнить операцию(1 или 2).');
+  readln(menuFile);
+  case menuFile of
+    1:
+      begin
+        writeln('Выбери какой тип записи тебе надо(1 - дозапись)');
+        readln(menuFile);
+        case menuFile of
+          1:
+            begin
+              appendFile(filename1);
+            end;
+        else
+          writeln('Think about it;');
+        end;
+      end;
+    2:
+      begin
+
+        begin
+          writeln('Выбери какой тип записи тебе надо(1 - дозапись)');
+          readln(menuFile);
+          case menuFile of
+            1:
+              begin
+                appendFile(filename2);
+              end;
+          else
+            writeln('Think about it;');
+          end;
+        end;
+      end;
+  else
+    writeln('Think about it;');
+  end;
+end;
+
+procedure renameFile;
+var
+  menuFile: uint8;
+  newNameOfFile: string;
+  f: textfile;
+begin
+  writeln('Выбери с каким файлом хочешь выполнить операцию(1 или 2).');
+  readln(menuFile);
+  case menuFile of
+    1:
+      begin
+        writeln('Напиши новое имя файла.');
+        readln(newNameOfFile);
+        assignfile(f, filename1);
+        rename(f, newNameOfFile + '.txt');
+        writeln('Файл переименован успешно. Не забудьте переименовать файл в программе, если хотите продолжить работу с ним.');
+      end;
+    2:
+      begin
+        writeln('Напиши новое имя файла.');
+        readln(newNameOfFile);
+        assignfile(f, filename2);
+        rename(f, newNameOfFile + '.txt');
+        writeln('Файл переименован успешно. Не забудьте переименовать файл в программе, если хотите продолжить работу с ним.');
+      end;
+  else
+    writeln('Think about it;');
+  end;
+end;
+
+procedure eraseFile;
+var
+  menuFile: uint8;
+  nameOfFile: string;
+  f: textfile;
+begin
+  writeln('Выбери какой файл хочешь удалить(1 или 2).');
+  readln(menuFile);
+  case menuFile of
+    1:
+      begin
+        assignfile(f, filename1);
+        erase(f);
+      end;
+    2:
+      begin
+        assignfile(f, filename2);
+        erase(f);
+      end;
+  else
+    writeln('Think about it;');
+  end;
+end;
+
+begin
+  repeat
+    try
+
+      writeMenu();
+      readln(menu);
+      case menu of
+        1:
+          begin
+            safeNameOfFiles;
+          end;
+        2:
+          begin
+            readFiles;
+          end;
+        3:
+          begin
+            writeFiles;
+          end;
+        4:
+          begin
+            appendFiles;
+          end;
+        5:
+          begin
+            renameFile;
+          end;
+        6:
+          begin
+            eraseFile;
+          end;
+        7:
+          begin
+            writeAllVariables;
+          end;
+        8:
+          begin
+            writeln('Введите ваше выражение int1 (+, -, *, /, d, m) int2 и real1 (+, -, *, /) real2');
+            readln(s);
+            calculations(s);
+          end;
+      else
+        writeln('Think about it;');
+      end;
+      writeln;
+
+      // readln;
+
+    except
+      on E: Exception do
+        writeln(E.ClassName, ': ', E.Message);
+    end;
+  until false;
+
+end.

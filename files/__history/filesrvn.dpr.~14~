@@ -1,0 +1,53 @@
+program filesrvn;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  sysutils;
+
+var
+  fin, fout: textfile;
+  a, b, c: int8;
+  sum: int32;
+  f_name, f_name2: ansistring;
+
+begin
+  repeat
+    sum := 0;
+    c := 0;
+    writeln('Введите имя файла чтения');
+    readln(f_name);
+    assignfile(fin, f_name + '.txt');
+    writeln('Введите имя файла вывода');
+    readln(f_name2);
+    assignfile(fout, f_name2 + '.txt');
+{$I-}
+    reset(fin);
+{$I+}
+    if IOResult <> 0 then
+    begin
+      writeln('Файл ' + f_name + 'отсутствует:');
+      continue;
+    end;
+    rewrite(fout);
+    //
+    while not Eof(fin) do
+    begin
+//      readln(fin, a, b);
+//      writeln(fout, a + b, ' ', a * b, ' ', a / b:0:2);
+      while not Eoln(fin) do
+      begin
+        read(fin, a);
+        inc(sum, a);
+        inc(c);
+      end;
+    end;
+    //
+
+    writeln(fout, 'sum = ', sum, ' count= ', c);
+    closefile(fout);
+    readln;
+  until false;
+
+end.

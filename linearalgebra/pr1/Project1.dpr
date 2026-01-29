@@ -1,0 +1,324 @@
+program Project1;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+type
+  td1 = array of real;
+  td2 = array of td1;
+  tdar = array ['A' .. 'F'] of td2;
+
+var
+  ar1, ar2: td1;
+  ar_matr: tdar;
+  i, j, n, m, menu, k: Integer;
+  statArr: array of Boolean;
+  fname: string;
+
+
+procedure readMatrixFromKeyboard(var matr: td2);
+begin
+  writeln('Введите количество строк и столбцов:');
+  read(n);
+  writeln('Введите количество столбцов:');
+  read(m);
+  SetLength(matr, n, m);
+  readln;
+  for i := 0 to n - 1 do
+  begin
+    for j := 0 to m - 1 do
+    begin
+      read(matr[i][j]);
+    end;
+    readln;
+  end;
+end;
+
+procedure readMatrixFromFile(filename: string; var matr: td2);
+var
+  f: TextFile;
+  r: real;
+begin
+  AssignFile(f, filename);
+  try
+    Reset(f);
+    readln(f, n, m);
+    SetLength(matr, n, m);
+    for i := 0 to n - 1 do
+    begin
+      for j := 0 to m - 1 do
+      begin
+        Read(f, r);
+        matr[i][j] := r;
+      end;
+      readln(f);
+    end;
+    CloseFile(f);
+    writeln('Матрица успешно загружена из файла.');
+  except
+    on E: Exception do
+    begin
+      writeln('Ошибка при чтении файла: ', E.Message);
+      SetLength(matr, 0, 0);
+    end;
+  end;
+end;
+
+procedure printMatrix(const matr: td2);
+begin
+  if Length(matr) = 0 then
+  begin
+    writeln('Матрица пуста.');
+    exit;
+  end;
+  for i := 0 to High(matr) do
+  begin
+    for j := 0 to High(matr[i]) do
+    begin
+      write(matr[i][j]:10:2, ' ');
+    end;
+    writeln;
+  end;
+end;
+
+procedure writeMatrixToFile(filename: string; const matr: td2);
+var
+  f: TextFile;
+begin
+  AssignFile(f, filename);
+  try
+    Rewrite(f);
+    writeln(f, Length(matr), ' ', Length(matr[0]));
+    for i := 0 to High(matr) do
+    begin
+      for j := 0 to High(matr[i]) do
+      begin
+        write(f, matr[i][j]:10:2, ' ');
+      end;
+      writeln(f);
+    end;
+    CloseFile(f);
+    writeln('Матрица успешно записана в файл.');
+  except
+    on E: Exception do
+    begin
+      writeln('Ошибка при записи файла: ', E.Message);
+    end;
+  end;
+end;
+
+function addMatrix(const a, b: td2): td2;
+begin
+  if (Length(a) <> Length(b)) or (Length(a[0]) <> Length(b[0])) then
+  begin
+    //writeln('Ошибка: Матрицы должны иметь одинаковые размеры для сложения.');
+    SetLength(Result, 0, 0);
+    raise Exception.Create('Матрицы должны иметь одинаковые размеры для сложения.');
+    //exit;
+  end;
+
+  SetLength(Result, Length(a), Length(a[0]));
+  for i := 0 to High(a) do
+    for j := 0 to High(a[i]) do
+      Result[i][j] := a[i][j] + b[i][j];
+end;
+
+function subtractMatrix(const a, b: td2): td2;
+begin
+  if (Length(a) <> Length(b)) or (Length(a[0]) <> Length(b[0])) then
+  begin
+    // writeln('Ошибка: Матрицы должны иметь одинаковые размеры для вычитания.');
+    SetLength(Result, 0, 0);
+    raise Exception.Create('Матрицы должны иметь одинаковые размеры для вычитания.');
+    // Exit;
+  end;
+
+  SetLength(Result, Length(a), Length(a[0]));
+  for i := 0 to High(a) do
+    for j := 0 to High(a[i]) do
+      Result[i][j] := a[i][j] - b[i][j];
+end;
+
+function multiplyMatrix(const a, b: td2): td2;
+begin
+  if Length(a[0]) <> Length(b) then
+  begin
+    //writeln('Ошибка: Количество столбцов первой матрицы должно равняться количеству строк второй матрицы.');
+    SetLength(Result, 0, 0);
+    raise Exception.Create('Количество столбцов первой матрицы должно равняться количеству строк второй матрицы.');
+    //exit;
+  end;
+
+  SetLength(Result, Length(a), Length(b[0]));
+  for i := 0 to High(a) do
+    for j := 0 to High(b[0]) do
+    begin
+      Result[i][j] := 0;
+      for k := 0 to High(a[0]) do
+        Result[i][j] := Result[i][j] + a[i][k] * b[k][j];
+    end;
+end;
+
+function selectMatrix: Char;
+var
+  ch: Char;
+begin
+  writeln('Выберите матрицу (A-F):');
+  repeat
+    readln(ch);
+    ch := UpCase(ch);
+    if not(ch in ['A' .. 'F']) then
+      writeln('Неверный выбор. Повторите ввод (A-F):');
+  until ch in ['A' .. 'F'];
+  Result := ch;
+end;
+
+procedure operateOnTwoMatrix(operation: Integer);
+var
+  matr1, matr2, resultMatr: td2;
+  idx1, idx2: Char;
+begin
+  writeln('Операция: ', operation);
+  writeln('Выберите первую матрицу:');
+  idx1 := selectMatrix;
+  if Length(ar_matr[idx1]) = 0 then
+  begin
+    writeln('Матрица ', idx1, ' не заполнена.');
+    exit;
+  end;
+  matr1 := ar_matr[idx1];
+
+  writeln('Выберите вторую матрицу:');
+  idx2 := selectMatrix;
+  if Length(ar_matr[idx2]) = 0 then
+  begin
+    writeln('Матрица ', idx2, ' не заполнена.');
+    exit;
+  end;
+  matr2 := ar_matr[idx2];
+
+  case operation of
+    1:
+      resultMatr := addMatrix(matr1, matr2);
+    2:
+      resultMatr := subtractMatrix(matr1, matr2);
+    3:
+      resultMatr := multiplyMatrix(matr1, matr2);
+  else
+    exit;
+  end;
+
+  if Length(resultMatr) > 0 then
+  begin
+    writeln('Результат:');
+    printMatrix(resultMatr);
+    for idx1 := 'A' to 'F' do
+    begin
+      if Length(ar_matr[idx1]) = 0 then
+      begin
+        ar_matr[idx1] := resultMatr;
+        writeln('Результат сохранен в матрицу ', idx1);
+        Break;
+      end;
+    end;
+  end;
+end;
+
+procedure printMenu;
+begin
+  writeln('===================================');
+  writeln('           МЕНЮ МАТРИЦЫ            ');
+  writeln('===================================');
+  writeln('1 - Ввод матрицы с клавиатуры');
+  writeln('2 - Загрузка матрицы из файла');
+  writeln('3 - Вывод матрицы на экран');
+  writeln('4 - Запись матрицы в файл');
+  writeln('5 - Сложение двух матриц');
+  writeln('6 - Разность двух матриц');
+  writeln('7 - Умножение двух матриц');
+  writeln('8 - Выход');
+  writeln('===================================');
+  write('Выберите пункт меню (1-8): ');
+end;
+
+begin
+  for i := Ord('A') to Ord('F') do
+    SetLength(ar_matr[Chr(i)], 0, 0);
+
+  repeat
+    try
+      printMenu();
+      readln(menu);
+      case menu of
+        1:
+          begin
+            writeln('Выберите матрицу для ввода (A-F):');
+            var
+            ch := selectMatrix;
+            readMatrixFromKeyboard(ar_matr[ch]);
+            writeln('Матрица ', ch, ' успешно введена.');
+          end;
+        2:
+          begin
+            writeln('Введите имя файла (без расширения .txt):');
+            readln(fname);
+            if fname <> '' then
+              fname := fname + '.txt';
+            writeln('Выберите матрицу для загрузки (A-F):');
+            var
+            ch := selectMatrix;
+            readMatrixFromFile(fname, ar_matr[ch]);
+          end;
+        3:
+          begin
+            writeln('Выберите матрицу для вывода (A-F):');
+            var
+            ch := selectMatrix;
+            if Length(ar_matr[ch]) = 0 then
+              writeln('Матрица ', ch, ' не заполнена.')
+            else
+            begin
+              writeln('Матрица ', ch, ':');
+              printMatrix(ar_matr[ch]);
+            end;
+          end;
+        4:
+          begin
+            writeln('Выберите матрицу для записи (A-F):');
+            var
+            ch := selectMatrix;
+            if Length(ar_matr[ch]) = 0 then
+              writeln('Матрица ', ch, ' не заполнена.')
+            else
+            begin
+              writeln('Введите имя файла для записи (без расширения .txt):');
+              readln(fname);
+              if fname <> '' then
+                fname := fname + '.txt';
+              writeMatrixToFile(fname, ar_matr[ch]);
+            end;
+          end;
+        5:
+          operateOnTwoMatrix(1);
+        6:
+          operateOnTwoMatrix(2);
+        7:
+          operateOnTwoMatrix(3);
+        8:
+          writeln('Выход из программы.');
+          //exit;
+      else
+        writeln('Неверный выбор. Повторите ввод.');
+      end;
+      writeln;
+
+    except
+      on E: Exception do
+        writeln('Исключение: ', E.ClassName, ': ', E.Message);
+    end;
+  until false;
+  readln;
+end.

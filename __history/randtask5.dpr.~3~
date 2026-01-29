@@ -1,0 +1,21 @@
+program randtask5;
+
+{$APPTYPE CONSOLE}
+
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+var c: char;
+i: int32;
+
+
+begin
+for i := 1 to 1200 do
+begin
+c:= char(random(25) + 66);
+write(c:3);
+end;
+readln;
+end.

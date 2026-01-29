@@ -1,0 +1,33 @@
+program randtask1;
+
+{$APPTYPE CONSOLE}
+
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+var i,i2, j,j2 , sum, sum1, k: int16;
+
+begin
+randseed:= 0;
+repeat
+for k := 1 to 25 do
+begin
+randseed:= randseed+1;
+  for i  := 1 to 100 do
+    begin
+      inc(i2);
+      j:=2*(random(10)+1);
+      sum:= sum+j;
+
+
+    end;
+    writeln('sum=', sum);
+    if sum1<sum then
+      sum1:= sum;
+end;
+writeln('sum=', sum1);
+    readln;
+until false;
+end.

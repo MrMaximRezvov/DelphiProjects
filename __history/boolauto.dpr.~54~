@@ -1,0 +1,27 @@
+﻿program boolauto;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+var
+  x, y, f: boolean;
+  r, s: uint16;
+  c: int16;
+  str: ansistring;
+
+begin
+  repeat
+
+    for x := false to true do
+    begin
+      for y := false to true do
+      begin
+        write(ord(x):3, ord(y):3);
+      end;
+    end;
+    readln;
+  until false;
+end.

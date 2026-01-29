@@ -1,0 +1,693 @@
+﻿program LA_main;
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils,
+  LA_Module in 'LA_Module.pas';
+
+var
+
+  i, j, c: integer;
+  S_COM: ansistring =
+    'help     cin      load     print    plus     minus    multi    Gensmatr Gen_matr Gen_vec  Gen_row  trans    scale    save     det      submatr  minor    recdet   invmatr   cramer   gauss   lu_solve   lu_det   swap   inverse_gauss   scalar   angle   exit     ';
+
+begin
+  for i := 1 to 7 do
+    main_matr[i] := nil;
+  writeln('Matrix Calculator. Type "help" for commands.');
+  writeln('Available commands: ', S_COM);
+  repeat
+    try
+      case c of
+        0:
+          begin
+            writeln('Available commands:');
+            writeln('help  - Show this help');
+            writeln('cin   - Input matrix from keyboard');
+            writeln('load  - Load matrix from file');
+            writeln('print - Print matrices');
+            writeln('plus  - Add two matrices');
+            writeln('minus - Subtract two matrices');
+            writeln('multi - Multiply two matrices');
+            writeln('Gensmatr - Generate constant matrix');
+            writeln('Gen_matr - Generate random matrix');
+            writeln('Gen_vec - Generate column vector');
+            writeln('Gen_row - Generate row vector');
+            writeln('trans - Transpose matrix');
+            writeln('scale - Multiply matrix by scalar');
+            writeln('save  - Save matrix to file');
+            writeln('det   - Calculate determinant (2x2, 3x3)');
+            writeln('submatr - Get submatrix by i,j indices');
+            writeln('minor - Generate minor matrix (for 3x3/4x4)');
+            writeln('recdet - Calculate determinant recursively');
+            writeln('invmatr - Calculate inverse matrix');
+            writeln('cramer - metod Cramers');
+            writeln('gauss - metod Gauss');
+            writeln('lu_solve');
+            writeln('lu_det');
+            writeln('swap');
+            writeln('inverse_gauss');
+            writeln('exit  - Exit program');
+            writeln('scalar');
+            writeln('angle');
+            writeln;
+            writeln('Heavy operations counter includes multiplications and divisions.');
+          end;
+      end;
+      write(#10'>>> ');
+      var
+        ent_com: ansistring;
+      readln(ent_com);
+      c := pos(trim(ent_com), S_COM) div 9;
+      case c of
+        1:
+          begin
+            i := 1;
+            while (i <= 7) and (main_matr[i] <> nil) do
+              inc(i);
+            if i > 7 then
+              raise Exception.Create('No free matrix slots');
+            main_matr[i] := read_matr_from_keyboard;
+            writeln('Matrix stored in slot ', i);
+          end;
+        2:
+          begin
+            var
+              filename: ansistring;
+            writeln('Enter filename: ');
+            readln(filename);
+            i := 1;
+            while (i <= 7) and (main_matr[i] <> nil) do
+              inc(i);
+            if i > 7 then
+              raise Exception.Create('No free matrix slots');
+            main_matr[i] := add_matr(filename);
+            writeln('Loaded into slot ', i);
+          end;
+        3:
+          begin
+            for i := 1 to 7 do
+            begin
+              writeln('Matrix ', i, ':');
+              print_matr(main_matr[i]);
+            end;
+          end;
+        4:
+          begin
+            var
+              k: integer;
+            writeln('Enter matrix indices i j k (result in k): ');
+            readln(i, j, k);
+            main_matr[k] := plus_matr(main_matr[i], main_matr[j]);
+            writeln('Result stored in slot ', k);
+          end;
+        5:
+          begin
+            var
+              k: integer;
+            writeln('Enter matrix indices i j k (result in k): ');
+            readln(i, j, k);
+            main_matr[k] := minus_matr(main_matr[i], main_matr[j]);
+            writeln('Result stored in slot ', k);
+          end;
+        6:
+          begin
+            var
+              k: integer;
+            writeln('Enter matrix indices i j k (result in k): ');
+            readln(i, j, k);
+            heavy_ops_counter := 0;
+            main_matr[k] := mylti_matr(main_matr[i], main_matr[j]);
+            writeln('Result stored in slot ', k);
+            writeln('Heavy operations (multiplications): ', heavy_ops_counter);
+          end;
+        7:
+          begin
+            var
+              n, m: integer;
+            var
+              val: real;
+            writeln('Enter rows, columns, value: ');
+            readln(n, m, val);
+            i := 1;
+            while (i <= 7) and (main_matr[i] <> nil) do
+              inc(i);
+            if i > 7 then
+              raise Exception.Create('No free matrix slots');
+            main_matr[i] := genmconst(n, m, val);
+            writeln('Constant matrix in slot ', i);
+          end;
+        8:
+          begin
+            var
+              n, m, seed: integer;
+            var
+              diap, offset: real;
+            writeln('Enter rows, cols, diap, offset, seed: ');
+            readln(n, m, diap, offset, seed);
+            i := 1;
+            while (i <= 7) and (main_matr[i] <> nil) do
+              inc(i);
+            if i > 7 then
+              raise Exception.Create('No free matrix slots');
+            main_matr[i] := gen_random_matr(n, m, diap, offset, seed);
+            writeln('Random matrix in slot ', i);
+          end;
+        9:
+          begin
+            var
+              n, k: integer;
+            writeln('Enter size and position of 1: ');
+            readln(n, k);
+            i := 1;
+            while (i <= 7) and (main_matr[i] <> nil) do
+              inc(i);
+            if i > 7 then
+              raise Exception.Create('No free matrix slots');
+            main_matr[i] := gen_ed(n, k);
+            writeln('Column vector in slot ', i);
+          end;
+        10:
+          begin
+            var
+              n, k: integer;
+            writeln('Enter size and position of 1: ');
+            readln(n, k);
+            i := 1;
+            while (i <= 7) and (main_matr[i] <> nil) do
+              inc(i);
+            if i > 7 then
+              raise Exception.Create('No free matrix slots');
+            main_matr[i] := gen_ed_row(n, k);
+            writeln('Row vector in slot ', i);
+          end;
+        11:
+          begin
+            var
+              k: integer;
+            writeln('Enter source and target slots (i k): ');
+            readln(i, k);
+            main_matr[k] := trans(main_matr[i]);
+            writeln('Transposed matrix in slot ', k);
+          end;
+        12:
+          begin
+            var
+              k: integer;
+            var
+              scalar: real;
+            writeln('Enter source slot, scalar, target slot (i scalar k): ');
+            readln(i, scalar, k);
+            heavy_ops_counter := 0;
+            main_matr[k] := multi_calc(main_matr[i], scalar);
+            writeln('Scaled matrix in slot ', k);
+            writeln('Heavy operations (multiplications): ', heavy_ops_counter);
+          end;
+        13:
+          begin
+            var
+              filename: ansistring;
+            var
+              idx: integer;
+            writeln('Enter slot index and filename: ');
+            readln(idx, filename);
+            save_matr_to_file(main_matr[idx], filename);
+          end;
+        14:
+          begin
+            var
+              idx: integer;
+            writeln('Enter matrix slot: ');
+            readln(idx);
+            heavy_ops_counter := 0;
+            writeln('Determinant = ', S_det(main_matr[idx]):0:3);
+            writeln('Heavy operations (multiplications/divisions): ',
+              heavy_ops_counter);
+          end;
+        15:
+          begin
+            var
+              source_idx, target_idx, row_idx, col_idx: integer;
+            writeln('Enter source slot, target slot, row index, column index (i k row col): ');
+            readln(source_idx, target_idx, row_idx, col_idx);
+            main_matr[target_idx] := get_submatrix(main_matr[source_idx],
+              row_idx - 1, col_idx - 1);
+            writeln('Submatrix stored in slot ', target_idx);
+            writeln('Submatrix (excluding row ', row_idx, ' and column ',
+              col_idx, '):');
+            print_matr(main_matr[target_idx]);
+          end;
+        16:
+          begin
+            var
+              idx, target_idx: integer;
+            writeln('Enter source slot and target slot (i k): ');
+            readln(idx, target_idx);
+            heavy_ops_counter := 0;
+            main_matr[target_idx] := gen_minor_matrix(main_matr[idx]);
+            writeln('Minor matrix stored in slot ', target_idx);
+            writeln('Heavy operations (multiplications): ', heavy_ops_counter);
+          end;
+        17:
+          begin
+            var
+              idx: integer;
+            writeln('Enter matrix slot for recursive determinant calculation: ');
+            readln(idx);
+            social_counter_sys := 0;
+            heavy_ops_counter := 0;
+            try
+              var
+                det: real;
+              det := rec_det(main_matr[idx]);
+              writeln('Recursive determinant = ', det:0:3);
+              writeln('Number of recursive calls: ', social_counter_sys);
+              writeln('Heavy operations (multiplications/divisions): ',
+                heavy_ops_counter);
+            except
+              on E: Exception do
+                writeln('Error calculating determinant: ', E.Message);
+            end;
+          end;
+        18:
+          begin
+            var
+              idx, target_idx: integer;
+            writeln('Enter source slot and target slot for inverse matrix (i k): ');
+            readln(idx, target_idx);
+            try
+              var
+              old_social := social_counter_sys;
+              var
+              old_heavy := heavy_ops_counter;
+              main_matr[target_idx] := inverse_matrix(main_matr[idx]);
+              writeln('Inverse matrix stored in slot ', target_idx);
+              print_matr(main_matr[target_idx]);
+              writeln('Operations for inverse matrix calculation:');
+              writeln('  Recursive calls: ', social_counter_sys);
+              writeln('  Heavy operations (multiplications/divisions): ',
+                heavy_ops_counter);
+            except
+              on E: Exception do
+                writeln('Error calculating inverse matrix: ', E.Message);
+            end;
+          end;
+        19:
+          begin
+            writeln('=== METHOD OF CRAMER FOR SOLVING SLAE ===');
+            writeln('Solves A * X = B, where A is a square matrix, B is a column vector.');
+            var
+              A_idx, B_idx, X_idx: integer;
+            writeln('Enter slot index of matrix A (square): ');
+            readln(A_idx);
+            writeln('Enter slot index of vector B (column, same size as A): ');
+            readln(B_idx);
+            writeln('Enter slot index to store solution vector X: ');
+            readln(X_idx);
+            A := main_matr[A_idx];
+            B := main_matr[B_idx];
+            if A = nil then
+              raise Exception.Create('Matrix A is not loaded');
+            if B = nil then
+              raise Exception.Create('Vector B is not loaded');
+            var
+            n := length(A);
+            if n <> length(A[0]) then
+              raise Exception.Create('Matrix A must be square');
+            if n <> length(B) then
+              raise Exception.Create
+                ('Vector B must have the same number of rows as matrix A');
+            if length(B[0]) <> 1 then
+              raise Exception.Create
+                ('Vector B must be a column vector (size n x 1)');
+            social_counter_sys := 0;
+            heavy_ops_counter := 0;
+            try
+              var
+              d := rec_det(A);
+              if Abs(d) < 1E-4 then
+                raise Exception.Create
+                  ('Matrix A is singular (determinant = 0). No unique solution.');
+              writeln(#10'Step 1: Determinant of A (d) = ', d:0:6);
+              setlength(main_matr[X_idx], n, 1);
+              for j := 0 to n - 1 do
+              begin
+                var
+                Aj := replace_column(A, B, j);
+                writeln(#10'Step 3.', j + 1, ': Matrix A', j + 1,
+                  ' (replacing column ', j + 1, ' with B):');
+                print_matr(Aj);
+                var
+                dj := rec_det(Aj);
+                writeln('Determinant of A', j + 1, ' (d', j + 1,
+                  ') = ', dj:0:6);
+                main_matr[X_idx][j, 0] := dj / d;
+                inc(heavy_ops_counter);
+                writeln('X[', j + 1, ',1] = d', j + 1, ' / d = ',
+                  main_matr[X_idx][j, 0]:0:6);
+              end;
+              writeln(#10'=== SOLUTION FOUND ===');
+              writeln('Solution vector X stored in slot ', X_idx, ':');
+              print_matr(main_matr[X_idx]);
+              writeln('Total Heavy Operations (multiplications/divisions): ',
+                heavy_ops_counter);
+              writeln('Total Recursive Calls: ', social_counter_sys);
+            except
+              on E: Exception do
+                writeln('Error solving SLAE by Cramer''s method: ', E.Message);
+            end;
+          end;
+        20:
+          begin
+            writeln('=== GAUSS ELIMINATION METHOD ===');
+            writeln('Converts system A*X=B to upper triangular form A*|B*.');
+            var
+              A_idx, B_idx, A_star_idx, B_star_idx: integer;
+            writeln('Enter slot index of matrix A (square): ');
+            readln(A_idx);
+            writeln('Enter slot index of vector B (column, same size as A): ');
+            readln(B_idx);
+            writeln('Enter slot index to store upper triangular matrix A*: ');
+            readln(A_star_idx);
+            writeln('Enter slot index to store transformed vector B*: ');
+            readln(B_star_idx);
+            A := main_matr[A_idx];
+            B := main_matr[B_idx];
+            if A = nil then
+              raise Exception.Create('Matrix A is not loaded');
+            if B = nil then
+              raise Exception.Create('Vector B is not loaded');
+            var
+            n := length(A);
+            if n <> length(A[0]) then
+              raise Exception.Create('Matrix A must be square');
+            if n <> length(B) then
+              raise Exception.Create
+                ('Vector B must have the same number of rows as matrix A');
+            if length(B[0]) <> 1 then
+              raise Exception.Create
+                ('Vector B must be a column vector (size n x 1)');
+            social_counter_sys := 0;
+            heavy_ops_counter := 0;
+            try
+              var
+                B_star: Tmatr_arr;
+              var
+              A_star := gausse(A, B, B_star);
+              main_matr[A_star_idx] := A_star;
+              main_matr[B_star_idx] := B_star;
+              writeln(#10'=== RESULTS ===');
+              writeln('Upper triangular matrix A* stored in slot ',
+                A_star_idx, ':');
+              print_matr(main_matr[A_star_idx]);
+              writeln(#10'Transformed vector B* stored in slot ',
+                B_star_idx, ':');
+              print_matr(main_matr[B_star_idx]);
+              writeln(#10'Total Heavy Operations (multiplications/divisions): ',
+                heavy_ops_counter);
+            except
+              on E: Exception do
+                writeln('Error applying Gauss elimination: ', E.Message);
+            end;
+          end;
+        21:
+          begin
+            writeln('=== LU DECOMPOSITION AND SOLVING SLAE ===');
+            writeln('Solves A * X = B using LU decomposition.');
+            var
+              A_idx, B_idx, L_idx, U_idx, Y_idx, X_idx: integer;
+            writeln('Enter slot index of matrix A (square): ');
+            readln(A_idx);
+            writeln('Enter slot index of vector B (column, same size as A): ');
+            readln(B_idx);
+            writeln('Enter slot index to store lower triangular matrix L: ');
+            readln(L_idx);
+            writeln('Enter slot index to store upper triangular matrix U: ');
+            readln(U_idx);
+            writeln('Enter slot index to store intermediate vector Y (L*Y=B): ');
+            readln(Y_idx);
+            writeln('Enter slot index to store solution vector X (U*X=Y): ');
+            readln(X_idx);
+            A := main_matr[A_idx];
+            B := main_matr[B_idx];
+            if A = nil then
+              raise Exception.Create('Matrix A is not loaded');
+            if B = nil then
+              raise Exception.Create('Vector B is not loaded');
+            var
+            n := length(A);
+            if n <> length(A[0]) then
+              raise Exception.Create('Matrix A must be square');
+            if n <> length(B) then
+              raise Exception.Create
+                ('Vector B must have the same number of rows as matrix A');
+            if length(B[0]) <> 1 then
+              raise Exception.Create
+                ('Vector B must be a column vector (size n x 1)');
+            social_counter_sys := 0;
+            heavy_ops_counter := 0;
+            try
+              var
+                L: Tmatr_arr;
+              var
+              U := LU(A, L);
+              main_matr[L_idx] := L;
+              main_matr[U_idx] := U;
+              writeln(#10'=== LU DECOMPOSITION RESULTS ===');
+              writeln('Lower triangular matrix L stored in slot ', L_idx, ':');
+              print_matr(main_matr[L_idx]);
+              writeln(#10'Upper triangular matrix U stored in slot ',
+                U_idx, ':');
+              print_matr(main_matr[U_idx]);
+              writeln(#10'Heavy Operations (multiplications/divisions): ',
+                heavy_ops_counter);
+              heavy_ops_counter := 0;
+              var
+              Y := direct_sub(L, B);
+              main_matr[Y_idx] := Y;
+              writeln(#10'Intermediate vector Y (solution of L*Y=B) stored in slot ',
+                Y_idx, ':');
+              print_matr(main_matr[Y_idx]);
+              writeln(#10'Heavy Operations (multiplications/divisions): ',
+                heavy_ops_counter);
+              heavy_ops_counter := 0;
+              var
+              X := revers_sub(U, Y);
+              main_matr[X_idx] := X;
+              writeln(#10'Solution vector X (solution of U*X=Y) stored in slot ',
+                X_idx, ':');
+              print_matr(main_matr[X_idx]);
+              writeln(#10'Heavy Operations (multiplications/divisions): ',
+                heavy_ops_counter);
+              heavy_ops_counter := 0;
+            except
+              on E: Exception do
+                writeln('Error solving SLAE by LU method: ', E.Message);
+            end;
+          end;
+        22:
+          begin
+            writeln('=== CALCULATE DETERMINANT USING LU DECOMPOSITION (NO PIVOTING) ===');
+            writeln('This method guarantees A = L * U.');
+            var
+              A_idx, L_idx, U_idx: integer;
+            writeln('Enter slot index of matrix A (square): ');
+            readln(A_idx);
+            writeln('Enter slot index to store L: ');
+            readln(L_idx);
+            writeln('Enter slot index to store U: ');
+            readln(U_idx);
+            A := main_matr[A_idx];
+            if A = nil then
+              raise Exception.Create('Matrix A is not loaded');
+            var
+            n := length(A);
+            if n <> length(A[0]) then
+              raise Exception.Create('Matrix A must be square');
+            heavy_ops_counter := 0;
+            social_counter_sys := 0;
+            try
+              var
+                L: Tmatr_arr;
+              var
+                U: Tmatr_arr;
+              U := lu_no_pivot(A, L);
+              main_matr[L_idx] := L;
+              main_matr[U_idx] := U;
+              writeln(#10'Lower triangular matrix L stored in slot ',
+                L_idx, ':');
+              print_matr(main_matr[L_idx]);
+              writeln(#10'Upper triangular matrix U stored in slot ',
+                U_idx, ':');
+              print_matr(main_matr[U_idx]);
+              var
+              deter_u := det_u(U);
+              var
+              det_A_LU := deter_u;
+              writeln('Determinant via LU (det(U)): ', det_A_LU:0:6);
+              var
+              ops_lu_and_detu := heavy_ops_counter;
+              writeln('Calculating recursive determinant...');
+              var
+              det_A_rec := rec_det(A);
+              writeln('Recursive determinant: ', det_A_rec:0:6);
+              var
+              ops_rec_det := heavy_ops_counter - ops_lu_and_detu;
+              writeln('Heavy Ops LU + det(U): ', ops_lu_and_detu);
+              writeln('Heavy Ops recursive: ', ops_rec_det);
+              writeln('Rec Calls recursive: ', social_counter_sys);
+            except
+              on E: Exception do
+                writeln('Error: ', E.Message);
+            end;
+          end;
+        23:
+          begin
+            writeln('=== SWAP ROWS IN MATRIX ===');
+            var
+              A_idx, B_idx: integer;
+            writeln('Enter slot index of matrix A: ');
+            readln(A_idx);
+            writeln('Enter slot index to store result matrix B: ');
+            readln(B_idx);
+            A := main_matr[A_idx];
+            if A = nil then
+              raise Exception.Create('Matrix A is not loaded');
+            var
+            n := length(A);
+            if n = 0 then
+              raise Exception.Create('Matrix A is empty');
+            writeln('Enter row index i1 (0-based): ');
+            var
+              i1: integer;
+            readln(i1);
+            dec(i1);
+            writeln('Enter row index i2 (0-based): ');
+            var
+              i2: integer;
+            readln(i2);
+            dec(i2);
+            try
+              B := swap(A, i1, i2);
+              main_matr[B_idx] := B;
+              writeln(#10'Matrix A (slot ', A_idx, '):');
+              print_matr(A);
+              writeln(#10'Matrix B (A with rows ', i1, ' and ', i2,
+                ' swapped, stored in slot ', B_idx, '):');
+              print_matr(B);
+            except
+              on E: Exception do
+                writeln('Error in swap operation: ', E.Message);
+            end;
+          end;
+        24:
+          begin
+            writeln('=== CALCULATE INVERSE MATRIX USING GAUSS METHOD ===');
+
+            var
+              A_idx, Ainv_idx: integer;
+            writeln('Enter slot index of matrix A (square): ');
+            readln(A_idx);
+            writeln('Enter slot index to store inverse matrix A^-1: ');
+            readln(Ainv_idx);
+
+            var
+            A := main_matr[A_idx];
+
+            if A = nil then
+              raise Exception.Create('Matrix A is not loaded');
+
+            var
+            n := length(A);
+            if n <> length(A[0]) then
+              raise Exception.Create('Matrix A must be square');
+
+            try
+              var
+                ko: integer;
+              var
+              Ainv := gmethod(A, ko);
+              main_matr[Ainv_idx] := Ainv;
+
+              writeln(#10'Inverse matrix A^-1 stored in slot ', Ainv_idx, ':');
+              print_matr(main_matr[Ainv_idx]);
+              writeln('Number of heavy operations: ', ko);
+
+            except
+              on E: Exception do
+                writeln('Error calculating inverse matrix via Gauss method: ',
+                  E.Message);
+            end;
+          end;
+        25:
+          begin
+            writeln('=== scalar ===');
+
+            var
+              v1_idx, v2_idx: integer;
+            writeln('Enter slot index of first vector (column vector): ');
+            readln(v1_idx);
+
+            var
+            v1 := main_matr[v1_idx];
+
+            try
+              var
+                square: real;
+              var
+                len: real;
+              scalar_product_via_matrix(v1, square, len);
+
+              writeln('Scalar product calculated via matrix multiplication.');
+              writeln('Square of scalar product (dot^2): ', square:0:6);
+              writeln('Length (absolute value) of scalar product (|dot|): ',
+                len:0:6);
+
+            except
+              on E: Exception do
+                writeln('Error in scalar product calculation: ', E.Message);
+            end;
+          end;
+        26:
+          begin
+            writeln('=== ANGLE BETWEEN TWO VECTORS (DEGREES) ===');
+            writeln('Computes and prints the angle θ in degrees using cos(θ) = (a·b) / (||a|| * ||b||).');
+
+            var
+              v1_idx, v2_idx: integer;
+            writeln('Enter slot index of first vector v1 (column vector): ');
+            readln(v1_idx);
+            writeln('Enter slot index of second vector v2 (column vector): ');
+            readln(v2_idx);
+
+            var
+            v1 := main_matr[v1_idx];
+            var
+            v2 := main_matr[v2_idx];
+
+            if (v1 = nil) or (v2 = nil) then
+              raise Exception.Create('One or both vectors are not loaded');
+
+            try
+              print_angle_degrees_between_vectors(v1, v2);
+
+            except
+              on E: Exception do
+                writeln('Error in angle calculation: ', E.Message);
+            end;
+          end;
+
+        27:
+          begin
+            writeln('Exiting...');
+            halt;
+          end;
+      end;
+    except
+      on E: Exception do
+        writeln(E.ClassName, ': ', E.Message, ' in command block: ', c);
+    end;
+  until false;
+
+end.

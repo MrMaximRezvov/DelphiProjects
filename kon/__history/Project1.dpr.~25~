@@ -1,0 +1,118 @@
+﻿program Project1;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils, Windows;
+
+const
+  m = 1000 + 7;
+
+type
+  tchess = array ['a' .. 'c'] of uint32;
+  t2chess = array ['a' .. 'e'] of uint32;
+
+var
+  i, k, n: uint32;
+  c: ansichar;
+  a1, a2, a3: tchess;
+  startTime, endTime, elapsedTime: DWORD;
+
+  i2, k2, n2: uint32;
+  c2: ansichar;
+  a12, a22, a32: t2chess;
+
+begin
+  repeat
+    try
+      for c := 'a' to 'c' do
+      begin
+        a1[c] := 0;
+        a2[c] := 0;
+      end;
+      a2['a'] := 1;
+      // a2['e'] := 1;
+      //
+      write('Enter k>0 : ');
+      readln(k);
+      if k < 3 then
+      begin
+        n := 0;
+        writeln('n=', n);
+        continue;
+      end;
+      // main
+
+      // Замер времени начала выполнения
+      startTime := GetTickCount;
+
+      for i := 3 to k do
+      begin
+        a3['a'] := (a1['b'] + a2['c']) mod m;
+        a3['b'] := ((a1['a'] + a1['c']) mod m + a2['b']) mod m;
+        a3['c'] := (((a1['b'] + a1['b']) mod m + a2['a']) mod m +
+          a2['a']) mod m;
+        // a3['d'] := a3['b'];
+        // a3['e'] := a3['a'];
+        a1 := a2;
+        a2 := a3;
+      end;
+      n := a3['c'];
+      writeln('n=', n);
+
+      // Замер времени окончания выполнения
+      endTime := GetTickCount;
+
+      // Вычисление времени выполнения
+      elapsedTime := endTime - startTime;
+
+      writeln('Execution time: ', elapsedTime, ' ms');
+      writeln('no opt');
+      startTime := GetTickCount;
+
+      for c := 'a' to 'e' do
+      begin
+        a12[c] := 0;
+        a22[c] := 0;
+      end;
+      a22['a'] := 1;
+      a22['e'] := 1;
+      //
+      write('Enter k>0 : ');
+      readln(k);
+      if k < 3 then
+      begin
+        n := 0;
+        writeln('n=', n);
+        continue;
+      end;
+      // main
+      for i := 3 to k do
+      begin
+        a32['a'] := (a12['b'] + a22['c']) mod m;
+        a32['b'] := ((a12['a'] + a12['c']) mod m + a22['d']) mod m;
+        a32['c'] := (((a12['b'] + a12['d']) mod m + a22['a']) mod m +
+          a22['e']) mod m;
+        a32['d'] := ((a12['c'] + a12['e']) mod m + a22['b']) mod m;
+        a32['e'] := (a12['d'] + a22['c']) mod m;
+        a12 := a22;
+        a22 := a32;
+      end;
+      n2 := a32['c'];
+
+      // Замер времени окончания выполнения
+      endTime := GetTickCount;
+
+      // Вычисление времени выполнения
+      elapsedTime := endTime - startTime;
+      writeln('n=', n2);
+      writeln('Execution time: ', elapsedTime, ' ms');
+    except
+      on E: Exception do
+        writeln(E.ClassName, ': ', E.Message);
+    end;
+    // readln;
+  until false;
+
+end.

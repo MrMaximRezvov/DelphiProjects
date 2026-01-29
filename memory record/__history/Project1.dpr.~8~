@@ -1,0 +1,321 @@
+﻿program Project1;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+type
+  PSt = ^TSt; // указательнатипTStudent
+
+  TSt = record
+    f_name: string[20]; // фамилия
+    l_name: string[20]; // имя
+    next: PSt; // следующийэлементсписка
+  end;
+
+var
+  head: PSt = nil; // начало (голова) списка
+  Last: PSt = nil; // последний элемент сптска
+  curr: PSt;
+  ans: char;
+  count: integer = 0; // количество элементов списка
+  num, i, n_p: integer;
+  reccom: THeapStatus; // !!
+
+  //
+procedure swop(var head: PSt; index1, index2: integer);
+var
+  prev1, curr1, prev2, curr2, temp: PSt;
+  i: integer;
+begin
+  // Проверка на корректность индексов
+  if (index1 < 1) or (index2 < 1) or (index1 = index2) then
+  begin
+    writeln('Ошибка: Некорректные индексы.');
+    Exit;
+  end;
+
+  // Находим первый элемент и его предыдущий
+  prev1 := nil;
+  curr1 := head;
+  for i := 1 to index1 - 1 do
+  begin
+    if curr1 = nil then
+    begin
+      writeln('Ошибка: Индекс ', index1, ' выходит за пределы списка.');
+      Exit;
+    end;
+    prev1 := curr1;
+    curr1 := curr1^.next;
+  end;
+
+  // Находим второй элемент и его предыдущий
+  prev2 := nil;
+  curr2 := head;
+  for i := 1 to index2 - 1 do
+  begin
+    if curr2 = nil then
+    begin
+      writeln('Ошибка: Индекс ', index2, ' выходит за пределы списка.');
+      Exit;
+    end;
+    prev2 := curr2;
+    curr2 := curr2^.next;
+  end;
+
+  // Если один из элементов не найден
+  if (curr1 = nil) or (curr2 = nil) then
+  begin
+    writeln('Ошибка: Один из элементов не найден.');
+    Exit;
+  end;
+
+  // Обмен элементами
+  if prev1 = nil then
+    head := curr2
+  else
+    prev1^.next := curr2;
+
+  if prev2 = nil then
+    head := curr1
+  else
+    prev2^.next := curr1;
+
+  temp := curr1^.next;
+  curr1^.next := curr2^.next;
+  curr2^.next := temp;
+
+  writeln('Элементы с индексами ', index1, ' и ', index2, ' успешно обменяны.');
+end;
+
+
+
+procedure clear_list(var head: PSt; var Last: PSt; var count: integer);
+var
+  curr, next: PSt;
+begin
+  curr := head;
+
+  while curr <> nil do
+  begin
+    Dispose(curr);
+    curr := curr^.next;
+  end;
+  head := nil;
+  Last := nil;
+  count := 0;
+
+  writeln('Список успешно очищен.');
+end;
+
+procedure delete_by_index(var head: PSt; var Last: PSt; var count: integer;
+  index: integer);
+var
+  curr, prev: PSt;
+  i: integer;
+begin
+  if (head = nil) or (index < 1) or (index > count) then
+  begin
+    writeln('Ошибка: Некорректный номер элемента или список пуст.');
+    Exit;
+  end;
+
+  curr := head;
+  prev := nil;
+
+  for i := 1 to index - 1 do
+  begin
+    prev := curr;
+    curr := curr^.next;
+  end;
+
+  if prev = nil then
+    head := curr^.next
+  else
+    prev^.next := curr^.next;
+
+  if curr^.next = nil then
+    Last := prev;
+
+  Dispose(curr);
+  Dec(count);
+
+  writeln('Элемент с номером ', index, ' успешно удален.');
+end;
+
+function count_elements(head: PSt): integer;
+var
+  curr: PSt;
+  count: integer;
+begin
+  count := 0;
+  curr := head;
+
+  while curr <> nil do
+  begin
+    Inc(count);
+    curr := curr^.next;
+  end;
+
+  Result := count;
+end;
+
+function new_rec: PSt;
+var
+  curr: PSt;
+begin
+  new(curr);
+  Result := curr;
+  write('Фамилия : ');
+  readln(curr^.f_name);
+  write('Имя : ');
+  readln(curr^.l_name);
+  // подготовка
+  curr^.next := nil;
+  Result := curr;
+end;
+
+procedure insert_by_index(var head: PSt; var Last: PSt; var count: integer;
+  index: integer);
+var
+  curr, prev, newElem: PSt;
+  i: integer;
+begin
+  // Проверка на корректность индекса
+  if (index < 1) or (index > count + 1) then
+  begin
+    writeln('Ошибка: Некорректный индекс для вставки.');
+    Exit;
+  end;
+
+  // Создаем новый элемент
+  newElem := new_rec;
+
+  // Если вставка в начало списка
+  if index = 1 then
+  begin
+    newElem^.next := head;
+    head := newElem;
+    if Last = nil then // Если список был пуст
+      Last := newElem;
+  end
+  else
+  begin
+    // Находим элемент, который будет перед новым
+    prev := nil;
+    curr := head;
+    for i := 1 to index - 1 do
+    begin
+      prev := curr;
+      curr := curr^.next;
+    end;
+
+    // Вставляем новый элемент между prev и curr
+    prev^.next := newElem;
+    newElem^.next := curr;
+
+    // Если вставка в конец списка
+    if curr = nil then
+      Last := newElem;
+  end;
+
+  // Увеличиваем счетчик элементов
+  Inc(count);
+  writeln('Элемент успешно вставлен на позицию ', index);
+end;
+
+// Добавление элемента в конец
+procedure add(var head: PSt; var Last: PSt; var count: integer);
+var
+  curr: PSt;
+begin
+  curr := new_rec;
+  if head = nil then
+    head := curr
+  else
+    Last^.next := curr;
+  Last := curr;
+  Inc(count);
+end;
+
+// Просмотр списка с печатью содержимого
+procedure view_list(curr: PSt);
+var
+  i: integer;
+begin
+  i := 0;
+  writeln('Size_record=', sizeof(curr^));
+  while curr <> nil do
+  begin
+    Inc(i);
+    with curr^ do
+      writeln(i:5, ' адр=', uintptr(curr):11, f_name:8, l_name:8, ' адр.next=',
+        uintptr(next):11);
+    curr := curr^.next;
+  end;
+  writeln('Count =', i);
+end;
+
+//
+function service: string;
+begin
+  reccom := GetHeapStatus;
+  with reccom do
+    service := 'Общий размер кучи = ' + TotalAddrSpace.toString + ' Занято = ' +
+      TotalAllocated.toString;
+end;
+
+//
+begin
+  repeat
+    try
+      writeln;
+      writeln('---Меню--------');
+      writeln('1. Добавить элемент');
+      writeln('2. Сервис');
+      writeln('3. Просмотр списка');
+      writeln('4. Число элементов в списке');
+      writeln('5. Перейти к элементу');
+      writeln('6. Удалить элемент по номеру');
+      writeln('7. Вставить элемент по номеру');
+      writeln('8. Очистить список');
+      writeln('-----------------');
+      writeln('Ваш выбор : ');
+      readln(n_p);
+      writeln;
+      case n_p of
+        1:
+          add(head, Last, count);
+        2:
+          writeln(service);
+        3:
+          view_list(head);
+        4:
+          writeln('Count = ', count_elements(head));
+        6:
+          begin
+            writeln('Введите номер элемента для удаления: ');
+            readln(num);
+            delete_by_index(head, Last, count, num);
+            // Удаляем элемент по номеру
+          end;
+        7:
+          begin
+            writeln('Введите индекс для вставки: ');
+            readln(num);
+            insert_by_index(head, Last, count, num);
+            // Вставляем элемент по индексу
+          end;
+        8:
+          clear_list(head, Last, count);
+      end;
+      { TODO -oUser -cConsole Main : Insert code here }
+    except
+      on E: Exception do
+        writeln(E.ClassName, ': ', E.Message);
+    end;
+  until false;
+
+end.

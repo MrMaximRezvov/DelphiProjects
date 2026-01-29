@@ -1,0 +1,405 @@
+﻿program pr7;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  SysUtils,
+  Windows;
+
+type
+  twin1251 = type AnsiString(1251);
+  tchar = #192 .. #255;
+  PEl = ^TEl;
+
+  TEl = record
+    count: UInt32; // Количество слов через этот узел
+    cn: UInt32; // Количество вхождений слова
+    Link: array [tchar] of PEl;
+  end;
+
+const
+  maxEl = 600000;
+
+var
+  f: textfile;
+  bor: array [0 .. maxEl] of TEl;
+  uk: Int32 = 0;
+  root: PEl = nil;
+  fl, quitflag: boolean;
+  count, fint: Int32;
+
+procedure InitNode(var node: TEl);
+var
+  c: tchar;
+begin
+  node.cn := 0;
+  node.count := 0;
+  for c := Low(tchar) to High(tchar) do
+    node.Link[c] := nil;
+end;
+
+procedure InitBor;
+var
+  i: Integer;
+begin
+  for i := 0 to maxEl do
+    InitNode(bor[i]);
+  uk := 0;
+  root := @bor[0];
+end;
+
+procedure InsertWord(s: twin1251);
+var
+  curr: PEl;
+  i: Integer;
+  c: tchar;
+begin
+  curr := root;
+  for i := 1 to Length(s) do
+  begin
+    c := s[i];
+    if not(c in [Low(tchar) .. High(tchar)]) then
+    begin
+      Writeln(twin1251('Ошибка: Недопустимый символ "'), c, '"');
+      Exit;
+    end;
+
+    if curr^.Link[c] = nil then
+    begin
+      Inc(uk);
+      if uk > maxEl then
+      begin
+        Writeln(twin1251('Ошибка: Превышен лимит элементов бора'));
+        Exit;
+      end;
+      curr^.Link[c] := @bor[uk];
+      InitNode(bor[uk]);
+    end;
+    curr := curr^.Link[c];
+    Inc(curr^.count);
+  end;
+  curr^.cn := curr^.cn + 1;
+end;
+
+procedure DeleteWord(s: twin1251);
+var
+  curr, tempCurr: PEl;
+  path: array of PEl;
+  i, idx: Integer;
+  c: tchar;
+begin
+  SetLength(path, Length(s));
+  curr := root;
+  idx := 0;
+
+  // Построение пути
+  for i := 1 to Length(s) do
+  begin
+    c := s[i];
+    if not(c in [Low(tchar) .. High(tchar)]) or (curr^.Link[c] = nil) then
+    begin
+      Writeln(twin1251('Слово не найдено'));
+      Exit;
+    end;
+    path[idx] := curr;
+    Inc(idx);
+    curr := curr^.Link[c];
+  end;
+
+  if curr^.cn = 0 then
+  begin
+    Writeln(twin1251('Слово не найдено'));
+    Exit;
+  end;
+
+  // Уменьшаем счётчик вхождений
+  curr^.cn := curr^.cn - 1;
+
+  // Обновляем счётчики использования узлов
+  tempCurr := root;
+  for i := 1 to Length(s) do
+  begin
+    tempCurr := tempCurr^.Link[s[i]];
+    Dec(tempCurr^.count);
+  end;
+
+  // Удаление неиспользуемых узлов
+  for i := Length(s) downto 1 do
+  begin
+    Dec(idx);
+    c := s[i];
+    curr := path[idx]^.Link[c];
+
+    if curr^.count = 0 then
+    begin
+      path[idx]^.Link[c] := nil;
+      InitNode(bor[uk]);
+      Dec(uk);
+    end;
+  end;
+  Writeln(twin1251('Слово успешно удалено'));
+end;
+
+procedure PrintWords(node: PEl; prefix: twin1251; var totalWords: UInt32;
+  i: Int32; fl: boolean);
+var
+  c: tchar;
+  newPrefix: twin1251;
+  // i: int32;
+begin
+  if fl then
+  begin
+    if node^.cn >= i then
+    begin
+      Writeln(twin1251(prefix), ' (', node^.cn, twin1251(' раз)'));
+      // totalWords := totalWords + 1;
+    end
+    else
+    begin
+      if node^.cn <= i then
+      begin
+        Writeln(twin1251(prefix), ' (', node^.cn, twin1251(' раз)'));
+        // totalWords := totalWords + 1;
+      end
+    end;
+  end;
+
+  if node^.cn > 0 then
+    totalWords := totalWords + 1;
+
+  for c := Low(tchar) to High(tchar) do
+  begin
+    if node^.Link[c] <> nil then
+    begin
+      newPrefix := twin1251(twin1251(prefix) + twin1251(c));
+      PrintWords(node^.Link[c], newPrefix, totalWords, i, fl);
+    end;
+  end;
+end;
+
+procedure PrintFileWords(node: PEl; prefix: twin1251; var totalWords: UInt32;
+  var f: textfile);
+var
+  c: tchar;
+  newPrefix: twin1251;
+begin
+  if node^.cn > 0 then
+  begin
+    Writeln(f, ansiToUtf8(twin1251(prefix) + ' '), node^.cn);
+    Inc(totalWords, 1);
+  end;
+
+  for c := Low(tchar) to High(tchar) do
+  begin
+    if node^.Link[c] <> nil then
+    begin
+      newPrefix := prefix + c;
+      PrintFileWords(node^.Link[c], newPrefix, totalWords, f);
+    end;
+  end;
+end;
+
+function GetTotalOccurrences(node: PEl): UInt32;
+var
+  c: tchar;
+begin
+  Result := node^.cn;
+  for c := Low(tchar) to High(tchar) do
+  begin
+    if node^.Link[c] <> nil then
+      Result := Result + GetTotalOccurrences(node^.Link[c]);
+  end;
+end;
+
+function SearchWord(s: twin1251): boolean;
+var
+  curr: PEl;
+  i: Integer;
+  c: tchar;
+begin
+  curr := root;
+  for i := 1 to Length(s) do
+  begin
+    c := s[i];
+    if not(c in [Low(tchar) .. High(tchar)]) or (curr^.Link[c] = nil) then
+      Exit(False);
+    curr := curr^.Link[c];
+  end;
+  Result := curr^.cn > 0;
+end;
+
+procedure LoadFromFile(fname: twin1251);
+var
+  f: textfile;
+  StartTime: DWORD;
+  s, s1: twin1251;
+  i: Int64;
+begin
+  try
+    StartTime := GetTickCount;
+    AssignFile(f, fname);
+    Reset(f);
+    while not Eof(f) do
+    begin
+      Readln(f, s);
+      s := twin1251(s);
+      s1 := twin1251('');
+      for i := 1 to Length(s) do
+      begin
+        if s[i] in [Low(tchar) .. High(tchar)] then
+          s1 := twin1251(twin1251(s1) + twin1251(s[i]))
+        else if s1 <> twin1251('') then
+        begin
+          InsertWord(twin1251(s1));
+          s1 := twin1251('');
+        end;
+      end;
+      if s1 <> twin1251('') then
+        InsertWord(twin1251(s1));
+    end;
+    CloseFile(f);
+    Writeln(twin1251('Загружено узлов: '), uk);
+    Writeln(twin1251('Время загрузки: '), GetTickCount - StartTime,
+      twin1251(' мс'));
+  except
+    on E: Exception do
+      Writeln(twin1251('Ошибка: '), E.Message);
+  end;
+end;
+
+procedure PrintMenu;
+begin
+  Writeln(twin1251('*** Меню ***'));
+  Writeln(twin1251('1. Показать меню'));
+  Writeln(twin1251('2. Вставить слово'));
+  Writeln(twin1251('3. Найти слово'));
+  Writeln(twin1251('4. Удалить слово'));
+  Writeln(twin1251('5. Вывести слова по префиксу'));
+  Writeln(twin1251('6. Загрузить из файла'));
+  // Writeln(twin1251('7. Вывести слова  по префиксу'));
+  Writeln(twin1251('7. Загрузить структуру БОРа в файл.'));
+  Writeln(twin1251('8. Выход'));
+end;
+
+var
+  cmd: Integer;
+  sInput, prefix: twin1251;
+  curr: PEl;
+  i: Integer;
+  c: tchar;
+  totalWords: UInt32;
+
+begin
+  SetConsoleCP(1251);
+  SetConsoleOutputCP(1251);
+
+  InitBor;
+  PrintMenu;
+  try
+    while not quitflag do
+    begin
+      Write(twin1251('>> '));
+      Readln(sInput);
+
+      if TryStrToInt(string(sInput), cmd) then
+      begin
+        case cmd of
+          1:
+            PrintMenu;
+          2:
+            begin
+              repeat
+                Write(twin1251('Введите слово (exit для выхода): '));
+                Readln(sInput);
+                if sInput <> twin1251('exit') then
+                  InsertWord(twin1251(sInput));
+              until sInput = twin1251('exit');
+            end;
+          3:
+            begin
+              Write(twin1251('Введите слово для поиска: '));
+              Readln(sInput);
+              if SearchWord(twin1251(sInput)) then
+                Writeln(twin1251('Слово найдено'))
+              else
+                Writeln(twin1251('Слово не найдено'));
+            end;
+          4:
+            begin
+              Write(twin1251('Введите слово для удаления: '));
+              Readln(sInput);
+              DeleteWord(twin1251(sInput));
+            end;
+          5:
+            begin
+              Write(twin1251('Введите префикс: '));
+              Readln(prefix);
+              curr := root;
+              for i := 1 to Length(prefix) do
+              begin
+                c := prefix[i];
+                if not(c in [Low(tchar) .. High(tchar)]) or (curr^.Link[c] = nil)
+                then
+                begin
+                  Writeln(twin1251('Префикс не найден'));
+                  curr := nil;
+                  Break;
+                end;
+                curr := curr^.Link[c];
+              end;
+              if curr <> nil then
+              begin
+                totalWords := 0;
+                Writeln('Введите число повторений по которым будет выведены слова.');
+                Readln(count);
+                Writeln('Введите режим повторений по которым будет выведены слова(1 больше первого значение, 2 меньше)');
+                Readln(fint);
+                if fint = 2 then
+                  fl := False
+                else
+                  fl := true;
+
+                PrintWords(curr, twin1251(prefix), totalWords, count, fl);
+                Writeln(twin1251('Всего слов: '), totalWords);
+                Writeln(twin1251
+                  ('Использовано узлов для всей структуры: '), uk);
+              end;
+            end;
+          6:
+            begin
+              Write(twin1251('Введите имя файла: '));
+              Readln(sInput);
+              LoadFromFile(twin1251(sInput + '.txt'));
+            end;
+          7:
+            begin
+              Write(twin1251('Введите имя файла: '));
+              Readln(sInput);
+              try
+                AssignFile(f, sInput + '.txt');
+                Rewrite(f); // Открываем файл для перезаписи
+                totalWords := 0;
+                PrintFileWords(root, twin1251(''), totalWords, f);
+                CloseFile(f);
+                Writeln(twin1251('Сохранено уникальных слов: '), totalWords);
+                Writeln(twin1251('Всего вхождений: '),
+                  GetTotalOccurrences(root));
+              except
+                on E: Exception do
+                  Writeln(twin1251('Ошибка записи: '), E.Message);
+              end;
+            end;
+
+        end
+        // quitFlag := True;
+      end;
+    end
+
+  except
+    on E: Exception do
+      Writeln(twin1251('Ошибка: '), E.Message);
+  end;
+  Writeln(twin1251('Работа завершена'));
+
+end.

@@ -1,0 +1,38 @@
+program Project1;
+
+{$APPTYPE CONSOLE}
+
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+function CountWays(n: Integer): Integer;
+begin
+  if n < 0 then
+    Exit(0);
+  if n = 0 then
+    Exit(1);
+  if n = 1 then
+    Exit(1);
+  if n = 2 then
+    Exit(1);
+  if n = 3 then
+    Exit(2);
+
+  Result := CountWays(n - 1) + CountWays(n - 3);
+end;
+
+var
+  stairs: int32;
+
+begin
+repeat
+  Write('Введите количество ступенек: ');
+  ReadLn(stairs);
+
+  WriteLn('Количество возможных вариантов спусков: ', CountWays(stairs));
+  readln;
+until false;
+end.
+

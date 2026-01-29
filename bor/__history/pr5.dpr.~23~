@@ -1,0 +1,399 @@
+﻿program pr5;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  SysUtils,
+  Windows;
+
+type
+  twin1251 = type AnsiString(1251);
+  tchar = #192 .. #255;
+  PEl = ^TEl;
+
+  TEl = record
+    count: UInt16;
+    f: Boolean;
+    Link: array [tchar] of PEl;
+  end;
+
+const
+  maxEl = 10000;
+
+var
+  bor: array [0 .. maxEl] of TEl;
+  uk: Int32 = 0;
+  root: PEl = nil;
+  quitFlag: Boolean = False;
+  m: uint32;
+
+  // Инициализация узла
+procedure InitNode(var node: TEl);
+var
+  c: tchar;
+begin
+  node.f := False;
+  node.count := 0;
+  for c := Low(tchar) to High(tchar) do
+    node.Link[c] := nil;
+end;
+
+// Инициализация структуры
+procedure InitBor;
+var
+  i: Integer;
+begin
+  for i := 0 to maxEl do
+    InitNode(bor[i]);
+  uk := 0;
+  root := @bor[0];
+end;
+
+// Вставка слова
+procedure InsertWord(s: twin1251);
+var
+  curr: PEl;
+  i: Integer;
+  c: tchar;
+begin
+  curr := root;
+  for i := 1 to Length(s) do
+  begin
+    c := s[i];
+    if not(c in [Low(tchar) .. High(tchar)]) then
+    begin
+      Writeln('Ошибка: Недопустимый символ "', c, '"');
+      Exit;
+    end;
+
+    if curr^.Link[c] = nil then
+    begin
+      Inc(uk);
+      if uk > maxEl then
+      begin
+        Writeln('Ошибка: Превышен лимит элементов бора');
+        Exit;
+      end;
+      curr^.Link[c] := @bor[uk];
+      InitNode(bor[uk]);
+    end;
+    curr := curr^.Link[c];
+    Inc(curr^.count);
+  end;
+  curr^.f := True;
+end;
+
+// Удаление слова
+procedure DeleteWord(s: twin1251);
+var
+  curr: PEl;
+  path: array of PEl;
+  i, idx: Integer;
+  c: tchar;
+begin
+  SetLength(path, Length(s));
+  curr := root;
+  idx := 0;
+
+  // Построение пути
+  for i := 1 to Length(s) do
+  begin
+    c := s[i];
+    if not(c in [Low(tchar) .. High(tchar)]) or (curr^.Link[c] = nil) then
+    begin
+      Writeln('Слово не найдено');
+      Exit;
+    end;
+    path[idx] := curr;
+    Inc(idx);
+    curr := curr^.Link[c];
+  end;
+
+  if not curr^.f then
+  begin
+    Writeln('Слово не найдено');
+    Exit;
+  end;
+
+  // Помечаем как удаленное
+  curr^.f := False;
+  Dec(curr^.count);
+
+  // Удаление ненужных узлов
+  for i := Length(s) downto 1 do
+  begin
+    Dec(idx);
+    c := s[i];
+    curr := path[idx]^.Link[c];
+
+    if curr^.count = 0 then
+    begin
+      path[idx]^.Link[c] := nil;
+      InitNode(bor[uk]);
+      Dec(uk);
+    end;
+  end;
+  Writeln('Слово успешно удалено');
+end;
+
+// Рекурсивный вывод слов
+procedure PrintWords(node: PEl; prefix: twin1251);
+var
+  c: tchar;
+begin
+  if node^.f then
+    Writeln(prefix);
+
+  for c := Low(tchar) to High(tchar) do
+  begin
+    if node^.Link[c] <> nil then
+      PrintWords(node^.Link[c], prefix + c);
+  end;
+end;
+
+// Вывод всех слов
+procedure PrintAllWords;
+begin
+  if root = nil then
+  begin
+    Writeln('Бор пуст');
+    Exit;
+  end;
+  Writeln('Список всех слов:');
+  PrintWords(root, '');
+end;
+// procedure PrintAllWords(cur: PEl; s: twin1251; var m: uint32); // s='';
+/// / cur=root
+// var
+// a: tchar;
+// cur2: PEl;
+// begin
+// if cur = nil then
+// exit;
+// a := low(tchar);
+// for cur2 in cur^.Link do
+// begin
+// if cur2 <> nil then
+// begin
+// if cur2^.f then
+// begin
+// writeln( s + a, ' ':(25 - length(a)));
+// inc(m);
+// end;
+// PrintAllWords(cur2, s + a, m);
+// end;
+// a := succ(a);
+// end;
+// end;
+
+procedure travelup_n(cur: PEl; s: twin1251; var m: uint32); // s='';
+// cur=root
+var
+  a: tchar;
+  cur2: PEl;
+begin
+
+  if cur = nil then
+    Exit;
+  a := low(tchar);
+  for cur2 in cur^.Link do
+  begin
+    if cur2 <> nil then
+    begin
+      if cur^.f then
+      begin
+        Writeln(s + a, ' ':(25 - Length(s + a)));
+        Inc(m);
+      end;
+      travelup_n(cur2, s + a, m);
+    end;
+    a := succ(a);
+  end;
+
+end;
+
+procedure travelup(cur: PEl; s: twin1251);
+var
+  a: tchar;
+  cur2: PEl;
+begin
+  if cur = nil then
+    Exit;
+
+  a := low(tchar);
+  for cur2 in cur^.Link do
+  begin
+    if cur2 <> nil then
+    begin
+      if cur2^.f then
+        Writeln(twin1251(twin1251(s) + twin1251(a)):25);
+      travelup(cur2, twin1251(twin1251(s) + twin1251(a)));
+    end;
+    if ord(a) < 255 then
+      a := tchar(succ(a));
+  end;
+end;
+
+// Остальные функции остаются без изменений (SearchWord, LoadFromFile...)
+function SearchWord(s: twin1251): Boolean;
+var
+  curr: PEl;
+  i: Integer;
+  c: tchar;
+begin
+  curr := root;
+  for i := 1 to Length(s) do
+  begin
+    c := s[i];
+    if not(c in [Low(tchar) .. High(tchar)]) or (curr^.Link[c] = nil) then
+      Exit(False);
+    curr := curr^.Link[c];
+  end;
+  Result := curr^.f;
+end;
+
+// Загрузка из файла
+procedure LoadFromFile(fname: twin1251);
+var
+  f: TextFile;
+  StartTime: DWORD;
+  aw: array of twin1251; // array of words
+  s, s1: twin1251;
+  i: Int32;
+begin
+  try
+    StartTime := GetTickCount;
+    AssignFile(f, fname);
+    Reset(f);
+    while not Eof(f) do
+    begin
+      Readln(f, s);
+      // s := twin1251(s);
+      s := twin1251(utf8toansi(s));
+      s1 := '';
+      // s:=s+' ';
+      for i := 1 to high(s) do
+        if s[i] in [low(tchar) .. high(tchar)] then
+          s1 := twin1251(s1) + twin1251(s[i])
+        else if s1 <> '' then
+        begin
+          aw := aw + [twin1251(s1)];
+          s1 := '';
+        end;
+      // 'хочу все знать'
+      // не нужен, если добавляем в конце ' ';
+      if s1 <> '' then
+        aw := aw + [s1];
+      Writeln('Всего слов: ', Length(aw));
+      for i := 0 to High(aw) do
+      begin
+        Writeln('<', twin1251(aw[i]), '>');
+        InsertWord(twin1251(aw[i]));
+      end;
+      Writeln(#10#10);
+      aw := nil;
+    end;
+    CloseFile(f);
+    Writeln('Загружено слов: ', uk);
+    Writeln('Время загрузки: ', GetTickCount - StartTime, ' мс');
+  except
+    On E: Exception Do
+      Writeln(E.ClassName, E.Message);
+  end;
+end;
+
+// Обновленное меню
+procedure PrintMenu;
+begin
+  Writeln('*** Меню ***');
+  Writeln('1. Показать меню');
+  Writeln('2. Вставить слово');
+  Writeln('3. Найти слово');
+  Writeln('4. Удалить слово');
+  Writeln('5. Вывести все слова');
+  Writeln('6. Загрузить из файла');
+  Writeln('7. Выход');
+end;
+
+// Основная программа
+var
+  cmd: Integer;
+  sInput, s: twin1251;
+  cur: PEl;
+
+begin
+  SetConsoleCP(1251);
+  SetConsoleOutputCP(1251);
+
+  InitBor;
+  PrintMenu;
+  try
+    while not quitFlag do
+    begin
+      Write('>> ');
+      Readln(sInput);
+
+      if TryStrToInt(sInput, cmd) then
+      begin
+        case cmd of
+          1:
+            PrintMenu;
+          2:
+            begin
+              while True do
+              begin
+                Write('Введите слово(для выхода введите exit): ');
+                Readln(sInput);
+                if sInput = 'exit' then
+                  break;
+                InsertWord(sInput);
+              end;
+            end;
+          3:
+            begin
+              Write('Введите слово для поиска: ');
+              Readln(sInput);
+              if SearchWord(sInput) then
+                Writeln('Слово найдено')
+              else
+                Writeln('Слово не найдено');
+            end;
+          4:
+            begin
+              Write('Введите слово для удаления: ');
+              Readln(sInput);
+              DeleteWord(sInput);
+            end;
+          5:
+            begin
+              Writeln('Использовано элементов - ', uk, #10);
+              cur := root;
+              s := '';
+              travelup(root, '');
+            end;
+          6:
+            begin
+              Write('Введите имя файла: ');
+              Readln(sInput);
+              LoadFromFile(twin1251(sInput + '.txt'));
+            end;
+          7:
+            quitFlag := True;
+        else
+          Writeln('Неверная команда');
+        end;
+      end
+      else
+      begin
+        Writeln('Введите числовую команду');
+      end;
+    end;
+  except
+    On E: Exception Do
+      Writeln(E.ClassName, E.Message);
+  end;
+
+  Writeln('Работа завершена');
+
+end.

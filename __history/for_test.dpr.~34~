@@ -1,0 +1,42 @@
+﻿program for_test;
+
+{$APPTYPE CONSOLE}
+
+{$R *.res}
+
+uses
+  System.SysUtils,
+  windows;
+
+var
+  sum, sumc, i: int32;
+
+
+const n1 = -1000;
+const n2 = 10000;
+
+
+begin
+setconsoleoutputCP(1251);
+sum:=0;
+sumc:=0;
+
+for i:= n1 to n2 do
+if i<0 then
+if i*-1 mod 13 = 0 then
+sum:=sum + i;
+sum:=sumc+1;
+
+
+if i mod 13 = 0 then
+sum:=sum + i;
+sumc:=sumc+1;
+
+
+
+writeln('sum= ', sum, #10);
+writeln('sumc= ', sumc, #10);
+
+
+readln;
+end.

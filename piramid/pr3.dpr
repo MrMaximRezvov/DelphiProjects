@@ -1,0 +1,78 @@
+program pr3;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  SysUtils, windows;
+
+var
+  n, i, j, sum: uInt64;
+  data: array of array of uint64;
+  first, second: uint64;
+  fin: textfile;
+  f_name: string;
+  t1, t2, fr: int64;
+
+begin
+repeat
+  sum := 0;
+  writeln('Введите имя файла чтения');
+  Readln(f_name);
+  QueryPerformanceFrequency(fr);
+    QueryPerformanceCounter(t1);
+  assignfile(fin, f_name + '.txt');
+  reset(fin);
+  Readln(fin, n);
+  SetLength(data, n, 2);
+
+  for i := 0 to n - 1 do
+  begin
+    Readln(fin, first, second);
+    data[i][0] := first;
+    data[i][1] := second;
+  end;
+
+  for i := 0 to n - 1 do
+  begin
+    first := data[i][0];
+    second := data[i][1];
+
+    for j := i + 1 to n - 1 do
+    begin
+      if data[j][0] = first then
+      begin
+        if data[j][1] <= second then
+        begin
+          data[j][0] := 0;
+          data[j][1] := 0;
+        end
+        else
+        begin
+          second := data[j][1];
+          data[i][0] := 0;
+          data[i][1] := 0;
+          Break;
+        end;
+      end;
+    end;
+  end;
+
+  writeln('Результат:');
+  for i := 0 to n - 1 do
+  begin
+    if (data[i][0] <> 0) or (data[i][1] <> 0) then
+    begin
+      //writeln(data[i][0], ' ', data[i][1]);
+      inc(sum, data[i][1]);
+    end;
+  end;
+
+  writeln('s = ', sum);
+  QueryPerformanceCounter(t2);
+  writeln('Time=', (t2 - t1) * 1000 / fr:0:3, 'ms');
+  Readln;
+  CloseFile(fin);
+until false;
+
+end.

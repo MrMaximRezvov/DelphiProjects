@@ -1,0 +1,73 @@
+﻿program Project1;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils, Windows;
+
+const
+  m = 1000 + 7;
+
+type
+  tchess = array ['a' .. 'c'] of uint32;
+
+var
+  i, k, n: uint32;
+  c: ansichar;
+  a1, a2, a3: tchess;
+  startTime, endTime, elapsedTime: DWORD;
+
+begin
+  repeat
+    try
+      for c := 'a' to 'c' do
+      begin
+        a1[c] := 0;
+        a2[c] := 0;
+      end;
+      a2['a'] := 1;
+      // a2['e'] := 1;
+      //
+      write('Enter k>0 : ');
+      readln(k);
+      if k < 3 then
+      begin
+        n := 0;
+        writeln('n=', n);
+        continue;
+      end;
+      // main
+
+      // Замер времени начала выполнения
+      startTime := GetTickCount;
+
+      for i := 3 to k do
+      begin
+        a3['a'] := (a1['b'] + a2['c']) mod m;
+        a3['b'] := ((a1['a'] + a1['c']) mod m + a2['b']) mod m;
+        a3['c'] := (((a1['b'] + a1['b']) mod m + a2['a']) mod m +
+          a2['a']) mod m;
+        // a3['d'] := a3['b'];
+        // a3['e'] := a3['a'];
+        a1 := a2;
+        a2 := a3;
+      end;
+      n := a3['c'];
+      writeln('n=', n);
+
+      // Замер времени окончания выполнения
+      endTime := GetTickCount;
+
+      // Вычисление времени выполнения
+      elapsedTime := endTime - startTime;
+
+      writeln('Execution time: ', elapsedTime, ' ms');
+    except
+      on E: Exception do
+        writeln(E.ClassName, ': ', E.Message);
+    end;
+    // readln;
+  until false;
+
+end.

@@ -1,0 +1,37 @@
+program pr2;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+procedure intToBin(m: integer);
+var
+  c: integer;
+begin
+  if m > 0 then
+  begin
+    c := m mod 2;
+    m := m div 2;
+    intToBin(m);
+  end;
+  writeln('c = ',c);
+end;
+
+var
+  m: integer;
+
+begin
+  try
+    readln(m);
+    writeln;
+    intToBin(m);
+    readln;
+    { TODO -oUser -cConsole Main : Insert code here }
+  except
+    on E: Exception do
+      writeln(E.ClassName, ': ', E.Message);
+  end;
+  readln;
+end.

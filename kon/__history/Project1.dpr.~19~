@@ -1,0 +1,66 @@
+program Project1;
+
+uses
+  SysUtils;
+
+const
+  MAX_X = 5;
+  MAX_Y = 100;
+
+var
+  targetX, targetY: Integer;
+  pathsCache: array[1..MAX_X, 1..MAX_Y] of Integer;
+  x, y, moves: Integer;
+
+///* Массив возможных ходов коня */
+const
+  knightMoves: array[1..8, 1..2] of Integer = (
+    (2, 1), (2, -1),
+    (1, 2), (1, -2),
+    (-1, 2), (-1, -2),
+    (-2, 1), (-2, -1)
+  );
+
+function IsValidMove(x, y: Integer): Boolean;
+begin
+  Result := (x >= 1) and (x <= MAX_X) and (y >= 1) and (y <= MAX_Y);
+end;
+
+begin
+  Write('Введите целевую абсциссу (1 - a, 2 - b, 3 - c, 4 - d, 5 - e): ');
+  ReadLn(targetX);
+
+  Write('Введите целевую ординату (натуральное число): ');
+  ReadLn(targetY);
+
+  if (targetX < 1) or (targetX > MAX_X) or (targetY < 1) or (targetY > MAX_Y) then
+  begin
+    WriteLn('Ошибка: целевая точка находится вне игрового поля.');
+    Exit;
+  end;
+
+  FillChar(pathsCache, SizeOf(pathsCache), 0);
+  pathsCache[3, 1] := 1; // Начальная позиция
+
+  for y := 1 to MAX_Y do
+  begin
+    for x := 1 to MAX_X do
+    begin
+      if (x = 3) and (y = 1) then Continue; // Пропустить начальную позицию
+
+      moves := 0;
+      for var i := 1 to 8 do
+      begin
+        if IsValidMove(x - knightMoves[i, 1], y - knightMoves[i, 2]) then
+          moves := moves + pathsCache[x - knightMoves[i, 1], y - knightMoves[i, 2]];
+      end;
+
+      pathsCache[x, y] := moves;
+    end;
+  end;
+
+  WriteLn('Количество путей коня до точки (', targetX, ', ', targetY, '): ', pathsCache[targetX, targetY]);
+
+  ReadLn; // Для сохранения окна консоли
+end.
+

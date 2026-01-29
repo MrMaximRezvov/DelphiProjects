@@ -1,0 +1,27 @@
+program task3;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+var
+  a, b, c, d, x, y: int32;
+
+begin
+  repeat
+    writeln('a, b, c, d');
+    readln(a, b, c, d);
+    if a > 0 then  if c > 0 then   if a > c then  x := a - c else x:= a+abs(c) else x:= abs(a)+abs(c);
+    writeln(x)               ;
+
+
+
+
+
+
+    x := a + c
+  until false;
+
+end.

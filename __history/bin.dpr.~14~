@@ -1,0 +1,39 @@
+﻿program bin;
+
+{$APPTYPE CONSOLE}
+
+{$R *.res}
+
+uses
+  System.SysUtils,
+  Windows;
+
+var
+  u, ubin: uint8;
+  i: int8;
+  ubinstr: string;
+  c: char;
+label m;
+
+begin
+m:
+setconsoleoutputCP(1251);
+writeln('Введите U');
+readln(u);
+for i := 1 to 8 do
+if odd(u) then  c:= '1'
+else
+begin
+ c:= '0';
+end;
+u:= u shr 1;
+ubinstr := ubinstr + c;
+
+
+
+writeln(ubinstr);
+
+
+
+goto m;
+end.

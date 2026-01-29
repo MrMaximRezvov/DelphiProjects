@@ -1,0 +1,29 @@
+program filestxt;
+
+{$APPTYPE CONSOLE}
+
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+var fin, fout: textfile;
+  a, b: int8;
+
+begin
+  assignfile(fin, './input.txt');
+  assignfile(fout, './output.txt');
+  reset(fin);
+  rewrite(fout);
+  readln(fin, a, b);
+  writeln(fout, a, ' + ', b, ' = ', a+b);
+  readln(fin, a, b);
+  writeln(fout, a, ' - ', b, ' = ', a-b);
+  readln(fin, a, b);
+  writeln(fout, a, ' * ', b, ' = ', a*b);
+  readln(fin, a, b);
+  writeln(fout, a, ' / ', b, ' = ', a/b);
+
+  closefile(fin);
+  closefile(fout);
+end.

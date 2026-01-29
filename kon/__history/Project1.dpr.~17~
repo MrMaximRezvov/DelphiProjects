@@ -1,0 +1,91 @@
+program Project1;
+
+{$APPTYPE CONSOLE}
+
+uses
+  SysUtils;
+
+const
+  MAX_X = 5; // Ширина поля (1-5)
+  MAX_Y = 100; // Максимальная высота поля
+
+var
+  targetX, targetY: Integer; // Целевая точка
+  pathsCache: array[1..MAX_X, 1..MAX_Y] of Integer; // Кэш для запоминания путей
+
+// Массив возможных ходов коня
+const
+  knightMoves: array[1..8, 1..2] of Integer = (
+    (2, 1), (2, -1),
+    (1, 2), (1, -2),
+    (-1, 2), (-1, -2),
+    (-2, 1), (-2, -1)
+  );
+
+function IsValidMove(x, y: Integer): Boolean;
+begin
+  Result := (x >= 1) and (x <= MAX_X) and (y >= 1) and (y <= MAX_Y);
+end;
+
+function CountPaths(x, y: Integer): Integer;
+var
+  paths: Integer;
+  i: Integer;
+begin
+  // Проверка кэша
+  if not IsValidMove(x, y) then
+    Exit(0);
+
+  if pathsCache[x, y] <> 0 then
+    Exit(pathsCache[x, y]);
+
+  // Базовый случай - если мы на первоначальной позиции
+  if (x = 3) and (y = 1) then
+    Exit(1);
+
+  paths := 0;
+
+  // Перебор возможных ходов коня
+  for i := 1 to 8 do
+  begin
+    // Вычисляем новые координаты
+    paths := paths + CountPaths(x - knightMoves[i, 1], y - knightMoves[i, 2]);
+  end;
+
+  pathsCache[x, y] := paths; // Запись результата в кэш
+  Result := paths;
+end;
+
+
+begin
+  repeat
+    try
+      { TODO -oUser -cConsole Main : Insert code here }
+      // Ввод целевой точки
+      //Write('Введите целевую абсциссу (1 - a, 2 - b, 3 - c, 4 - d, 5 - e): ');
+      //ReadLn(targetX);
+      targetX := 3;
+      Write('Введите целевую ординату (натуральное число): ');
+      ReadLn(targetY);
+
+      // Проверка корректности целевой точки
+      if (targetX < 1) or (targetX > MAX_X) or (targetY < 1) or (targetY > MAX_Y)
+      then
+      begin
+        WriteLn('Ошибка: целевая точка находится вне игрового поля.');
+        Exit;
+      end;
+
+      // Подсчет путей
+      FillChar(pathsCache, SizeOf(pathsCache), 0);
+      WriteLn('Количество путей коня до точки (', targetX, ', ', targetY, '): ',
+        CountPaths(targetX, targetY));
+
+      ReadLn; // Для сохранения окна консоли
+    except
+      on E: Exception do
+        WriteLn(E.ClassName, ': ', E.Message);
+    end;
+  until false;
+
+end.

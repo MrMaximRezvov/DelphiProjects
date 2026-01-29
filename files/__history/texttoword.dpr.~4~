@@ -1,0 +1,109 @@
+program texttoword;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils, windows;
+
+type
+  TWin1251 = type AnsiString(1251);
+
+var
+  fin, fout: TextFile;
+  f_name, f_name2: TWin1251;
+  words: array of TWin1251;
+  str, word: TWin1251;
+  i, j: Integer;
+  ban: set of Char = [' ', ',', '.', ';', ':', '!', '?', '-', #9, #10, #13,
+    '''', '"']; // Множество разделителей
+
+begin
+  setconsoleoutputCP(1251);
+  setConsoleCP(1251);
+  repeat
+    try
+      // Ввод имен файлов
+      WriteLn('Введите имя файла для чтения (без расширения):');
+      ReadLn(f_name);
+      AssignFile(fin, f_name + '.txt');
+
+      WriteLn('Введите имя файла для записи (без расширения):');
+      ReadLn(f_name2);
+      AssignFile(fout, f_name2 + '.txt');
+
+      // Проверка существования входного файла
+{$I-}
+      Reset(fin);
+{$I+}
+      if IOResult <> 0 then
+      begin
+        WriteLn('Ошибка: Файл ', f_name, '.txt не найден!');
+        Continue;
+      end;
+
+      // Открытие файла вывода для записи (rewrite) или дозаписи (append)
+      Rewrite(fout);
+      // Используйте Append(fout); для добавления в конец существующего файла
+
+      // Основная обработка
+      while not EOF(fin) do
+      begin
+        ReadLn(fin, str); // Чтение всей строки
+
+        word := '';
+        for j := 1 to Length(str) do // В Pascal строки индексируются с 1
+        begin
+          if CharInSet(str[j], ban) then
+          begin
+            if word <> '' then
+            begin
+              SetLength(words, Length(words) + 1);
+              words[High(words)] := TWin1251(word);
+              word := '';
+            end;
+          end
+          else
+          begin
+            word := TWin1251(word + str[j]);
+          end;
+        end;
+
+        // Добавляем последнее слово в строке
+        if word <> '' then
+        begin
+          SetLength(words, Length(words) + 1);
+          words[High(words)] := TWin1251(word);
+        end;
+      end;
+
+      // Запись результатов в файл и вывод на экран
+      WriteLn('Найденные слова:');
+      for i := 0 to High(words) do
+      begin
+        Write(fout, TWin1251(words[i]), ' ');
+        Write(TWin1251(words[i]), ' ');
+      end;
+      WriteLn;
+
+      // Очистка
+      CloseFile(fin);
+      CloseFile(fout);
+      SetLength(words, 0);
+    except
+      on E: Exception do
+        WriteLn('Ошибка: ', E.Message);
+    end;
+
+    ReadLn;
+  until false; // Завершение по Ctrl+C
+
+end.
+// begin
+// try
+// { TODO -oUser -cConsole Main : Insert code here }
+// except
+// on E: Exception do
+// Writeln(E.ClassName, ': ', E.Message);
+// end;
+// end.

@@ -1,0 +1,39 @@
+﻿program monkeykeyboardtime;
+
+{$APPTYPE CONSOLE}
+
+{$R *.res}
+
+uses
+  System.SysUtils, windows;
+
+const n=4;
+type tch = 'a'..'z';
+var  s, sw :ansistring;
+     c1,c2,c3,c4:ansichar;
+     i,k:uint32;
+     fr,t1,t2:int64;
+begin
+repeat
+writeln('Введите слово из ',n,' букв : ');
+readln(sw);
+writeln('Введите randseed');
+readln(randseed);
+k:=0;
+c1:=' ';c2:=' ';c3:=' ';c4:=' ';
+QueryPerformanceFrequency(fr);
+QueryPerformanceCounter(t1);
+repeat
+    c1:=c2; c2:=c3; c3:=c4;
+    c4:=ansichar(random(26)+ord('a'));
+    s:=c1+c2+c3+c4;
+    inc(k);
+    write(c4);
+until sw=s;
+QueryPerformanceCounter(t2);
+writeln(#10,'k=',k);
+writeln('Слово=',s);
+writeln('Time=',(t2-t1)*1000/fr:0:2,'ms ',' op/ms=',k/((t2-t1)*1000/fr):0:1);
+readln;
+until false;
+end.

@@ -1,0 +1,251 @@
+﻿program Project1;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils, windows;
+//
+// const
+// a = 5;
+// var
+// i1, i2, i3, i4, i5, i: uint16;
+// r1, r2, r3: real;
+// pr1, pr2, pr3: ^real;
+// p1, p2: pointer; //pointer
+// pi1, pi2, pi3: ^uint16; // ^uint16
+// pr : ^real;
+//
+// begin
+// try
+/// /    p1:=@i1;
+/// /    p2:=@i2;
+/// /    writeln('addr i1 = ', uintptr(p1), ' addr i2 = ', uint32(p2), ' addr i3 = ', uint32(@i3), ' addr i4 = ', uint32(@i4), ' addr i5 = ', uint32(@i5));
+/// /    writeln('addr r(1, 2, 3): ', uint32(@r1):8, uint32(@r2):8, uint32(@r3):8);
+/// /    //writeln('addr a: ', uint32(@a));
+/// /    { TODO -oUser -cConsole Main : Insert code here }
+/// /    pi1 := @i1;
+/// /    i1 := 5;
+/// /    writeln('i1 = pi1 ^= ', pi1^);
+/// /    i1 := 1; i2:=2;i3:=3;i4:=4; i5:=5;
+/// /    for i := 10 to 14 do
+/// /    begin
+/// /      pi1 ^:= i;
+/// /      inc(pi1);
+/// /    end;
+/// /    writeln('i1 = ', i1, ' i2 = ', i2,' i3 = ', i3,' i4 = ', i4,' i5 = ', i5);
+/// /    writeln('addr i1 = ', uintptr(p1), ' addr i2 = ', uint32(p2), ' addr i3 = ', uint32(@i3), ' addr i4 = ', uint32(@i4), ' addr i5 = ', uint32(@i5));
+/// /    writeln('pi1 = ', uintptr(pi1), ' pi1 hex = ', uintptr(pi1).ToHexString);
+/// /    writeln('addr r1 = ', uintptr(@r1), ' addr r2 = ', uintptr(@r2));
+/// /    pr := @r1;
+/// /    pr ^:= pi;
+/// /    writeln('addr pr = ', uintptr(pr).ToHexString);
+/// /    r2 := 2.54;
+/// /    new(pr); // запрос памяти для real heap
+/// /    pr ^:= pi + 2;
+/// /    writeln('new addr pr = ', uintptr(pr).ToHexString);
+/// /    r2 := pr^;
+/// /    dispose(pr); // возврат памяти обратно в heap
+/// /    pr := nil;
+/// /    readln;
+// //////////////////////////////
+// new(pr1);
+// new(pr2);
+// new(pr3);
+// writeln(uintptr(pr1), ' ', uintptr(pr2), ' ', uintptr(pr3));
+// pr1^:=pi;
+// pr2^:=2.5;
+// pr3^:=45;
+// r1:= pr1^+pr2^+pr3^;
+// writeln(r1:0:3);
+// Dispose(pr1);
+// pr1 :=nil;
+// Dispose(pr2);
+// pr2 := nil;
+// dispose(pr3);
+// pr3:= nil;
+// new(pi1);
+// new(pi2);
+// new(pi3);
+// writeln(uintptr(pi1), ' ', uintptr(pi2), ' ', uintptr(pi3));
+// pi1^ := 2;
+// pi2^:= 3;
+// pi3^ := 4;
+// i1:= pi1^+pi2^+pi3^;
+// writeln(i1:3);
+// Dispose(pi1);
+// writeln(uintptr(pi1));
+// pi1 :=nil;
+// Dispose(pi2);
+// pi2 := nil;
+// dispose(pi3);
+// pi3:= nil;
+// readln;
+// except
+// on E: Exception do
+// Writeln(E.ClassName, ': ', E.Message);
+// end;
+// end.
+
+// var pr1,pr2,pr3 : ^real;//Heap
+// r1,r2:real;//СД программы
+// pi1,pi2,pi3: ^uint16;
+// pex1,pex2:^extended;
+// begin
+// try
+// New(pr1);
+// New(pr2);
+// writeln(uintptr(pr1),'  ',uintptr(pr2));
+// pr1^:=pi;
+// pr2^:=2.5;
+// r1:=pr1^+pr2^;
+// writeln(r1:0:3);
+// New(pr3);
+// writeln(uintptr(pr3));
+// New(pi1);
+// New(pi2);
+// New(pi3);
+// writeln(uintptr(pi1),'  ',uintptr(pi2),'  ',uintptr(pi3));
+// Dispose(pr1);
+// pr1:=nil;
+// Dispose(pr2);
+// pr2:=nil;
+// Dispose(pr3);
+// pr3:=nil;
+// Dispose(pi1);
+// writeln('До обниливания ',uintptr(pi1));
+// pi1:=nil;
+// Dispose(pi2);
+// pi2:=nil;
+// Dispose(pi3);
+// pi3:=nil;
+// New(pex1);
+// New(pex2);
+// pex1^:=1;
+// pex2^:=2;
+// writeln('Extended ',uintptr(pex1),'  ',uintptr(pex2),'  ',pex1^+pex2^);
+// Dispose(pex1);
+// pex1:=nil;
+// Dispose(pex2);
+// pex2:=nil;
+// writeln('sizeof: pex1 ', sizeof(pex1^), ' pi1 ', sizeof(pi1^));
+/// / if pr1=nil then ....
+// readln;
+// except
+// on E: Exception do
+// Writeln(E.ClassName, ': ', E.Message);
+// end;
+// end.
+// var
+// i: int32;
+// s, s1: string;
+// p, p1: Pointer;
+// ps: ^string;
+// startTime, endTime, elapsedTime: DWORD;
+// t1, t2, fr: int64;
+//
+// procedure descr_str(p: Pointer);
+// var
+// pint: ^int32;
+// pw: ^uint16;
+// begin
+// pint := p;
+// dec(pint);
+// writeln('---------------------------------------');
+// writeln('Adress ', uint32(p), #10, 'len ', pint^);
+// dec(pint);
+// writeln('Ref, ', pint^);
+// dec(pint);
+// pw := p;
+// dec(pw);
+// writeln('Size of char ', pw^);
+// dec(pw);
+// writeln('Code page ', pw^);
+// writeln('---------------------------------------');
+/// /  dispose(pw);
+/// /  pw := nil;
+/// /  dispose(pint);
+/// /  pint := nil;
+// end;
+//
+// begin
+// try
+// s := 'привет';
+// p := @s;
+// ps := @s;
+// writeln('!', ps^, '!');
+// writeln('Adress i= ', uintptr(@i), ' Adress s= ', uintptr(p));
+// writeln('Adress S in Heap = ', uintptr(p^), ' Adress s[1]= ',
+// uintptr(@s[1]));
+// writeln(ps^, ' ', uintptr(ps^));
+// s1 := string.create('z', 25);
+// writeln(s1, ' ', s1.length.ToString);
+// writeln('Adress s1 = ', uintptr(@s1), ' adress s1 = ', uintptr(@s1[1]));
+// s1 := 'Марко ';
+// s := 'Канту ';
+// startTime := GetTickCount;
+// QueryPerformanceFrequency(fr);
+// QueryPerformanceCounter(t1);
+// for i := 1 to 2000000 do
+// begin
+// s1 := s1 + s;
+// end;
+// endTime := GetTickCount;
+// elapsedTime := endTime - startTime;
+// writeln('Length: ', s1.length.ToString);
+// // Вычисление времени выполнения
+//
+// QueryPerformanceCounter(t2);
+// writeln('Execution time(Tick): ', elapsedTime, ' ms');
+// writeln('Time(Frequency): ', (t2 - t1) * 1000 / fr:0:3, 'ms');
+// s := 'Всем привет!';
+// p := @s[1];
+// writeln('Len s = ', s.Length.ToString);
+// descr_str(p);
+//
+// readln;
+// except
+// on E: Exception do
+// writeln(E.ClassName, ': ', E.Message);
+// end;
+//
+// end.
+
+// Код программы для исследования Ansistring
+var
+  Str1, Str2: ansistring;
+  I: Integer;
+  p: Pointer;
+  ps, ps1: ^ansistring;
+
+  //
+procedure descr_str(p: Pointer);
+var
+  pint: ^uint32;
+  pw: ^uint16;
+begin
+  pint := p;
+  dec(pint);
+  writeln('----------------');
+  writeln('Addr ', uint32(p), #10, 'Len ', pint^);
+  dec(pint);
+  writeln('Ref ', pint^);
+  p := pint;
+  pw := p;
+  dec(pw);
+  writeln('Size char ', pw^);
+  dec(pw);
+  writeln('Code page ', pw^);
+  writeln('----------------');
+end;
+
+//
+begin
+  Str1 := 'Всем привет!';
+  ps := @Str1[1];
+  p := ps;
+  writeln(Str1, ' Длина length= ', length(Str1));
+  descr_str(p);
+  readln;
+
+end.

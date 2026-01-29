@@ -1,0 +1,62 @@
+﻿program ChangeDispenserDynamicProgramming;
+
+{$APPTYPE CONSOLE}
+
+uses
+  SysUtils;
+
+var
+  change: Integer;
+  denominations: array[1..4] of Integer = (10, 5, 3, 2);
+  dp: array of Integer;
+  count: array of Integer;
+  i, j: Integer;
+
+begin
+  // Ввод суммы сдачи
+  Write('Введите сумму сдачи: ');
+  ReadLn(change);
+
+  // Инициализация массивов
+  SetLength(dp, change + 1);
+  SetLength(count, change + 1);
+
+  for i := 0 to change do
+  begin
+    dp[i] := MaxInt; // Инициализируем с максимальным значением
+    count[i] := 0;   // Инициализируем счетчик
+  end;
+
+  dp[0] := 0; // Ноль монет для нулевой суммы
+
+  // Алгоритм динамического программирования
+  for i := 1 to Length(denominations) do
+  begin
+    for j := denominations[i] to change do
+    begin
+      if dp[j - denominations[i]] + 1 < dp[j] then
+      begin
+        dp[j] := dp[j - denominations[i]] + 1;
+        count[j] := i; // Сохраняем последний использованный номинал
+      end;
+    end;
+  end;
+
+  // Вывод результата
+  if dp[change] = MaxInt then
+    WriteLn('Не удалось выдать всю сдачу.')
+  else
+  begin
+    WriteLn('Количество монет: ', dp[change]);
+    WriteLn('Номиналы и количество:');
+
+    while change > 0 do
+    begin
+      WriteLn('Номинал ', denominations[count[change]], ': 1 шт.');
+      change := change - denominations[count[change]];
+    end;
+  end;
+
+  ReadLn; // Ожидание нажатия клавиши
+end.
+

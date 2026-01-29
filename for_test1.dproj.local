@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899.12.30 00:00:00.000.656,C:\Users\Maxim\Documents\Embarcadero\Studio\Projects\Project1.dproj=D:\Project3.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.407,D:\Project4.dproj=D:\Project5.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.281,D:\Project4.dproj=D:\Project3.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.940,D:\Project5.dproj=D:\for_test.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.934,D:\Delphi project\for_test1.dproj=D:\Delphi project\for_test.dproj</Transaction>
+  </Transactions>
+</BorlandProject>

@@ -1,0 +1,51 @@
+﻿program asciishow;
+
+{$APPTYPE CONSOLE}
+
+{$R *.res}
+
+uses
+  System.SysUtils, Windows;
+
+type tsoem = type ansistring(866);
+
+var
+i, j, h: uint8;
+k: ansichar;
+koem: tsoem;
+
+
+
+
+begin
+setconsoleoutputCP(1251);
+writeln('Таблица ASCII ext CP 1251': 55);
+for i := 0 to 31 do
+  begin
+    for j := 0 to 7 do
+      begin
+        h:= i+32*j;
+        k:= ansichar(h);
+        if h = 149 then k:= '*';
+        if h < 31 then k:='*';
+        write(h: 7, k: 3);
+      end;
+      writeln;
+  end;
+h:=0;
+i:=0;
+j:=0;
+  writeln('Таблица ASCII ext oem 866': 55);
+  for i := 0 to 31 do
+  begin
+    for j := 0 to 7 do
+      begin
+        h:= i+32*j;
+        koem:= tsoem(ansichar(h));
+        if h in [0..31] then k:='#';
+        write(h: 7, tsoem(k): 3);
+      end;
+      writeln;
+  end;
+  readln;
+end.

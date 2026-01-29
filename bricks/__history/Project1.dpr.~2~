@@ -1,0 +1,100 @@
+program Project1;
+
+{$APPTYPE CONSOLE}
+
+{$R *.res}
+
+uses
+  SysUtils,
+  Math;
+
+type
+  TStringArray = array of string;
+
+// Функция для проверки симметрии ряда
+function IsSymmetric(s: string): Boolean;
+var
+  i, len: Integer;
+begin
+  len := Length(s);
+  for i := 1 to len div 2 do
+  begin
+    if s[i] <> s[len - i + 1] then
+    begin
+      Result := False;
+      Exit;
+    end;
+  end;
+  Result := True;
+end;
+
+// Рекурсивная функция для генерации всех возможных рядов
+procedure GenerateRows(L: Integer; currentRow: string; var rows: TStringArray);
+begin
+  if Length(currentRow) = L then
+  begin
+    if IsSymmetric(currentRow) then
+    begin
+      SetLength(rows, Length(rows) + 1);
+      rows[High(rows)] := currentRow;
+    end;
+    Exit;
+  end;
+
+  if Length(currentRow) + 3 <= L then
+    GenerateRows(L, currentRow + '3', rows);
+
+  if Length(currentRow) + 4 <= L then
+    GenerateRows(L, currentRow + '4', rows);
+end;
+
+// Основная функция для вычисления максимальной высоты стены
+function CalculateMaxHeight(L: Integer): Integer;
+var
+  rows: TStringArray;
+  i, j: Integer;
+begin
+  SetLength(rows, 0);
+  GenerateRows(L, '', rows);
+
+  // Уникальные ряды
+  for i := 0 to High(rows) - 1 do
+  begin
+    if rows[i] = '' then Continue;
+    for j := i + 1 to High(rows) do
+    begin
+      if rows[i] = rows[j] then
+        rows[j] := '';
+    end;
+  end;
+
+  // Подсчет уникальных рядов
+  Result := 0;
+  for i := 0 to High(rows) do
+  begin
+    if rows[i] <> '' then
+      Inc(Result);
+  end;
+end;
+
+var
+  L, H: Integer;
+begin
+repeat
+  // Ввод длины стены
+  Write('Введите длину стены L (5 <= L <= 50): ');
+  ReadLn(L);
+
+  if (L < 5) or (L > 50) then
+  begin
+    WriteLn('Некорректная длина стены.');
+    Exit;
+  end;
+
+  // Вычисление максимальной высоты
+  H := CalculateMaxHeight(L);
+
+  // Вывод результата
+  WriteLn('Максимальная высота стены H: ', H);
+until false;
+end.

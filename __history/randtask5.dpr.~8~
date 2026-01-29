@@ -1,0 +1,24 @@
+program randtask5;
+
+{$APPTYPE CONSOLE}
+
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+var c: char;
+i, schet: int32;
+
+
+begin
+for i := 1 to 1200 do
+begin
+c:= char(random(25) + 66);
+write(c:3);
+if ord(c) = 76 then inc(schet);
+
+end;
+writeln(#10, 'schet= ', schet);
+readln;
+end.

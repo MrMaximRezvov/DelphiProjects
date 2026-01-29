@@ -1,0 +1,55 @@
+﻿program pr3;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+Type
+  PEl = ^TEl;
+
+  TEl = record
+    f: boolean;
+    Link: array ['а' .. 'я'] of PEl;
+  end;
+
+procedure Insert(s: ansistring; var root: PEl);
+var
+  i: integer;
+  curr: PEl;
+  c: ansichar;
+begin
+  if root = nil then
+    New(root);
+
+  curr := root;
+  for i := 1 to Length(s) do
+  begin
+    c := s[i];
+
+    if not(c in ['а' .. 'я']) then
+      writeln('Недопустимый символ: ' + c);
+
+    if curr^.Link[c] = nil then
+      New(curr^.Link[c]);
+
+    curr := curr^.Link[c];
+  end;
+  
+  curr^.f := True;
+end;
+
+var
+  root: PEl = nil;
+
+begin
+  try
+    repeat
+      Insert('тест', root);
+      readln;
+    until false;
+  except
+  
+  end;
+end.

@@ -1,0 +1,60 @@
+program randtaskbreak;
+
+{$APPTYPE CONSOLE}
+
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+var i, j, s, c: int32;
+
+begin
+randseed:= 1;
+
+
+for i := 1 to 1000 do
+begin
+  j:= random(31)-10;
+  write(j: 5);
+  s:= s+j;
+  inc(c);
+  if s>=500 then break;
+end;
+writeln(#10, 'count= ', c, ' Sum= ', s);
+
+
+i:=0;
+s:=0;
+c:=0;
+
+randseed:= 1;
+while i<=1000 do
+begin
+  j:= random(31)-10;
+  write(j: 5);
+  s:= s+j;
+  inc(c);
+  if s>=500 then break;
+end;
+writeln(#10, 'count= ', c, ' Sum= ', s);
+
+
+i:=0;
+s:=0;
+c:=0;
+
+randseed:= 1;
+repeat
+  j:= random(31)-10;
+  write(j: 5);
+  s:= s+j;
+  inc(c);
+  inc(i);
+  if s>=500 then break;
+until i=1000;
+writeln(#10, 'count= ', c, ' Sum= ', s);
+
+
+readln;
+end.

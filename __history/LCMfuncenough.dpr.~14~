@@ -1,0 +1,47 @@
+﻿program LCMfuncenough;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils,
+  windows;
+
+var
+  a, b, c, n, gcd, Icm, a1, b1, a2, b2, c2: int32;
+
+begin
+  setconsoleoutputCP(1251);
+
+  n := 0;
+  a := 1;
+  repeat
+    write('Введите ', n + 1, ' число: ');
+    readln(b);
+    if b = 0 then
+      continue;
+    a2:= a2+b2;
+    b2:=b;
+    while b2 <> 0 do
+    begin
+      c2 := b2;
+      b2 := a2 mod b2;
+      a2 := c2;
+    end;
+    a1 := a;
+    b1 := b;
+    while b1 <> 0 do
+    begin
+      c := b1;
+      b1 := a1 mod b1;
+      a1 := c;
+    end;
+    gcd := abs(a1);
+    Icm := (a * b) div gcd;
+    inc(n);
+    if n > 1 then
+      writeln('NOK №', n, '= ', Icm, ' NOD №', n, '= ', abs(a2+b2));
+    a := Icm;
+  until false;
+
+end.

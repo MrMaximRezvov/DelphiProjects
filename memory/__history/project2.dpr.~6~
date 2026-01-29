@@ -1,0 +1,51 @@
+program project2;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+// begin
+// try
+// { TODO -oUser -cConsole Main : Insert code here }
+// except
+// on E: Exception do
+// Writeln(E.ClassName, ': ', E.Message);
+// end;
+//
+// end.
+
+var
+  i, j: uint16;
+  r1, r2: real;
+  c1, c2: ansichar;
+  s1, s2: string[20];
+  s3, s4: shortstring;
+  s5, s6: string;
+
+type
+  ts = array[1 .. 100] of int16;
+  trec = record
+     i, j: int32;
+     a, b: real;
+     s:string[20];
+  end;
+var rec1, rec2:trec;
+
+ar1, ar2:ts;
+begin
+  rec2.i:= 3; rec2.s:= 'Привет от короткой строки';
+  rec1 := rec2;
+  writeln('@rec2.s = ', uintptr(@rec2.s), ' @rec1.s= ', uintptr(@rec1.s));
+  for i := 1 to High(ts) do
+    ar2[i] := random(100);
+  ar1 := ar2;
+  for i := 1 to High(ts) do
+    if ar2[i]<>ar1[i] then writeln('Нет копии!!!');
+  writeln('@ar1[1] ', uintptr(@ar1[1]), ' @ar2[1] ', uintptr(@ar2[1]));
+  writeln('sizeof ', sizeof(ts), ' @ar2[1] - @ar1[1] ', uintptr(@ar2[1])-uintptr(@ar1[1]));
+  ar1[1] := 3;
+  writeln('(ar1[1] := 3) = ', ar1[1], ' ar2[1] = ', ar2[1]);
+  readln;
+end.
