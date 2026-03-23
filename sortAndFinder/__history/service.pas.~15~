@@ -1,0 +1,243 @@
+unit Service;
+
+interface
+
+type
+  tdi = array of Int32;      // array of integers
+  tdc = AnsiString;           // string
+  tdr = array of Real;        // array of reals
+
+// Процедуры генерации массивов
+procedure GenArr(var ar: tdi; n, lb, rb, rand: Int32); overload;
+procedure GenArr(var ar: tdr; n, lb, rb, rand: Int32); overload;
+procedure GenArr(var ar: tdc; n, lb, rb, rand: Int32); overload;
+
+// Процедуры вывода массивов
+procedure PrintArr(const ar: tdi; width: UInt8 = 4; startind: UInt32 = 0); overload;
+procedure PrintArr(const ar: tdr; width: UInt8 = 8; digits: UInt8 = 4; startind: UInt32 = 0); overload;
+procedure PrintArr(const ar: tdc; startind: UInt32 = 0); overload;
+
+implementation
+
+uses
+  System.SysUtils, math
+
+// Генерация массива целых чисел
+procedure GenArr(var ar: tdi; n, lb, rb, rand: Int32);
+var
+  i: Int32;
+begin
+  SetLength(ar, n);
+  RandSeed := rand;
+  for i := 0 to n - 1 do
+    ar[i] := Random(rb - lb + 1) + lb;
+end;
+
+// Генерация массива вещественных чисел
+procedure GenArr(var ar: tdr; n, lb, rb, rand: Int32);
+var
+  i: Int32;
+begin
+  SetLength(ar, n);
+  RandSeed := rand;
+  for i := 0 to n - 1 do
+    ar[i] := (rb - lb) * Random + lb;
+end;
+
+// Генерация строки случайных символов
+procedure GenArr(var ar: tdc; n, lb, rb, rand: Int32);
+var
+  i: Int32;
+begin
+  SetLength(ar, n);
+  RandSeed := rand;
+  for i := 1 to n do
+    ar[i] := AnsiChar(Random(rb - lb + 1) + lb);
+end;
+
+// Вывод массива целых чисел
+procedure PrintArr(const ar: tdi; width: UInt8 = 4; startind: UInt32 = 0);
+var
+  i, cnt, lineLen: Int32;
+  totalElements: Int32;
+  charsPerLine: Int32;
+begin
+  totalElements := Length(ar) - startind;
+
+  if totalElements <= 0 then
+  begin
+    WriteLn('(пустой массив)');
+    Exit;
+  end;
+
+  charsPerLine := 100;
+
+  if totalElements <= 300 then
+  begin
+    // Малый массив - выводим всё
+    cnt := 0;
+    lineLen := 0;
+
+    for i := startind to Length(ar) - 1 do
+    begin
+      Write(Format('%*d', [width, ar[i]]));
+      Inc(cnt);
+      Inc(lineLen, width);
+
+      if (cnt mod 10 = 0) or (lineLen + width > charsPerLine) then
+      begin
+        WriteLn;
+        lineLen := 0;
+      end;
+    end;
+
+    if lineLen > 0 then
+      WriteLn;
+  end
+  else
+  begin
+    // Большой массив - первые 100 символов
+    lineLen := 0;
+    for i := startind to Length(ar) - 1 do
+    begin
+      Write(Format('%*d', [width, ar[i]]));
+      Inc(lineLen, width);
+      if lineLen + width > charsPerLine then
+        Break;
+    end;
+    WriteLn;
+
+    // Последние 100 символов
+    lineLen := 0;
+    i := Length(ar) - 1;
+    while (i >= startind) and (lineLen + width <= charsPerLine) do
+    begin
+      Dec(i);
+      Inc(lineLen, width);
+    end;
+    Inc(i);
+
+    for var j := i to Length(ar) - 1 do
+      Write(Format('%*d', [width, ar[j]]));
+    WriteLn;
+  end;
+end;
+
+// Вывод массива вещественных чисел
+procedure PrintArr(const ar: tdr; width: UInt8 = 8; digits: UInt8 = 4; startind: UInt32 = 0);
+var
+  i, cnt, lineLen: Int32;
+  fmt: string;
+  totalElements: Int32;
+  charsPerLine: Int32;
+begin
+  totalElements := Length(ar) - startind;
+
+  if totalElements <= 0 then
+  begin
+    WriteLn('(пустой массив)');
+    Exit;
+  end;
+
+  fmt := Format('%%%d.%df', [width, digits]);
+  charsPerLine := 100;
+
+  if totalElements <= 300 then
+  begin
+    // Малый массив - выводим всё
+    cnt := 0;
+
+    for i := startind to Length(ar) - 1 do
+    begin
+      Write(Format(fmt, [ar[i]]));
+      Inc(cnt);
+
+      if cnt mod 10 = 0 then
+        WriteLn;
+    end;
+
+    if cnt mod 10 <> 0 then
+      WriteLn;
+  end
+  else
+  begin
+    // Большой массив - первые 100 символов
+    lineLen := 0;
+    for i := startind to Length(ar) - 1 do
+    begin
+      Write(Format(fmt, [ar[i]]));
+      Inc(lineLen, width);
+      if lineLen + width > charsPerLine then
+        Break;
+    end;
+    WriteLn;
+
+    // Последние 100 символов
+    lineLen := 0;
+    i := Length(ar) - 1;
+    while (i >= startind) and (lineLen + width <= charsPerLine) do
+    begin
+      Dec(i);
+      Inc(lineLen, width);
+    end;
+    Inc(i);
+
+    for var j := i to Length(ar) - 1 do
+      Write(Format(fmt, [ar[j]]));
+    WriteLn;
+  end;
+end;
+
+// Вывод строки (ansistring)
+procedure PrintArr(const ar: tdc; startind: UInt32 = 0);
+var
+  i, lineLen: Int32;
+  totalLen: Int32;
+  charsPerLine: Int32;
+begin
+  totalLen := Length(ar) - startind;
+
+  if totalLen <= 0 then
+  begin
+    WriteLn('(пустая строка)');
+    Exit;
+  end;
+
+  charsPerLine := 100;
+
+  if totalLen <= 300 then
+  begin
+    // Малая строка - выводим всё
+    lineLen := 0;
+
+    for i := startind + 1 to Length(ar) do
+    begin
+      Write(ar[i]);
+      Inc(lineLen);
+
+      if lineLen >= charsPerLine then
+      begin
+        WriteLn;
+        lineLen := 0;
+      end;
+    end;
+
+    if lineLen > 0 then
+      WriteLn;
+  end
+  else
+  begin
+    // Большая строка - первые 100 символов
+    for i := startind + 1 to Min(startind + charsPerLine, Length(ar)) do
+      Write(ar[i]);
+    WriteLn;
+
+    // Последние 100 символов
+    i := Max(Length(ar) - charsPerLine + 1, startind + 1);
+    for var j := i to Length(ar) do
+      Write(ar[j]);
+    WriteLn;
+  end;
+end;
+
+end.

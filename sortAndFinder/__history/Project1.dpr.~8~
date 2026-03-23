@@ -1,0 +1,91 @@
+program Project1;
+
+{$APPTYPE CONSOLE}
+
+uses
+  System.SysUtils;
+
+// const
+// N = 100; // Можно изменить на 1000000 для большого массива
+
+type
+  TIntArray = array of Integer;
+
+  // Процедура пузырьковой сортировки
+procedure BubbleSort(var Arr: TIntArray);
+var
+  i, j, temp: Integer;
+  n: Integer;
+begin
+  n := Length(Arr);
+  for i := 0 to n - 2 do
+    for j := 0 to n - 2 - i do
+      if Arr[j] > Arr[j + 1] then
+      begin
+        // Обмен элементов
+        temp := Arr[j];
+        Arr[j] := Arr[j + 1];
+        Arr[j + 1] := temp;
+      end;
+end;
+
+// Процедура генерации массива
+procedure GenerateArray(var Arr: TIntArray; n: Integer);
+var
+  i: Integer;
+begin
+  SetLength(Arr, n);
+  Randomize;
+  RandSeed := 11; // Установка начального значения генератора
+  for i := 0 to n - 1 do
+    Arr[i] := Random(100); // Случайные числа от 0 до 99
+end;
+
+// Процедура вывода массива
+procedure PrintArray(const Arr: TIntArray; const Caption: string);
+var
+  i: Integer;
+begin
+  WriteLn(Caption);
+  for i := 0 to 10 do
+  begin
+    Write(Arr[i]:4);
+  end;
+  WriteLn;
+  WriteLn;
+  for i := Length(Arr) - 1 downto Length(Arr) - 11 do
+  begin
+    Write(Arr[i]:4);
+  end;
+  WriteLn;
+  WriteLn;
+end;
+
+var
+  MyArray: TIntArray;
+  n: Integer;
+
+begin
+  try
+    write('n = ');
+    readln(n);
+    // Генерация массива
+    GenerateArray(MyArray, n);
+
+    // Вывод исходного массива
+    PrintArray(MyArray, 'Исходный массив:');
+
+    // Сортировка массива
+    BubbleSort(MyArray);
+
+    // Вывод отсортированного массива
+    PrintArray(MyArray, 'Отсортированный массив:');
+
+    WriteLn('Нажмите Enter для выхода...');
+    readln;
+  except
+    on E: Exception do
+      WriteLn('Ошибка: ', E.Message);
+  end;
+
+end.

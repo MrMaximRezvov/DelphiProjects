@@ -1,0 +1,51 @@
+unit libSort;
+
+interface
+
+uses
+  System.SysUtils,
+  service;
+
+overload procedure BubbleSort(var Arr: TIntArray);
+overload procedure BubbleSort(var Arr: TRealArray);
+
+implementation
+
+overload
+procedure BubbleSort(var Arr: TIntArray);
+
+var
+  i, j, temp: Integer;
+  n: Integer;
+begin
+  n := Length(Arr);
+  for i := 0 to n - 2 do
+    for j := 0 to n - 2 - i do
+      if Arr[j] > Arr[j + 1] then
+      begin
+        temp := Arr[j];
+        Arr[j] := Arr[j + 1];
+        Arr[j + 1] := temp;
+      end;
+end;
+
+overload
+procedure BubbleSort(var Arr: TRealArray);
+
+var
+  i, j: Integer;
+  temp: real;
+  n: Integer;
+begin
+  n := Length(Arr);
+  for i := 0 to n - 2 do
+    for j := 0 to n - 2 - i do
+      if Arr[j] > Arr[j + 1] then
+      begin
+        temp := Arr[j];
+        Arr[j] := Arr[j + 1];
+        Arr[j + 1] := temp;
+      end;
+end;
+
+end.

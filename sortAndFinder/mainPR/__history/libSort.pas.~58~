@@ -1,0 +1,209 @@
+﻿unit libSort;
+
+interface
+
+uses
+  System.SysUtils,
+  service,
+  windows;
+
+procedure BubbleSort(var Arr: TIntArray); overload;
+procedure BubbleSort(var Arr: TRealArray); overload;
+procedure BubbleSort(var Arr: TCharArray); overload;
+
+procedure SelectionSort(var Arr: TIntArray); overload;
+procedure SelectionSort(var Arr: TRealArray); overload;
+procedure SelectionSort(var Arr: TCharArray); overload;
+
+procedure InsertionSort(var Arr: TIntArray); overload;
+procedure InsertionSort(var Arr: TRealArray); overload;
+procedure InsertionSort(var Arr: TCharArray); overload;
+
+function BinSearchInt(const Arr: TIntArray; Left, Right, Key: Integer): Integer;
+function BinSearchReal(const Arr: TRealArray; Left, Right: Integer; Key: Real): Integer;
+function BinSearchChar(const Arr: TCharArray; Left, Right: Integer; Key: AnsiChar): Integer;
+
+procedure BinaryInsertionSort(var Arr: TIntArray); overload;
+procedure BinaryInsertionSort(var Arr: TRealArray); overload;
+procedure BinaryInsertionSort(var Arr: TCharArray); overload;
+
+implementation
+
+procedure BubbleSort(var Arr: TIntArray);
+var i, j, temp, n: Integer; begin
+  n := Length(Arr);
+  for i := 0 to n - 2 do
+    for j := 0 to n - 2 - i do
+      if Arr[j] > Arr[j + 1] then begin
+        temp := Arr[j]; Arr[j] := Arr[j + 1]; Arr[j + 1] := temp;
+      end;
+end;
+
+procedure BubbleSort(var Arr: TRealArray);
+var i, j, n: Integer; temp: Real; begin
+  n := Length(Arr);
+  for i := 0 to n - 2 do
+    for j := 0 to n - 2 - i do
+      if Arr[j] > Arr[j + 1] then begin
+        temp := Arr[j]; Arr[j] := Arr[j + 1]; Arr[j + 1] := temp;
+      end;
+end;
+
+procedure BubbleSort(var Arr: TCharArray);
+var i, j, n: Integer; temp: AnsiChar; begin
+  n := Length(Arr);
+  for i := 0 to n - 2 do
+    for j := 0 to n - 2 - i do
+      if Arr[j] > Arr[j + 1] then begin
+        temp := Arr[j]; Arr[j] := Arr[j + 1]; Arr[j + 1] := temp;
+      end;
+end;
+
+procedure SelectionSort(var Arr: TIntArray);
+var i, j, minIdx, temp, n: Integer; begin
+  n := Length(Arr);
+  for i := 0 to n - 2 do begin
+    minIdx := i;
+    for j := i + 1 to n - 1 do
+      if Arr[j] < Arr[minIdx] then minIdx := j;
+    if minIdx <> i then begin
+      temp := Arr[i]; Arr[i] := Arr[minIdx]; Arr[minIdx] := temp;
+    end;
+  end;
+end;
+
+procedure SelectionSort(var Arr: TRealArray);
+var i, j, minIdx, n: Integer; temp: Real; begin
+  n := Length(Arr);
+  for i := 0 to n - 2 do begin
+    minIdx := i;
+    for j := i + 1 to n - 1 do
+      if Arr[j] < Arr[minIdx] then minIdx := j;
+    if minIdx <> i then begin
+      temp := Arr[i]; Arr[i] := Arr[minIdx]; Arr[minIdx] := temp;
+    end;
+  end;
+end;
+
+procedure SelectionSort(var Arr: TCharArray);
+var i, j, minIdx, n: Integer; temp: AnsiChar; begin
+  n := Length(Arr);
+  for i := 0 to n - 2 do begin
+    minIdx := i;
+    for j := i + 1 to n - 1 do
+      if Arr[j] < Arr[minIdx] then minIdx := j;
+    if minIdx <> i then begin
+      temp := Arr[i]; Arr[i] := Arr[minIdx]; Arr[minIdx] := temp;
+    end;
+  end;
+end;
+
+procedure InsertionSort(var Arr: TIntArray);
+var i, j, key, n: Integer; begin
+  n := Length(Arr);
+  for i := 1 to n - 1 do begin
+    key := Arr[i]; j := i - 1;
+    while (j >= 0) and (Arr[j] > key) do begin
+      Arr[j + 1] := Arr[j]; j := j - 1;
+    end;
+    Arr[j + 1] := key;
+  end;
+end;
+
+procedure InsertionSort(var Arr: TRealArray);
+var i, j, n: Integer; key: Real; begin
+  n := Length(Arr);
+  for i := 1 to n - 1 do begin
+    key := Arr[i]; j := i - 1;
+    while (j >= 0) and (Arr[j] > key) do begin
+      Arr[j + 1] := Arr[j]; j := j - 1;
+    end;
+    Arr[j + 1] := key;
+  end;
+end;
+
+procedure InsertionSort(var Arr: TCharArray);
+var i, j, n: Integer; key: AnsiChar; begin
+  n := Length(Arr);
+  for i := 1 to n - 1 do begin
+    key := Arr[i]; j := i - 1;
+    while (j >= 0) and (Arr[j] > key) do begin
+      Arr[j + 1] := Arr[j]; j := j - 1;
+    end;
+    Arr[j + 1] := key;
+  end;
+end;
+
+function BinSearchInt(const Arr: TIntArray; Left, Right, Key: Integer): Integer;
+var Mid: Integer; begin
+  while Left <= Right do begin
+    Mid := Left + ((Right - Left) div 2);
+    if Arr[Mid] < Key then Left := Mid + 1 else Right := Mid - 1;
+  end;
+  Result := Left;
+end;
+
+function BinSearchReal(const Arr: TRealArray; Left, Right: Integer; Key: Real): Integer;
+var Mid: Integer; begin
+  while Left <= Right do begin
+    Mid := Left + ((Right - Left) div 2);
+    if Arr[Mid] < Key then Left := Mid + 1 else Right := Mid - 1;
+  end;
+  Result := Left;
+end;
+
+function BinSearchChar(const Arr: TCharArray; Left, Right: Integer; Key: AnsiChar): Integer;
+var Mid: Integer; begin
+  while Left <= Right do begin
+    Mid := Left + ((Right - Left) div 2);
+    if Arr[Mid] < Key then Left := Mid + 1 else Right := Mid - 1;
+  end;
+  Result := Left;
+end;
+
+procedure BinaryInsertionSort(var Arr: TIntArray);
+var i, pos, key, shift, n: Integer;
+begin
+  n := Length(Arr);
+  for i := 1 to n - 1 do begin
+    key := Arr[i];
+    pos := BinSearchInt(Arr, 0, i - 1, key);
+    if i <> pos then begin
+      Shift := i - pos;
+      Move(Arr[pos], Arr[pos + 1], Shift * SizeOf(Integer));
+      Arr[pos] := key;
+    end;
+  end;
+end;
+
+procedure BinaryInsertionSort(var Arr: TRealArray);
+var i, pos, key, shift, n: Integer;
+begin
+  n := Length(Arr);
+  for i := 1 to n - 1 do begin
+    key := Arr[i];
+    pos := BinSearchReal(Arr, 0, i - 1, key);
+    if i <> pos then begin
+      Shift := i - pos;
+      Move(Arr[pos], Arr[pos + 1], Shift * SizeOf(Real));
+      Arr[pos] := key;
+    end;
+  end;
+end;
+
+procedure BinaryInsertionSort(var Arr: TCharArray);
+var i, pos, key, shift, n: Integer;
+begin
+  n := Length(Arr);
+  for i := 1 to n - 1 do begin
+    key := Arr[i];
+    pos := BinSearchChar(Arr, 0, i - 1, key);
+    if i <> pos then begin
+      Shift := i - pos;
+      Move(Arr[pos], Arr[pos + 1], Shift * SizeOf(AnsiChar));
+      Arr[pos] := key;
+    end;
+  end;
+end;
+
+end.

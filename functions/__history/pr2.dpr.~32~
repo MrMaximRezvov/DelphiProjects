@@ -1,0 +1,96 @@
+﻿program pr2;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils, Math;
+
+type
+  td1 = array of real;
+  tf1 = function(x: real; a, b, c: real): real;
+
+function sin1(x: real; a: real = 1; b: real = 0; c: real = 0): real;
+begin
+  Result := a * sin(x + b) + c;
+end;
+
+function par(x: real; a: real = 1; b: real = 0; c: real = 0): real;
+begin
+  Result := a * x * x + b * x + c;
+end;
+
+function cos1(x: real; a: real = 1; b: real = 0; c: real = 0): real;
+begin
+  Result := a * cos(x + b) + c;
+end;
+
+function calcf(x: real; f: tf1; n: integer = 15; step: real = 1; a: real = 1;
+  b: real = 0; c: real = 0): td1;
+var
+  i: integer;
+begin
+  setlength(Result, n);
+  for i := 0 to n - 1 do
+  begin
+    Result[i] := f(x, a, b, c);
+    x := x + step;
+  end;
+end;
+
+procedure print(arr: td1);
+var
+  i: integer;
+begin
+  for i := 0 to high(arr) do
+    write(arr[i]:0:3, ' ');
+  writeln;
+end;
+
+var
+  arr: td1;
+  a, b, c: real;
+
+begin
+  try
+    // Пример 1: парабола x^2 - 3x + 2
+    writeln('Парабола (x^2 - 3x + 2):');
+    arr := calcf(0, par, 10, 0.5, 1, -3, 2);
+    print(arr);
+
+    // Пример 2: синус 2*sin(x+0.5)+1
+    writeln('Синус (2*sin(x+0.5)+1):');
+    arr := calcf(0, sin1, 10, 0.5, 2, 0.5, 1);
+    print(arr);
+
+    // Пример 3: косинус 0.5*cos(x+pi/4)-0.3
+    writeln('Косинус (0.5*cos(x+pi/4)-0.3):');
+    arr := calcf(0, cos1, 10, 0.5, 0.5, Pi / 4, -0.3);
+    print(arr);
+
+    // Пример 4: парабола по умолчанию (x^2)
+    writeln('Парабола по умолчанию (x^2):');
+    arr := calcf(0, par);
+    print(arr);
+
+    // Пример 5: синус по умолчанию (sin(x))
+    writeln('Синус по умолчанию (sin(x)):');
+    arr := calcf(0, sin1);
+    print(arr);
+
+    // Пример 6: косинус по умолчанию (cos(x))
+    writeln('Косинус по умолчанию (cos(x)):');
+    arr := calcf(0, cos1);
+    print(arr);
+
+    writeln('Нажмите Enter для выхода...');
+    readln;
+  except
+    on E: Exception do
+      writeln(E.ClassName, ': ', E.Message);
+  end;
+
+end.
+
+
+

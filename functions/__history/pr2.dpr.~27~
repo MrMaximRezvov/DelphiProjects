@@ -1,0 +1,83 @@
+﻿program pr2;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils, Math;
+
+type
+  td1 = array of real;
+  TFunc = function(x: real): real;
+
+// === Базовые функции (принимают ТОЛЬКО один параметр x) ===
+function parabola(x: real): real;
+begin
+  Result := x * x;  // x^2
+end;
+
+function sine(x: real): real;
+begin
+  Result := sin(x);  // sin(x)
+end;
+
+function cosine(x: real): real;
+begin
+  Result := cos(x);  // cos(x)
+end;
+
+// === Универсальная функция с параметрами по умолчанию ===
+// Преобразование: a * f(x + b) + c
+function calcf(x: real; f: TFunc; a: real = 1; b: real = 0; c: real = 0;
+               n: integer = 10; step: real = 1): td1;
+var
+  i: integer;
+begin
+  SetLength(Result, n);
+  for i := 0 to n - 1 do
+  begin
+    Result[i] := a * f(x + b) + c;
+    x := x + step;
+  end;
+end;
+
+// === Вывод массива ===
+procedure print(arr: td1);
+var
+  i: integer;
+begin
+  for i := 0 to High(arr) do
+    Write(arr[i]:0:4, ' ');
+  Writeln;
+end;
+
+begin
+  try
+    // === ПАРАБОЛА ===
+    Writeln('Парабола по умолчанию (x^2):');
+    print(calcf(0, parabola));  // a=1, b=0, c=0, n=10, step=1
+
+    Writeln('Парабола (2*(x+1)^2 - 3):');
+    print(calcf(0, parabola, 2, 1, -3, 5, 1));
+
+    // === СИНУС ===
+    Writeln('Синус по умолчанию (sin(x)):');
+    print(calcf(0, sine));  // a=1, b=0, c=0, n=10, step=1
+
+    Writeln('Синус (2*sin(x+0.5)+1):');
+    print(calcf(0, sine, 2, 0.5, 1, 10, 0.5));
+
+    // === КОСИНУС ===
+    Writeln('Косинус по умолчанию (cos(x)):');
+    print(calcf(0, cosine));  // a=1, b=0, c=0, n=10, step=1
+
+    Writeln('Косинус (0.5*cos(x+pi/4)-0.3):');
+    print(calcf(0, cosine, 0.5, Pi/4, -0.3, 10, 0.5));
+
+    Writeln('Нажмите Enter для выхода...');
+    Readln;
+  except
+    on E: Exception do
+      Writeln(E.ClassName, ': ', E.Message);
+  end;
+end.

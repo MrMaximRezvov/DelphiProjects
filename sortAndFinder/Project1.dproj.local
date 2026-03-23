@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2026/02/16 18:59:33.000.186,D:\Delphi\sortAndFinder\Project1.dproj=C:\Users\Maxim\Documents\Embarcadero\Studio\Projects\Project1.dproj</Transaction>
+    <Transaction>2026/02/18 18:29:51.000.344,=D:\Delphi\sortAndFinder\Unit1.pas</Transaction>
+    <Transaction>2026/02/18 18:30:02.000.630,=D:\Delphi\sortAndFinder\Unit2.pas</Transaction>
+    <Transaction>2026/02/18 18:30:12.000.271,D:\Delphi\sortAndFinder\Unit2.pas=D:\Delphi\sortAndFinder\service.pas</Transaction>
+    <Transaction>2026/02/18 18:33:45.000.596,D:\Delphi\sortAndFinder\Unit1.pas=D:\Delphi\sortAndFinder\libSort.pas</Transaction>
+  </Transactions>
+</BorlandProject>

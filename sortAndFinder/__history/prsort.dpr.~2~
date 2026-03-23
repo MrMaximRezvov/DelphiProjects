@@ -1,0 +1,56 @@
+﻿program PrSort;
+
+{$APPTYPE CONSOLE}
+
+uses
+  System.SysUtils,
+  Service in 'Service.pas';
+
+var
+  ari: tdi;   // массив целых чисел
+  arr: tdr;   // массив вещественных чисел
+  arc: tdc;   // строка
+
+begin
+  try
+    WriteLn('=== ПРИМЕР 1: Маленький массив (как на скриншоте) ===');
+    // gen_ar(ari, 3, 0, 100, 11)
+    GenArr(ari, 3, 0, 100, 11);  // 3 элемента, диапазон [0..100], seed=11
+    PrintArr(ari);
+    WriteLn;
+
+    WriteLn('=== ПРИМЕР 2: Средний массив (1000 элементов) ===');
+    // gen_ar(ari, 1000, 0, 100, 11)
+    GenArr(ari, 1000, 0, 100, 11);  // 1000 элементов
+    WriteLn('Массив int данных создан');
+    WriteLn('Первые 20 элементов:');
+    PrintArr(ari, 4, 0);  // выводим первые 20 (2 строки по 10)
+    WriteLn('...');
+    WriteLn;
+
+    WriteLn('=== ПРИМЕР 3: Вещественные числа ===');
+    GenArr(arr, 15, -50, 50, 42);
+    WriteLn('Массив real данных:');
+    PrintArr(arr);  // ширина 8, 4 знака после точки
+    WriteLn;
+
+    WriteLn('=== ПРИМЕР 4: Строка символов ===');
+    GenArr(arc, 200, Ord('A'), Ord('Z'), 99);
+    WriteLn('Случайная строка (200 символов A-Z):');
+    PrintArr(arc);
+    WriteLn;
+
+    WriteLn('=== ПРИМЕР 5: Разные параметры генерации ===');
+    GenArr(ari, 25, 10, 99, 777);  // числа от 10 до 99
+    WriteLn('Числа в диапазоне [10..99]:');
+    PrintArr(ari, 5);
+    WriteLn;
+
+  except
+    on E: Exception do
+      WriteLn('Ошибка: ', E.Message);
+  end;
+
+  WriteLn('Нажмите Enter...');
+  ReadLn;
+end.

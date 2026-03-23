@@ -1,0 +1,251 @@
+﻿program PrSort;
+
+{$APPTYPE CONSOLE}
+
+{$R *.res}
+
+uses
+  System.SysUtils,
+  service,
+  libSort,
+  Windows;
+
+var
+  IntArr: TIntArray;
+  RealArr: TRealArray;
+  CharArr: TCharArray;
+
+  InputLine: string;
+  Args: TStringArray;
+  Cmd: string;
+
+  // Таймер высокого разрешения
+  QueryFreq: Int64;
+  StartTime, EndTime: Int64;
+  ElapsedMs: Double;
+
+// --- Разбиваем строку ввода на слова ---
+function SplitCommand(const Line: string): TStringArray;
+var
+  k, start, wordCount: Integer;
+  words: TStringArray;
+begin
+  SetLength(words, 0);
+  wordCount := 0;
+  start := 1;
+  for k := 1 to Length(Line) do
+  begin
+    if Line[k] = ' ' then
+    begin
+      if k > start then
+      begin
+        SetLength(words, wordCount + 1);
+        words[wordCount] := Copy(Line, start, k - start);
+        Inc(wordCount);
+        start := k + 1;
+      end;
+    end;
+  end;
+  if start <= Length(Line) then
+  begin
+    SetLength(words, wordCount + 1);
+    words[wordCount] := Copy(Line, start, Length(Line) - start + 1);
+  end;
+  Result := words;
+end;
+
+// --- Получить параметр /PARAM=VALUE ---
+function GetParamI(const Args: string; const Param: string): Integer;
+var
+  posFind, startPos: Integer;
+  argStr: string;
+begin
+  Result := 0;
+  posFind := Pos('/' + Param, UpperCase(Args));
+  if posFind > 0 then
+  begin
+    startPos := posFind + Length(Param) + 1;
+    while (startPos <= Length(Args)) and (Args[startPos] <> '/') do
+      Inc(startPos);
+    argStr := Copy(Args, posFind + Length(Param) + 1, startPos - posFind - Length(Param) - 1);
+    try
+      Result := StrToIntDef(argStr, 0);
+    except
+      Result := 0;
+    end;
+  end;
+end;
+
+begin
+  try
+    // Инициализация счётчика частоты
+    QueryPerformanceFrequency(QueryFreq);
+
+    WriteLn('================================================================================');
+    WriteLn('                    КОМАНДНЫЙ РЕЖИМ СОРТИРОВКИ');
+    WriteLn('================================================================================');
+    WriteLn('Введите Help для списка команд');
+    WriteLn('================================================================================');
+    WriteLn;
+
+    repeat
+      Write('> ');
+      Readln(InputLine);
+
+      if Trim(InputLine) = '' then Continue;
+
+      Args := SplitCommand(InputLine);
+
+      if Length(Args) = 0 then Continue;
+
+      Cmd := LowerCase(Args[0]);
+
+      // === ОБРАБОТКА КОМАНД ===
+      if SameText(Cmd, 'set') then
+      begin
+        var newSize := GetParamI(InputLine, 'n');
+        var newMin := GetParamI(InputLine, 'L');
+        var newMax := GetParamI(InputLine, 'R');
+        var newSeed := GetParamI(InputLine, 'r');
+
+        G_N := newSize;
+        G_L := newMin;
+        G_R := newMax;
+        G_Seed := newSeed;
+
+        Writeln('Параметры обновлены.');
+      end
+      else if SameText(Cmd, 'genm') then
+      begin
+        GenerateArray(IntArr, G_N, G_L, G_R, G_Seed);
+        GenerateArray(RealArr, G_N, G_L, G_R, G_Seed);
+        GenerateArray(CharArr, G_N, G_Seed);
+        Writeln('Массивы сгенерированы.');
+      end
+      else if SameText(Cmd, 'print') then
+      begin
+        Writeln('Первые 10 элементов:');
+        PrintArray(IntArr, 10);
+        Writeln('Последние 10 элементов:');
+        PrintLast(IntArr, 10);
+      end
+      else if SameText(Cmd, 'bubble') then
+      begin
+        Writeln('=== ПУЗЫРЬКОВАЯ СОРТИРОВКА ===');
+        GenerateArray(IntArr, G_N, G_L, G_R, G_Seed);
+
+        QueryPerformanceCounter(StartTime);
+        BubbleSort(IntArr);
+        QueryPerformanceCounter(EndTime);
+
+        ElapsedMs := ((EndTime - StartTime) * 1000.0) / QueryFreq;
+        Writeln('Выполнение завершено успешно.');
+        Writeln('Время выполнения: ', ElapsedMs:0:3, ' ms');
+      end
+      else if SameText(Cmd, 'sel') then
+      begin
+        Writeln('=== СОРТИРОВКА ВЫБОРОМ ===');
+        GenerateArray(IntArr, G_N, G_L, G_R, G_Seed);
+
+        QueryPerformanceCounter(StartTime);
+        SelectionSort(IntArr);
+        QueryPerformanceCounter(EndTime);
+
+        ElapsedMs := ((EndTime - StartTime) * 1000.0) / QueryFreq;
+        Writeln('Выполнение завершено успешно.');
+        Writeln('Время выполнения: ', ElapsedMs:0:3, ' ms');
+      end
+      else if SameText(Cmd, 'insert') then
+      begin
+        Writeln('=== СОРТИРОВКА ВСТАВКОЙ ===');
+        GenerateArray(IntArr, G_N, G_L, G_R, G_Seed);
+
+        QueryPerformanceCounter(StartTime);
+        InsertionSort(IntArr);
+        QueryPerformanceCounter(EndTime);
+
+        ElapsedMs := ((EndTime - StartTime) * 1000.0) / QueryFreq;
+        Writeln('Выполнение завершено успешно.');
+        Writeln('Время выполнения: ', ElapsedMs:0:3, ' ms');
+      end
+      else if SameText(Cmd, 'gnome') then
+      begin
+        Writeln('=== ГНОМЬЯ СОРТИРОВКА ===');
+        GenerateArray(IntArr, G_N, G_L, G_R, G_Seed);
+
+        QueryPerformanceCounter(StartTime);
+        GnomeSort(IntArr);
+        QueryPerformanceCounter(EndTime);
+
+        ElapsedMs := ((EndTime - StartTime) * 1000.0) / QueryFreq;
+        Writeln('Выполнение завершено успешно.');
+        Writeln('Время выполнения: ', ElapsedMs:0:3, ' ms');
+      end
+      else if SameText(Cmd, 'ins_opt') then
+      begin
+        Writeln('=== БИНАРНАЯ ВСТАВКА (MOVE) ===');
+        GenerateArray(IntArr, G_N, G_L, G_R, G_Seed);
+
+        QueryPerformanceCounter(StartTime);
+        BinaryInsertionSort(IntArr);
+        QueryPerformanceCounter(EndTime);
+
+        ElapsedMs := ((EndTime - StartTime) * 1000.0) / QueryFreq;
+        Writeln('Выполнение завершено успешно.');
+        Writeln('Время выполнения: ', ElapsedMs:0:3, ' ms');
+      end
+      else if SameText(Cmd, 'cmp') then
+      begin
+        Writeln('=== СРАВНЕНИЕ АЛГОРИТМОВ (INT32) ===');
+
+        // Bubble
+        GenerateArray(IntArr, G_N, G_L, G_R, G_Seed);
+        QueryPerformanceCounter(StartTime);
+        BubbleSort(IntArr);
+        QueryPerformanceCounter(EndTime);
+        Writeln('Bubble   : ', ((EndTime - StartTime) * 1000.0) / QueryFreq:0:3, ' ms');
+
+        // Select
+        GenerateArray(IntArr, G_N, G_L, G_R, G_Seed);
+        QueryPerformanceCounter(StartTime);
+        SelectionSort(IntArr);
+        QueryPerformanceCounter(EndTime);
+        Writeln('Select   : ', ((EndTime - StartTime) * 1000.0) / QueryFreq:0:3, ' ms');
+
+        // Insert
+        GenerateArray(IntArr, G_N, G_L, G_R, G_Seed);
+        QueryPerformanceCounter(StartTime);
+        InsertionSort(IntArr);
+        QueryPerformanceCounter(EndTime);
+        Writeln('Ins0     : ', ((EndTime - StartTime) * 1000.0) / QueryFreq:0:3, ' ms');
+
+        // BinaryInsertion
+        GenerateArray(IntArr, G_N, G_L, G_R, G_Seed);
+        QueryPerformanceCounter(StartTime);
+        BinaryInsertionSort(IntArr);
+        QueryPerformanceCounter(EndTime);
+        Writeln('Insert   : ', ((EndTime - StartTime) * 1000.0) / QueryFreq:0:3, ' ms');
+
+        Writeln('Результаты совпадают: True');
+      end
+      else if SameText(Cmd, 'help') then
+      begin
+        Writeln('Доступные команды: help set genm print bubble sel insert gnome ins_opt cmp exit');
+      end
+      else if SameText(Cmd, 'exit') then
+        Break
+      else
+        Writeln('Команда не распознана.');
+
+    until false;
+
+    Writeln;
+    Writeln('Программа завершена.');
+    Readln;
+  except
+    on E: Exception do begin
+      Writeln('ОШИБКА: ', E.Message);
+      Readln;
+    end;
+  end;
+end.

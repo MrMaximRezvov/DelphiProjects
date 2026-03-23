@@ -1,0 +1,195 @@
+﻿unit service;
+
+interface
+
+uses
+  System.SysUtils,
+  Windows, math;
+
+type
+  TIntArray = array of Integer;
+  TRealArray = array of Real;
+  TCharArray = array of AnsiChar;
+  TStringArray = array of string;
+
+// --- Глобальные параметры ---
+var
+  G_N: uint32 = 1000;
+  G_L: int32 = 0;
+  G_R: int32 = 100;
+  G_Seed: uint8 = 11;
+
+// --- Генерация массивов (перегрузка по типу данных) ---
+procedure GenerateArray(var Arr: TIntArray; Size, MinVal, MaxVal, Seed: Integer); overload;
+procedure GenerateArray(var Arr: TRealArray; Size, MinVal, MaxVal, Seed: Integer); overload;
+procedure GenerateArray(var Arr: TCharArray; Size, Seed: Integer); overload;
+
+// --- Вывод данных (перегрузка по типу данных) ---
+procedure PrintArray(const Arr: TIntArray; Count: Integer); overload;
+procedure PrintArray(const Arr: TRealArray; Count: Integer); overload;
+procedure PrintArray(const Arr: TCharArray; Count: Integer); overload;
+
+procedure PrintLast(const Arr: TIntArray; Count: Integer); overload;
+procedure PrintLast(const Arr: TRealArray; Count: Integer); overload;
+procedure PrintLast(const Arr: TCharArray; Count: Integer); overload;
+
+// --- Парсинг команды ---
+function SplitCommand(const Line: string): TStringArray;
+function GetParamI(const Args: string; const Param: string): Integer;
+
+// --- Прочие ---
+procedure ShowParams;
+
+implementation
+
+// --- Разбиение строки на слова ---
+function SplitCommand(const Line: string): TStringArray;
+var
+  k, start, wordCount: Integer;
+  words: TStringArray;
+begin
+  SetLength(words, 0);
+  wordCount := 0;
+  start := 1;
+  for k := 1 to Length(Line) do
+  begin
+    if Line[k] = ' ' then
+    begin
+      if k > start then
+      begin
+        SetLength(words, wordCount + 1);
+        words[wordCount] := Copy(Line, start, k - start);
+        Inc(wordCount);
+        start := k + 1;
+      end;
+    end;
+  end;
+  if start <= Length(Line) then
+  begin
+    SetLength(words, wordCount + 1);
+    words[wordCount] := Copy(Line, start, Length(Line) - start + 1);
+  end;
+  Result := words;
+end;
+
+// --- Получить параметр /N=1000 ---
+function GetParamI(const Args: string; const Param: string): Integer;
+var
+  posFind, startPos: Integer;
+  argStr: string;
+begin
+  Result := 0;
+  posFind := Pos('/' + Param, UpperCase(Args));
+  if posFind > 0 then
+  begin
+    startPos := posFind + Length(Param) + 1;
+    while (startPos <= Length(Args)) and (Args[startPos] <> '/') do
+      Inc(startPos);
+    argStr := Copy(Args, posFind + Length(Param) + 1, startPos - posFind - Length(Param) - 1);
+    try
+      Result := StrToIntDef(argStr, 0);
+    except
+      Result := 0;
+    end;
+  end;
+end;
+
+// --- Показать параметры ---
+procedure ShowParams;
+begin
+  Writeln('--- Параметры системы ---');
+  Writeln('Size   = ', G_N);
+  Writeln('MinVal = ', G_L);
+  Writeln('MaxVal = ', G_R);
+  Writeln('Seed   = ', G_Seed);
+  Writeln('-------------------------');
+end;
+
+// --- Генерация Int массива ---
+procedure GenerateArray(var Arr: TIntArray; Size, MinVal, MaxVal, Seed: Integer);
+var i: Integer; begin
+  SetLength(Arr, Size); RandSeed := Seed;
+  for i := 0 to Size - 1 do Arr[i] := Random(MaxVal - MinVal + 1) + MinVal;
+end;
+
+// --- Генерация Real массива ---
+procedure GenerateArray(var Arr: TRealArray; Size, MinVal, MaxVal, Seed: Integer);
+var i: Integer; begin
+  SetLength(Arr, Size); RandSeed := Seed;
+  for i := 0 to Size - 1 do Arr[i] := Random * (MaxVal - MinVal) + MinVal;
+end;
+
+// --- Генерация Char массива ---
+procedure GenerateArray(var Arr: TCharArray; Size, Seed: Integer);
+var i: Integer; begin
+  SetLength(Arr, Size); RandSeed := Seed;
+  for i := 0 to Size - 1 do Arr[i] := AnsiChar(Random(ord('z') - ord('a') + 1) + ord('a'));
+end;
+
+// --- Вывод первых N элементов (Int) ---
+procedure PrintArray(const Arr: TIntArray; Count: Integer);
+var i, j: Integer; begin
+  j := 0;
+  for i := 0 to Min(Count - 1, Length(Arr) - 1) do begin
+    Write(Arr[i]:4);
+    Inc(j);
+    if j mod 10 = 0 then Writeln;
+  end;
+  if j mod 10 <> 0 then Writeln;
+end;
+
+// --- Вывод первых N элементов (Real) ---
+procedure PrintArray(const Arr: TRealArray; Count: Integer);
+var i, j: Integer; begin
+  j := 0;
+  for i := 0 to Min(Count - 1, Length(Arr) - 1) do begin
+    Write(Arr[i]:8:2, ' ');
+    Inc(j);
+    if j mod 10 = 0 then Writeln;
+  end;
+  if j mod 10 <> 0 then Writeln;
+end;
+
+// --- Вывод первых N элементов (Char) ---
+procedure PrintArray(const Arr: TCharArray; Count: Integer);
+var i, j: Integer; begin
+  j := 0;
+  for i := 0 to Min(Count - 1, Length(Arr) - 1) do begin
+    Write(Arr[i]);
+    Inc(j);
+    if j mod 50 = 0 then Writeln;
+  end;
+  if j mod 50 <> 0 then Writeln;
+end;
+
+// --- Вывод последних N элементов (Int) ---
+procedure PrintLast(const Arr: TIntArray; Count: Integer);
+var i, StartIdx: Integer; begin
+  StartIdx := Max(0, Length(Arr) - Count);
+  for i := StartIdx to Length(Arr) - 1 do begin
+    Write(Arr[i]:4);
+    if (i - StartIdx + 1) mod 10 = 0 then Writeln;
+  end;
+  if (Length(Arr) - StartIdx) mod 10 <> 0 then Writeln;
+end;
+
+// --- Вывод последних N элементов (Real) ---
+procedure PrintLast(const Arr: TRealArray; Count: Integer);
+var i, StartIdx: Integer; begin
+  StartIdx := Max(0, Length(Arr) - Count);
+  for i := StartIdx to Length(Arr) - 1 do begin
+    Write(Arr[i]:8:2, ' ');
+    if (i - StartIdx + 1) mod 10 = 0 then Writeln;
+  end;
+  if (Length(Arr) - StartIdx) mod 10 <> 0 then Writeln;
+end;
+
+// --- Вывод последних N элементов (Char) ---
+procedure PrintLast(const Arr: TCharArray; Count: Integer);
+var i, StartIdx: Integer; begin
+  StartIdx := Max(0, Length(Arr) - Count);
+  for i := StartIdx to Length(Arr) - 1 do Write(Arr[i]);
+  Writeln;
+end;
+
+end.

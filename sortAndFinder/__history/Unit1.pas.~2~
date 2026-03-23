@@ -1,0 +1,11 @@
+unit Unit1;
+
+interface
+
+uses
+  System.SysUtils,
+  service in 'service.pas';
+
+implementation
+
+end.

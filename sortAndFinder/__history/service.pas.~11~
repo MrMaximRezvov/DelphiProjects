@@ -1,0 +1,171 @@
+unit Service;
+
+interface
+
+type
+  tdi = array of Int32;      // array of integers
+  tdc = AnsiString;           // string
+  tdr = array of Real;        // array of reals
+
+// Процедуры генерации массивов
+procedure GenArr(var ar: tdi; n, lb, rb, rand: Int32); overload;
+procedure GenArr(var ar: tdr; n, lb, rb, rand: Int32); overload;
+procedure GenArr(var ar: tdc; n, lb, rb, rand: Int32); overload;
+
+// Процедуры вывода массивов
+procedure PrintArr(const ar: tdi; width: UInt8 = 4; startind: UInt32 = 0); overload;
+procedure PrintArr(const ar: tdr; width: UInt8 = 8; digits: UInt8 = 4; startind: UInt32 = 0); overload;
+procedure PrintArr(const ar: tdc; startind: UInt32 = 0); overload;
+
+implementation
+
+uses
+  System.SysUtils, math;
+
+// Генерация массива целых чисел
+procedure GenArr(var ar: tdi; n, lb, rb, rand: Int32);
+var
+  i: Int32;
+begin
+  SetLength(ar, n);
+  RandSeed := rand;  // установка seed для воспроизводимости
+  for i := 0 to n - 1 do
+    ar[i] := Random(rb - lb + 1) + lb;  // случайное число в диапазоне [lb, rb]
+end;
+
+// Генерация массива вещественных чисел
+procedure GenArr(var ar: tdr; n, lb, rb, rand: Int32);
+var
+  i: Int32;
+begin
+  SetLength(ar, n);
+  RandSeed := rand;
+  for i := 0 to n - 1 do
+    ar[i] := (rb - lb) * Random + lb;  // случайное число в диапазоне [lb, rb]
+end;
+
+// Генерация строки случайных символов
+procedure GenArr(var ar: tdc; n, lb, rb, rand: Int32);
+var
+  i: Int32;
+begin
+  SetLength(ar, n);
+  RandSeed := rand;
+  for i := 1 to n do
+    ar[i] := AnsiChar(Random(rb - lb + 1) + lb);  // случайный символ в диапазоне [lb, rb]
+end;
+
+// Вывод массива целых чисел
+procedure PrintArr(const ar: tdi; width: UInt8 = 4; startind: UInt32 = 0);
+var
+  i, cnt: Int32;
+  lineLen: Int32;
+begin
+  cnt := 0;
+  lineLen := 0;
+
+  // Определяем сколько элементов выводить (первые 10 или последние 10)
+  if Length(ar) <= 300 then
+  begin
+    // Выводим первые 10 элементов
+    for i := startind to Min(startind + 9, High(ar)) do
+    begin
+      Write(Format('%*d', [width, ar[i]]));
+      Inc(cnt);
+      Inc(lineLen, width);
+
+      if cnt mod 10 = 0 then
+      begin
+        WriteLn;
+        lineLen := 0;
+      end
+      else if lineLen + width > 100 then
+      begin
+        WriteLn;
+        lineLen := 0;
+      end;
+    end;
+  end
+  else
+  begin
+    // Для больших массивов выводим по 100 символов в строке
+    for i := startind to High(ar) do
+    begin
+      Write(Format('%*d', [width, ar[i]]));
+      Inc(lineLen, width);
+
+      if lineLen + width > 100 then
+      begin
+        WriteLn;
+        lineLen := 0;
+      end;
+    end;
+  end;
+
+  if lineLen > 0 then
+    WriteLn;
+end;
+
+// Вывод массива вещественных чисел
+procedure PrintArr(const ar: tdr; width: UInt8 = 8; digits: UInt8 = 4; startind: UInt32 = 0);
+var
+  i, cnt: Int32;
+  fmt: string;
+begin
+  cnt := 0;
+  fmt := Format('%%%d.%df', [width, digits]);  // формат для вывода real
+
+  // Определяем сколько элементов выводить
+  if Length(ar) <= 300 then
+  begin
+    // Выводим первые 10 элементов
+    for i := startind to Min(startind + 9, High(ar)) do
+    begin
+      Write(Format(fmt, [ar[i]]));
+      Inc(cnt);
+
+      if cnt mod 10 = 0 then
+        WriteLn;
+    end;
+  end
+  else
+  begin
+    // Для больших массивов выводим по 100 символов в строке
+    for i := startind to High(ar) do
+    begin
+      Write(Format(fmt, [ar[i]]));
+
+      if (i - startind + 1) mod 10 = 0 then
+        WriteLn;
+    end;
+  end;
+
+  if cnt mod 10 <> 0 then
+    WriteLn;
+end;
+
+// Вывод строки (ansistring)
+procedure PrintArr(const ar: tdc; startind: UInt32 = 0);
+var
+  i, lineLen: Int32;
+begin
+  lineLen := 0;
+
+  // Выводим без пробелов по 100 символов в строке
+  for i := startind + 1 to Length(ar) do
+  begin
+    Write(ar[i]);
+    Inc(lineLen);
+
+    if lineLen >= 100 then
+    begin
+      WriteLn;
+      lineLen := 0;
+    end;
+  end;
+
+  if lineLen > 0 then
+    WriteLn;
+end;
+
+end.
