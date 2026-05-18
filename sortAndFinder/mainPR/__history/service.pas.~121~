@@ -47,9 +47,7 @@ function GetParamType(const Args: string): uint8;
 // --- Прочие ---
 procedure ShowParams;
 
-procedure TreeView(const ar: TIntArray; b: uint32; w: uint32);overload;
-procedure TreeView(const ar: TRealArray; b: uint32; w: uint32);overload;
-procedure TreeView(const ar: TCharArray; b: uint32; w: uint32);overload;
+procedure TreeView(const ar: TIntArray; b: uint32; w: uint32);
 
 implementation
 
@@ -405,70 +403,13 @@ begin
     if (j = (1 shl (k1 - k))) then
     begin
       Writeln;
-      Writeln;
+      writeln;
       dec(k);
       j := 0;
 
     end;
   end;
 
-end;
-
-procedure TreeView(const ar: TRealArray; b, w: uint32);
-var
-  i, l, j: uint32;
-  k, k1: uint8;
-begin
-  k := 0;
-  l := w - b + 1;
-  while ((1 shl k) < l) do
-    Inc(k);
-  k1 := k;
-  j := 0;
-  for i := b to w do
-  begin
-    if j = 0 then
-      Write(StringOfChar(' ', 1 shl k));
-
-    Inc(j);
-    Write(ar[i]:7:2); // ширина 7, 2 знака после запятой
-    Write(StringOfChar(' ', (1 shl (k + 1)) - 3));
-    // чуть меньше пробелов из-за ширины числа
-    if (j = (1 shl (k1 - k))) then
-    begin
-      Writeln;
-      dec(k);
-      j := 0;
-    end;
-  end;
-end;
-
-procedure TreeView(const ar: TCharArray; b, w: uint32);
-var
-  i, l, j: uint32;
-  k, k1: uint8;
-begin
-  k := 0;
-  l := w - b + 1;
-  while ((1 shl k) < l) do
-    Inc(k);
-  k1 := k;
-  j := 0;
-  for i := b to w do
-  begin
-    if j = 0 then
-      Write(StringOfChar(' ', 1 shl k));
-
-    Inc(j);
-    Write(' ', ar[i], ' '); // символ с отступами для визуального выравнивания
-    Write(StringOfChar(' ', (1 shl (k + 1)) - 3)); // компенсация ширины вывода
-    if (j = (1 shl (k1 - k))) then
-    begin
-      Writeln;
-      dec(k);
-      j := 0;
-    end;
-  end;
 end;
 
 end.

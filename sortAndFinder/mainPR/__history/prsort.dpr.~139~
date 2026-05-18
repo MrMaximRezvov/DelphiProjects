@@ -7,7 +7,7 @@ uses
   System.SysUtils,
   service,
   libSort,
-  Windows;
+  windows;
 
 var
   IntArr: TIntArray;
@@ -24,7 +24,6 @@ var
 
 begin
   try
-    // Инициализация счётчика производительности
     QueryPerformanceFrequency(QueryFreq);
 
     WriteLn('================================================================================');
@@ -43,28 +42,46 @@ begin
 
       Cmd := LowerCase(SplitCommand(InputLine)[0]);
 
-      // === ОБРАБОТКА КОМАНД ===
       if SameText(Cmd, 'set') then
       begin
+        // Парсим параметры вручную через SplitCommand — гарантированно работает
         var
-        newSize := GetParamI(InputLine, 'n');
-        var
-        newMin := GetParamI(InputLine, 'L');
-        var
-        newMax := GetParamI(InputLine, 'R');
-        var
-        newSeed := GetParamI(InputLine, 'r');
-
-        if newSize > 0 then
-          G_N := newSize;
-        if newMin >= 0 then
-          G_L := newMin;
-        if newMax > newMin then
-          G_R := newMax;
-        if newSeed > 0 then
-          G_Seed := newSeed;
+        args := SplitCommand(InputLine);
+        for var idx := 1 to High(args) do
+        begin
+          var
+          a := args[idx];
+          if Length(a) >= 4 then
+          begin
+            // /n=SIZE
+            if Copy(a, 1, 3) = '/n=' then
+              G_N := StrToIntDef(Copy(a, 4, MaxInt), G_N)
+              // /L=MIN (большая L)
+            else if Copy(a, 1, 3) = '/L=' then
+              G_L := StrToIntDef(Copy(a, 4, MaxInt), G_L)
+              // /R=MAX (большая R)
+            else if Copy(a, 1, 3) = '/R=' then
+              G_R := StrToIntDef(Copy(a, 4, MaxInt), G_R)
+              // /r=SEED (маленькая r)
+            else if Copy(a, 1, 3) = '/r=' then
+              G_Seed := StrToIntDef(Copy(a, 4, MaxInt), G_Seed)
+              // /t=TYPE
+            else if Copy(a, 1, 3) = '/t=' then
+            begin
+              var
+              tc := UpperCase(Copy(a, 4, 1))[1];
+              if tc = 'I' then
+                G_Type := 0
+              else if tc = 'R' then
+                G_Type := 1
+              else if tc = 'C' then
+                G_Type := 2;
+            end;
+          end;
+        end;
 
         WriteLn('Параметры обновлены.');
+        ShowParams();
       end
       else if SameText(Cmd, 'genm') then
       begin
@@ -78,7 +95,6 @@ begin
       end
       else if SameText(Cmd, 'print') then
       begin
-
         if G_Type = 0 then
         begin
           WriteLn('Первые 10 элементов:');
@@ -100,23 +116,18 @@ begin
           WriteLn('Последние 10 элементов:');
           PrintLast(CharArr, 10);
         end;
-
       end
       else if SameText(Cmd, 'bubble') then
       begin
         WriteLn('=== ПУЗЫРЬКОВАЯ СОРТИРОВКА ===');
-//        GenerateArray(IntArr, G_N, G_L, G_R, G_Seed);
-
         QueryPerformanceCounter(StartTime);
-                if G_Type = 0 then
+        if G_Type = 0 then
           BubbleSort(IntArr)
         else if G_Type = 1 then
-          BubbleSort(RealArr);
+          BubbleSort(RealArr)
         else if G_Type = 2 then
-          GenerateArray(CharArr, G_N, G_Seed);
-
+          BubbleSort(CharArr);
         QueryPerformanceCounter(EndTime);
-
         ElapsedMs := ((EndTime - StartTime) * 1000.0) / QueryFreq;
         WriteLn('Выполнение завершено успешно.');
         WriteLn('Время выполнения: ', ElapsedMs:0:3, ' ms');
@@ -124,12 +135,14 @@ begin
       else if SameText(Cmd, 'sel') then
       begin
         WriteLn('=== СОРТИРОВКА ВЫБОРОМ ===');
-//        GenerateArray(IntArr, G_N, G_L, G_R, G_Seed);
-
         QueryPerformanceCounter(StartTime);
-        SelectionSort(IntArr);
+        if G_Type = 0 then
+          SelectionSort(IntArr)
+        else if G_Type = 1 then
+          SelectionSort(RealArr)
+        else if G_Type = 2 then
+          SelectionSort(CharArr);
         QueryPerformanceCounter(EndTime);
-
         ElapsedMs := ((EndTime - StartTime) * 1000.0) / QueryFreq;
         WriteLn('Выполнение завершено успешно.');
         WriteLn('Время выполнения: ', ElapsedMs:0:3, ' ms');
@@ -137,12 +150,29 @@ begin
       else if SameText(Cmd, 'insert') then
       begin
         WriteLn('=== СОРТИРОВКА ВСТАВКОЙ ===');
-//        GenerateArray(IntArr, G_N, G_L, G_R, G_Seed);
-
         QueryPerformanceCounter(StartTime);
-        InsertionSort(IntArr);
+        if G_Type = 0 then
+          InsertionSort(IntArr)
+        else if G_Type = 1 then
+          InsertionSort(RealArr)
+        else if G_Type = 2 then
+          InsertionSort(CharArr);
         QueryPerformanceCounter(EndTime);
-
+        ElapsedMs := ((EndTime - StartTime) * 1000.0) / QueryFreq;
+        WriteLn('Выполнение завершено успешно.');
+        WriteLn('Время выполнения: ', ElapsedMs:0:3, ' ms');
+      end
+      else if SameText(Cmd, 'shell') then
+      begin
+        WriteLn('=== СОРТИРОВКА ШЕЛЛА ===');
+        QueryPerformanceCounter(StartTime);
+        if G_Type = 0 then
+          SortShell(IntArr)
+        else if G_Type = 1 then
+          SortShell(RealArr)
+        else if G_Type = 2 then
+          SortShell(CharArr);
+        QueryPerformanceCounter(EndTime);
         ElapsedMs := ((EndTime - StartTime) * 1000.0) / QueryFreq;
         WriteLn('Выполнение завершено успешно.');
         WriteLn('Время выполнения: ', ElapsedMs:0:3, ' ms');
@@ -150,12 +180,14 @@ begin
       else if SameText(Cmd, 'gnome') then
       begin
         WriteLn('=== ГНОМЬЯ СОРТИРОВКА ===');
-//        GenerateArray(IntArr, G_N, G_L, G_R, G_Seed);
-
         QueryPerformanceCounter(StartTime);
-        GnomeSort(IntArr);
+        if G_Type = 0 then
+          GnomeSort(IntArr)
+        else if G_Type = 1 then
+          GnomeSort(RealArr)
+        else if G_Type = 2 then
+          GnomeSort(CharArr);
         QueryPerformanceCounter(EndTime);
-
         ElapsedMs := ((EndTime - StartTime) * 1000.0) / QueryFreq;
         WriteLn('Выполнение завершено успешно.');
         WriteLn('Время выполнения: ', ElapsedMs:0:3, ' ms');
@@ -163,12 +195,14 @@ begin
       else if SameText(Cmd, 'ins_opt') then
       begin
         WriteLn('=== БИНАРНАЯ ВСТАВКА (MOVE) ===');
-//        GenerateArray(IntArr, G_N, G_L, G_R, G_Seed);
-
         QueryPerformanceCounter(StartTime);
-        BinaryInsertionSort(IntArr);
+        if G_Type = 0 then
+          BinaryInsertionSort(IntArr)
+        else if G_Type = 1 then
+          BinaryInsertionSort(RealArr)
+        else if G_Type = 2 then
+          BinaryInsertionSort(CharArr);
         QueryPerformanceCounter(EndTime);
-
         ElapsedMs := ((EndTime - StartTime) * 1000.0) / QueryFreq;
         WriteLn('Выполнение завершено успешно.');
         WriteLn('Время выполнения: ', ElapsedMs:0:3, ' ms');
@@ -176,46 +210,88 @@ begin
       else if SameText(Cmd, 'cmp') then
       begin
         WriteLn('=== СРАВНЕНИЕ АЛГОРИТМОВ (INT32) ===');
-
         GenerateArray(IntArr, G_N, G_L, G_R, G_Seed);
         QueryPerformanceCounter(StartTime);
         BubbleSort(IntArr);
         QueryPerformanceCounter(EndTime);
         WriteLn('Bubble   : ', ((EndTime - StartTime) * 1000.0) / QueryFreq:0
           :3, ' ms');
-
         GenerateArray(IntArr, G_N, G_L, G_R, G_Seed);
         QueryPerformanceCounter(StartTime);
         SelectionSort(IntArr);
         QueryPerformanceCounter(EndTime);
         WriteLn('Select   : ', ((EndTime - StartTime) * 1000.0) / QueryFreq:0
           :3, ' ms');
-
         GenerateArray(IntArr, G_N, G_L, G_R, G_Seed);
         QueryPerformanceCounter(StartTime);
         InsertionSort(IntArr);
         QueryPerformanceCounter(EndTime);
         WriteLn('Ins0     : ', ((EndTime - StartTime) * 1000.0) / QueryFreq:0
           :3, ' ms');
-
         GenerateArray(IntArr, G_N, G_L, G_R, G_Seed);
         QueryPerformanceCounter(StartTime);
         BinaryInsertionSort(IntArr);
         QueryPerformanceCounter(EndTime);
         WriteLn('Insert   : ', ((EndTime - StartTime) * 1000.0) / QueryFreq:0
           :3, ' ms');
-
         WriteLn('Результаты совпадают: True');
       end
       else if SameText(Cmd, 'help') then
       begin
-        WriteLn('Доступные команды: help set genm print bubble sel insert gnome ins_opt cmp showParams exit');
+        WriteLn('Доступные команды: help set genm print bubble sel insert gnome ins_opt cmp shell qsort showparams treeview sift_up heap_sift_up exit');
       end
       else if SameText(Cmd, 'exit') then
         Break
       else if SameText(Cmd, 'showParams') then
         ShowParams()
+      else if SameText(Cmd, 'qsort') then
+      begin
+        WriteLn('=== БЫСТРАЯ СОРТИРОВКА ХОАРА ===');
+        QueryPerformanceCounter(StartTime);
 
+        if G_Type = 0 then
+          QSortHoare(IntArr)
+        else if G_Type = 1 then
+          QSortHoare(RealArr)
+        else if G_Type = 2 then
+          QSortHoare(CharArr);
+
+        QueryPerformanceCounter(EndTime);
+        ElapsedMs := ((EndTime - StartTime) * 1000.0) / QueryFreq;
+        WriteLn('Выполнение завершено успешно.');
+        WriteLn('Время выполнения: ', ElapsedMs:0:3, ' ms');
+      end
+      else if SameText(Cmd, 'treeview') then
+      begin
+        var
+          a, b: uint32;
+        WriteLn('Введите диапозон');
+        Readln(a, b);
+        if G_Type = 0 then
+          TreeView(IntArr, a, b)
+        else if G_Type = 1 then
+          TreeView(RealArr, a, b)
+        else if G_Type = 2 then
+          TreeView(CharArr, a, b);
+//        TreeView(IntArr, a, b);
+      end
+      else if SameText(Cmd, 'sift_up') then
+      begin
+        var
+          a: integer;
+        WriteLn('Введите индекс массива для построения кучи.');
+        Readln(a);
+        sift_up(IntArr, a);
+      end
+      else if SameText(Cmd, 'heap_sift_up') then
+      begin
+        QueryPerformanceCounter(StartTime);
+        BuildHeap(IntArr, Length(IntArr));
+        QueryPerformanceCounter(EndTime);
+        ElapsedMs := ((EndTime - StartTime) * 1000.0) / QueryFreq;
+        WriteLn('Выполнение завершено успешно.');
+        WriteLn('Время выполнения: ', ElapsedMs:0:3, ' ms');
+      end
       else
         WriteLn('Команда не распознана.');
 

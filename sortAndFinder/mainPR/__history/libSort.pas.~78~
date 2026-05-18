@@ -29,11 +29,32 @@ procedure InsertionSort(var Arr: TRealArray); overload;
 procedure InsertionSort(var Arr: TCharArray); overload;
 
 // ======================================
-// GNOME SORT (Без Swap!)
+// GNOME SORT (Базовая)
 // ======================================
 procedure GnomeSort(var Arr: TIntArray); overload;
 procedure GnomeSort(var Arr: TRealArray); overload;
 procedure GnomeSort(var Arr: TCharArray); overload;
+
+// ======================================
+// GNOME SORT (Оптимизированная)
+// ======================================
+procedure GnomeSortOptimized(var Arr: TIntArray); overload;
+procedure GnomeSortOptimized(var Arr: TRealArray); overload;
+procedure GnomeSortOptimized(var Arr: TCharArray); overload;
+
+// ======================================
+// SHELL SORT
+// ======================================
+procedure SortShell(var Arr: TIntArray); overload;
+procedure SortShell(var Arr: TRealArray); overload;
+procedure SortShell(var Arr: TCharArray); overload;
+
+// ======================================
+// QUICKSORT HOARE (НОВОЕ!)
+// ======================================
+procedure QSortHoare(var Arr: TIntArray); overload;
+procedure QSortHoare(var Arr: TRealArray); overload;
+procedure QSortHoare(var Arr: TCharArray); overload;
 
 // ======================================
 // BINARY SEARCH
@@ -51,12 +72,25 @@ procedure BinaryInsertionSort(var Arr: TIntArray); overload;
 procedure BinaryInsertionSort(var Arr: TRealArray); overload;
 procedure BinaryInsertionSort(var Arr: TCharArray); overload;
 
+procedure sift_up(var ar: TIntArray; i: Integer); overload;
+
+procedure BuildHeap(var ar: TIntArray; n: Integer); overload;
+
+procedure sift_up(var ar: TIntArray; i: Integer); overload;
+
+procedure BuildHeap(var ar: TIntArray; n: Integer); overload;
+
+procedure sift_up(var ar: TIntArray; i: Integer); overload;
+
+procedure BuildHeap(var ar: TIntArray; n: Integer); overload;
+
 implementation
+
+// ... (Весь остальной код bubble, selection, insertion и т.д. оставляем без изменений) ...
 
 // ======================================
 // BUBBLE SORT
 // ======================================
-
 procedure BubbleSort(var Arr: TIntArray);
 var
   i, j, temp, n: Integer;
@@ -107,7 +141,6 @@ end;
 // ======================================
 // SELECTION SORT
 // ======================================
-
 procedure SelectionSort(var Arr: TIntArray);
 var
   i, j, minIdx, temp, n: Integer;
@@ -173,7 +206,6 @@ end;
 // ======================================
 // INSERTION SORT
 // ======================================
-
 procedure InsertionSort(var Arr: TIntArray);
 var
   i, j, Key, n: Integer;
@@ -231,22 +263,21 @@ begin
 end;
 
 // ======================================
-// GNOME SORT (Ручной обмен, без Swap)
+// GNOME SORT (Базовая версия)
 // ======================================
-
 procedure GnomeSort(var Arr: TIntArray);
 var
   i, temp: Integer;
 begin
   i := 0;
-  while i < High(Arr) do
+  while i < Length(Arr) do
   begin
     if (i = 0) or (Arr[i - 1] <= Arr[i]) then
       Inc(i)
     else
     begin
-      temp := Arr[i]; // Ручная перестановка
-      Arr[i] := Arr[i - 1]; // вместо Swap(Arr[i], Arr[i-1]);
+      temp := Arr[i];
+      Arr[i] := Arr[i - 1];
       Arr[i - 1] := temp;
       Dec(i);
     end;
@@ -259,7 +290,7 @@ var
   temp: Real;
 begin
   i := 0;
-  while i < High(Arr) do
+  while i < Length(Arr) do
   begin
     if (i = 0) or (Arr[i - 1] <= Arr[i]) then
       Inc(i)
@@ -279,7 +310,7 @@ var
   temp: AnsiChar;
 begin
   i := 0;
-  while i < High(Arr) do
+  while i < Length(Arr) do
   begin
     if (i = 0) or (Arr[i - 1] <= Arr[i]) then
       Inc(i)
@@ -294,9 +325,297 @@ begin
 end;
 
 // ======================================
-// BINARY SEARCH
+// GNOME SORT (ОПТИМИЗИРОВАННАЯ ВЕРСИЯ)
+// ======================================
+procedure GnomeSortOptimized(var Arr: TIntArray);
+var
+  i, j, Key: Integer;
+  n: Integer;
+begin
+  i := 1;
+  j := 2;
+  n := Length(Arr);
+  while i < n do
+  begin
+    Key := Arr[i];
+    if Arr[i - 1] <= Key then
+    begin
+      i := j;
+      Inc(j);
+    end
+    else
+    begin
+      Arr[i] := Arr[i - 1];
+      Arr[i - 1] := Key;
+      Dec(i);
+      if i = 0 then
+      begin
+        i := j;
+        Inc(j);
+      end;
+    end;
+  end;
+end;
+
+procedure GnomeSortOptimized(var Arr: TRealArray);
+var
+  i, j: Integer;
+  Key: Real;
+begin
+  i := 1;
+  j := 2;
+  while i < Length(Arr) do
+  begin
+    Key := Arr[i];
+    if Arr[i - 1] <= Key then
+    begin
+      i := j;
+      Inc(j);
+    end
+    else
+    begin
+      Arr[i] := Arr[i - 1];
+      Arr[i - 1] := Key;
+      Dec(i);
+      if i = 0 then
+      begin
+        i := j;
+        Inc(j);
+      end;
+    end;
+  end;
+end;
+
+procedure GnomeSortOptimized(var Arr: TCharArray);
+var
+  i, j: Integer;
+  Key: AnsiChar;
+begin
+  i := 1;
+  j := 2;
+  while i < Length(Arr) do
+  begin
+    Key := Arr[i];
+    if Arr[i - 1] <= Key then
+    begin
+      i := j;
+      Inc(j);
+    end
+    else
+    begin
+      Arr[i] := Arr[i - 1];
+      Arr[i - 1] := Key;
+      Dec(i);
+      if i = 0 then
+      begin
+        i := j;
+        Inc(j);
+      end;
+    end;
+  end;
+end;
+
+// ======================================
+// SHELL SORT
+// ======================================
+procedure SortShell(var Arr: TIntArray);
+var
+  i, j, x, d, n: Integer;
+begin
+  n := Length(Arr);
+  if n = 0 then
+    raise Exception.Create('Массив отсутствует!');
+  d := n shr 1;
+  while d > 0 do
+  begin
+    for i := d to n - 1 do
+    begin
+      j := i;
+      while (j >= d) and (Arr[j - d] > Arr[j]) do
+      begin
+        x := Arr[j];
+        Arr[j] := Arr[j - d];
+        Arr[j - d] := x;
+        j := j - d;
+      end;
+    end;
+    d := d shr 1;
+  end;
+end;
+
+procedure SortShell(var Arr: TRealArray);
+var
+  i, j, d, n: Integer;
+  x: Real;
+begin
+  n := Length(Arr);
+  if n = 0 then
+    raise Exception.Create('Массив отсутствует!');
+  d := n shr 1;
+  while d > 0 do
+  begin
+    for i := d to n - 1 do
+    begin
+      j := i;
+      while (j >= d) and (Arr[j - d] > Arr[j]) do
+      begin
+        x := Arr[j];
+        Arr[j] := Arr[j - d];
+        Arr[j - d] := x;
+        j := j - d;
+      end;
+    end;
+    d := d shr 1;
+  end;
+end;
+
+procedure SortShell(var Arr: TCharArray);
+var
+  i, j: Integer;
+  x: AnsiChar;
+  d, n: Integer;
+begin
+  n := Length(Arr);
+  if n = 0 then
+    raise Exception.Create('Массив отсутствует!');
+  d := n shr 1;
+  while d > 0 do
+  begin
+    for i := d to n - 1 do
+    begin
+      j := i;
+      while (j >= d) and (Arr[j - d] > Arr[j]) do
+      begin
+        x := Arr[j];
+        Arr[j] := Arr[j - d];
+        Arr[j - d] := x;
+        j := j - d;
+      end;
+    end;
+    d := d shr 1;
+  end;
+end;
+
+// ======================================
+// QUICKSORT HOARE (Именно как на фото)
 // ======================================
 
+procedure QSortHoare(var Arr: TIntArray);
+var
+  i, j, x, y: Integer;
+  procedure QS(L, R: Integer);
+  begin
+    i := L;
+    j := R;
+    x := Arr[(i + j) shr 1]; // pivot
+    repeat
+      while Arr[i] < x do
+      begin
+        Inc(i);
+      end;
+      while Arr[j] > x do
+      begin
+        Dec(j);
+      end;
+      if i <= j then
+      begin
+        y := Arr[i];
+        Arr[i] := Arr[j];
+        Arr[j] := y;
+        Inc(i);
+        Dec(j);
+      end;
+    until i > j;
+    if j > L then
+      QS(L, j);
+    if i < R then
+      QS(i, R);
+  end;
+
+begin
+  if Length(Arr) > 0 then
+    QS(0, High(Arr));
+end;
+
+procedure QSortHoare(var Arr: TRealArray);
+var
+  i, j: Integer;
+  x, y: Real;
+  procedure QS(L, R: Integer);
+  begin
+    i := L;
+    j := R;
+    x := Arr[(i + j) shr 1];
+    repeat
+      while Arr[i] < x do
+      begin
+        Inc(i);
+      end;
+      while Arr[j] > x do
+      begin
+        Dec(j);
+      end;
+      if i <= j then
+      begin
+        y := Arr[i];
+        Arr[i] := Arr[j];
+        Arr[j] := y;
+        Inc(i);
+        Dec(j);
+      end;
+    until i > j;
+    if j > L then
+      QS(L, j);
+    if i < R then
+      QS(i, R);
+  end;
+
+begin
+  if Length(Arr) > 0 then
+    QS(0, High(Arr));
+end;
+
+procedure QSortHoare(var Arr: TCharArray);
+var
+  i, j: Integer;
+  x, y: AnsiChar;
+  procedure QS(L, R: Integer);
+  begin
+    i := L;
+    j := R;
+    x := Arr[(i + j) shr 1];
+    repeat
+      while Arr[i] < x do
+      begin
+        Inc(i);
+      end;
+      while Arr[j] > x do
+      begin
+        Dec(j);
+      end;
+      if i <= j then
+      begin
+        y := Arr[i];
+        Arr[i] := Arr[j];
+        Arr[j] := y;
+        Inc(i);
+        Dec(j);
+      end;
+    until i > j;
+    if j > L then
+      QS(L, j);
+    if i < R then
+      QS(i, R);
+  end;
+
+begin
+  if Length(Arr) > 0 then
+    QS(0, High(Arr));
+end;
+
+// ======================================
+// BINARY SEARCH
+// ======================================
 function BinSearchInt(const Arr: TIntArray; Left, Right, Key: Integer): Integer;
 var
   Mid: Integer;
@@ -347,7 +666,6 @@ end;
 // ======================================
 // BINARY INSERTION SORT С MOVE
 // ======================================
-
 procedure BinaryInsertionSort(var Arr: TIntArray);
 var
   i, pos, Key, shift, n: Integer;
@@ -388,8 +706,7 @@ end;
 procedure BinaryInsertionSort(var Arr: TCharArray);
 var
   i, pos, shift, n: Integer;
-Key:
-AnsiChar
+  Key: AnsiChar;
 begin
   n := Length(Arr);
   for i := 1 to n - 1 do
@@ -403,6 +720,92 @@ begin
       Arr[pos] := Key;
     end;
   end;
+end;
+
+procedure sift_up(var ar: TIntArray; i: Integer);
+var
+  parent: Integer;
+  temp: Integer;
+begin
+  while i > 0 do
+  begin
+    parent := (i - 1) shr 1;
+
+    if ar[i] > ar[parent] then
+    begin
+      temp := ar[i];
+      ar[i] := ar[parent];
+      ar[parent] := temp;
+
+      i := parent;
+    end
+    else
+      Break;
+  end;
+end;
+
+procedure BuildHeap(var ar: TIntArray; n: Integer);
+var
+  i: Integer;
+begin
+  for i := 1 to n - 1 do
+    sift_up(ar, i);
+end;
+
+procedure sift_up(var ar: TRealArray; i: Integer);
+var
+  parent: Integer;
+  temp: Real;
+begin
+  while i > 0 do
+  begin
+    parent := (i - 1) shr 1;
+    if ar[i] > ar[parent] then
+    begin
+      temp := ar[i];
+      ar[i] := ar[parent];
+      ar[parent] := temp;
+      i := parent;
+    end
+    else
+      Break;
+  end;
+end;
+
+procedure BuildHeap(var ar: TRealArray; n: Integer);
+var
+  i: Integer;
+begin
+  for i := 1 to n - 1 do
+    sift_up(ar, i);
+end;
+
+procedure sift_up(var ar: TCharArray; i: Integer);
+var
+  parent: Integer;
+  temp: AnsiChar;
+begin
+  while i > 0 do
+  begin
+    parent := (i - 1) shr 1;
+    if ar[i] > ar[parent] then
+    begin
+      temp := ar[i];
+      ar[i] := ar[parent];
+      ar[parent] := temp;
+      i := parent;
+    end
+    else
+      Break;
+  end;
+end;
+
+procedure BuildHeap(var ar: TCharArray; n: Integer);
+var
+  i: Integer;
+begin
+  for i := 1 to n - 1 do
+    sift_up(ar, i);
 end;
 
 end.

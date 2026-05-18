@@ -990,7 +990,7 @@ begin
   end;
 end;
 
-procedure heapsort1(var m: TRealArray);
+procedure heapsort1_Real(var m: TRealArray);
 var
   s: Integer;
   temp: Real;
@@ -1058,57 +1058,6 @@ begin
 
     Dec(s);
     sift_down1(m, s);
-  end;
-end;
-
-
-procedure sift_down2(var ar: TIntArray; n, i: Integer);
-var
-  largest, left, right, temp: Integer;
-begin
-  while True do
-  begin
-    largest := i;
-    left := (i shl 1) + 1;
-    right := (i shl 1) + 2;
-
-    if (left < n) and (ar[left] > ar[largest]) then
-      largest := left;
-
-    if (right < n) and (ar[right] > ar[largest]) then
-      largest := right;
-
-    if largest = i then
-      Break;
-
-    temp := ar[i];
-    ar[i] := ar[largest];
-    ar[largest] := temp;
-
-    i := largest;
-  end;
-end;
-
-procedure heapsort2(var ar: TIntArray);
-var
-  n, i, temp: Integer;
-begin
-  n := Length(ar);
-
-  // Этап 1: Построение кучи через sift_down (от последнего родителя к корню)
-  for i := (n shr 1) - 1 downto 0 do
-    sift_down2(ar, n, i);
-
-  // Этап 2: Сортировка
-  for i := n - 1 downto 1 do
-  begin
-    // Меняем корень (максимум) с последним элементом
-    temp := ar[0];
-    ar[0] := ar[i];
-    ar[i] := temp;
-
-    // Восстанавливаем кучу
-    sift_down2(ar, i, 0);
   end;
 end;
 

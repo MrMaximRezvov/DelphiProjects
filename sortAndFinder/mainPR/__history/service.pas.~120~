@@ -39,9 +39,15 @@ procedure PrintLast(const Arr: TCharArray; Count: Integer); overload;
 // --- Парсинг команды ---
 function SplitCommand(const Line: string): TStringArray;
 function GetParamI(const Args: string; const Param: string): Integer;
+function GetParamF(const Args: string; const Param: string): Double; overload;
+function GetParamValue(const Args: string; const ParamKey: char): Integer;
+function GetCharValue(const Args: string; const ParamKey: char): char;
+function GetParamType(const Args: string): uint8;
 
 // --- Прочие ---
 procedure ShowParams;
+
+procedure TreeView(const ar: TIntArray; b: uint32; w: uint32);
 
 implementation
 
@@ -75,7 +81,19 @@ begin
   Result := words;
 end;
 
-// --- Получить параметр /N=1000 ---
+function GetParamType(const Args: string): uint8;
+begin
+  if Pos('/t=i', UpperCase(Args)) > 0 then
+    Result := 0
+  else if Pos('/t=r', UpperCase(Args)) > 0 then
+    Result := 1
+  else if Pos('/t=c', UpperCase(Args)) > 0 then
+    Result := 2
+  else
+    Result := G_Type;
+end;
+
+// --- Получить целочисленный параметр /N=1000 ---
 function GetParamI(const Args: string; const Param: string): Integer;
 var
   posFind, startPos: Integer;
@@ -98,11 +116,34 @@ begin
   end;
 end;
 
+// --- Получить вещественный параметр /L=0.5 ---
+function GetParamF(const Args: string; const Param: string): Double;
+var
+  posFind, startPos: Integer;
+  argStr: string;
+begin
+  Result := 0.0;
+  posFind := Pos('/' + Param, UpperCase(Args));
+  if posFind > 0 then
+  begin
+    startPos := posFind + Length(Param) + 1;
+    while (startPos <= Length(Args)) and (Args[startPos] <> '/') do
+      Inc(startPos);
+    argStr := Copy(Args, posFind + Length(Param) + 1,
+      startPos - posFind - Length(Param) - 1);
+    try
+      Result := StrToFloatDef(argStr, 0.0);
+    except
+      Result := 0.0;
+    end;
+  end;
+end;
+
 // --- Показать параметры ---
 procedure ShowParams;
 begin
   Writeln('--- Параметры системы ---');
-  Wrietln('Type   = ', G_Type);
+  Writeln('Type   = ', G_Type, ' 0 - int, 1 - real, 2 - char');
   Writeln('Size   = ', G_N);
   Writeln('MinVal = ', G_L);
   Writeln('MaxVal = ', G_R);
@@ -237,6 +278,138 @@ begin
   for i := StartIdx to Length(Arr) - 1 do
     Write(Arr[i]);
   Writeln;
+end;
+
+/// / --- Разбиение строки на слова (как в фото) ---
+// function SplitCommand(const Line: string): TStringArray;
+// var k, start, wordCount: Integer; words: TStringArray; begin
+// SetLength(words, 0); wordCount := 0; start := 1;
+// for k := 1 to Length(Line) do
+// if Line[k] = ' ' then begin
+// if k > start then begin
+// SetLength(words, wordCount + 1);
+// words[wordCount] := Copy(Line, start, k - start);
+// Inc(wordCount); start := k + 1;
+// end;
+// end;
+// if start <= Length(Line) then begin
+// SetLength(words, wordCount + 1);
+// words[wordCount] := Copy(Line, start, Length(Line) - start + 1);
+// end;
+// Result := words;
+// end;
+
+// --- Получить числовое значение по символу-ключу (парсим /N=1000) ---
+// Считаем ключ первой буквой после слеша (например N из /N=)
+function GetParamValue(const Args: string; const ParamKey: char): Integer;
+var
+  i, j: Integer;
+  foundStart: Boolean;
+begin
+  Result := 0;
+  i := 1;
+  foundStart := False;
+  // Ищем сначала слэш
+  while i <= Length(Args) do
+  begin
+    if Args[i] = '/' then
+    begin
+      // Следующий символ — это ключ
+      if (i + 1 <= Length(Args)) and
+        (UpperCase(Args[i + 1])[1] = UpperCase(ParamKey)) then
+      begin
+        // Нашли ключ, теперь ищем =
+        foundStart := True;
+        j := i + 2; // Пропускаем /КЛЮЧ
+        // Находим знак '='
+        while (j <= Length(Args)) and (Args[j] <> '=') do
+          Inc(j);
+        if j <= Length(Args) then
+        begin
+          // Теперь читаем значение от символа после '=' до слэша или конца строки
+          Inc(j); // Пропускаем '='
+          while (j <= Length(Args)) and (Args[j] <> '/') do
+            Inc(j);
+          try
+            Result := StrToIntDef(Copy(Args, i + 2, j - i - 2), 0);
+          except
+            Result := 0;
+          end;
+        end;
+      end;
+    end;
+    Inc(i);
+  end;
+end;
+
+// --- Получить буквенное значение по символу-ключу (парсим /T=R) ---
+function GetCharValue(const Args: string; const ParamKey: char): char;
+var
+  i: Integer;
+begin
+  Result := ' ';
+  i := 1;
+  while i <= Length(Args) do
+  begin
+    if Args[i] = '/' then
+    begin
+      // Следующий символ — это ключ
+      if (i + 1 <= Length(Args)) and
+        (UpperCase(Args[i + 1])[1] = UpperCase(ParamKey)) then
+      begin
+        // Нашли ключ, теперь ищем =
+        var
+        j := i + 2;
+        while (j <= Length(Args)) and (Args[j] <> '=') do
+          Inc(j);
+        if j <= Length(Args) then
+        begin
+          // Значение после знака равно
+          Inc(j);
+          // Берем один символ (или больше, если нужно)
+          Result := Args[j];
+        end;
+      end;
+    end;
+    Inc(i);
+  end;
+end;
+
+procedure TreeView(const ar: TIntArray; b: uint32; w: uint32);
+var
+  i, l, j: uint32;
+  k, k1: uint8;
+begin
+  k := 0;
+  l := w - b + 1;
+  // write(l);
+  while ((1 shl k) < l) do
+  begin
+    // write(k);
+    Inc(k);
+  end;
+  k1 := k;
+  // dec(k);
+  // write('step = ', k)
+  j := 0;
+  for i := b to w do
+  begin
+    if j = 0 then
+      write(StringOfChar(' ', 1 shl k));
+
+    Inc(j);
+    write(ar[i]:2);
+    write(StringOfChar(' ', (1 shl (k + 1) - 2)));
+    if (j = (1 shl (k1 - k))) then
+    begin
+      Writeln;
+      writeln;
+      dec(k);
+      j := 0;
+
+    end;
+  end;
+
 end;
 
 end.
