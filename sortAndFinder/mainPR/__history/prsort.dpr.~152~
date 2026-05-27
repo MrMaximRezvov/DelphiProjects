@@ -238,7 +238,7 @@ begin
       end
       else if SameText(Cmd, 'help') then
       begin
-        WriteLn('Доступные команды: help set genm print bubble sel insert gnome ins_opt cmp shell qsort showparams treeview sift_up heap_sift_up exit');
+        WriteLn('Доступные команды: help set genm print bubble sel insert gnome ins_opt cmp shell qsort showparams treeview sift_up heap_sift_up heapsort1 exit');
       end
       else if SameText(Cmd, 'exit') then
         Break
@@ -273,7 +273,7 @@ begin
           TreeView(RealArr, a, b)
         else if G_Type = 2 then
           TreeView(CharArr, a, b);
-//        TreeView(IntArr, a, b);
+        // TreeView(IntArr, a, b);
       end
       else if SameText(Cmd, 'sift_up') then
       begin
@@ -281,12 +281,85 @@ begin
           a: integer;
         WriteLn('Введите индекс массива для построения кучи.');
         Readln(a);
+
         sift_up(IntArr, a);
       end
       else if SameText(Cmd, 'heap_sift_up') then
       begin
         QueryPerformanceCounter(StartTime);
-        BuildHeap(IntArr, Length(IntArr));
+
+        if G_Type = 0 then
+          BuildHeap(IntArr, Length(IntArr))
+        else if G_Type = 1 then
+          BuildHeap(RealArr, Length(RealArr))
+        else if G_Type = 2 then
+          BuildHeap(CharArr, Length(CharArr));
+
+        QueryPerformanceCounter(EndTime);
+        ElapsedMs := ((EndTime - StartTime) * 1000.0) / QueryFreq;
+        WriteLn('Выполнение завершено успешно.');
+        WriteLn('Время выполнения: ', ElapsedMs:0:3, ' ms');
+      end
+      else if SameText(Cmd, 'heapsort1') then
+      begin
+        QueryPerformanceCounter(StartTime);
+
+        if G_Type = 0 then
+          heapsort1(IntArr)
+        else if G_Type = 1 then
+          heapsort1(RealArr)
+        else if G_Type = 2 then
+          heapsort1(CharArr);
+
+        QueryPerformanceCounter(EndTime);
+        ElapsedMs := ((EndTime - StartTime) * 1000.0) / QueryFreq;
+        WriteLn('Выполнение завершено успешно.');
+        WriteLn('Время выполнения: ', ElapsedMs:0:3, ' ms');
+      end
+
+      else if SameText(Cmd, 'heap_sift_down') then
+      begin
+        QueryPerformanceCounter(StartTime);
+
+        if G_Type = 0 then
+          BuildHeap(IntArr, Length(IntArr))
+        else if G_Type = 1 then
+          BuildHeap(RealArr, Length(RealArr))
+        else if G_Type = 2 then
+          BuildHeap(CharArr, Length(CharArr));
+
+        QueryPerformanceCounter(EndTime);
+        ElapsedMs := ((EndTime - StartTime) * 1000.0) / QueryFreq;
+        WriteLn('Выполнение завершено успешно.');
+        WriteLn('Время выполнения: ', ElapsedMs:0:3, ' ms');
+      end
+      else if SameText(Cmd, 'heapsort2') then
+      begin
+        QueryPerformanceCounter(StartTime);
+
+        if G_Type = 0 then
+          heapsort2(IntArr)
+        else if G_Type = 1 then
+          heapsort2(RealArr)
+        else if G_Type = 2 then
+          heapsort2(CharArr);
+
+        QueryPerformanceCounter(EndTime);
+        ElapsedMs := ((EndTime - StartTime) * 1000.0) / QueryFreq;
+        WriteLn('Выполнение завершено успешно.');
+        WriteLn('Время выполнения: ', ElapsedMs:0:3, ' ms');
+      end
+      else if SameText(Cmd, 'supersort') then
+      begin
+        QueryPerformanceCounter(StartTime);
+
+        if G_Type = 0 then
+          SuperSort(IntArr, FindMin(IntArr), FindMax(IntArr))
+          // else if G_Type = 1 then
+          // heapsort1(RealArr)
+        else if G_Type = 2 then
+          SuperSort(CharArr, FindMin(CharArr), FindMax(CharArr));
+
         QueryPerformanceCounter(EndTime);
         ElapsedMs := ((EndTime - StartTime) * 1000.0) / QueryFreq;
         WriteLn('Выполнение завершено успешно.');

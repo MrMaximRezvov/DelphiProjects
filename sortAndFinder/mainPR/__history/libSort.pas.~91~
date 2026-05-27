@@ -84,6 +84,28 @@ procedure sift_up(var ar: TCharArray; i: Integer); overload;
 
 procedure BuildHeap(var ar: TCharArray; n: Integer); overload;
 
+procedure sift_down(var ar: TIntArray; n: Integer); overload;
+procedure sift_down(var ar: TRealArray; n: Integer); overload;
+procedure sift_down(var ar: TCharArray; n: Integer); overload;
+
+procedure sift_down1(var a: TIntArray; s: UInt32); overload;
+procedure heapsort1(var m: TIntArray); overload;
+
+procedure sift_down1(var a: TRealArray; s: UInt32); overload;
+procedure heapsort1(var m: TRealArray); overload;
+
+procedure sift_down1(var a: TCharArray; s: UInt32); overload;
+procedure heapsort1(var m: TCharArray); overload;
+
+procedure sift_down2(var ar: TIntArray; n, i: Integer); overload;
+procedure heapsort2(var ar: TIntArray); overload;
+
+procedure sift_down2(var ar: TRealArray; n, i: Integer); overload;
+procedure heapsort2(var ar: TRealArray); overload;
+
+procedure sift_down2(var ar: TCharArray; n, i: Integer); overload;
+procedure heapsort2(var ar: TCharArray); overload;
+
 implementation
 
 // ... (Весь остальной код bubble, selection, insertion и т.д. оставляем без изменений) ...
@@ -806,6 +828,401 @@ var
 begin
   for i := 1 to n - 1 do
     sift_up(ar, i);
+end;
+
+procedure sift_down(var ar: TIntArray; n: Integer);
+var
+  i, largest, Left, Right, temp: Integer;
+begin
+  i := 0;
+  while True do
+  begin
+    largest := i;
+    Left := (i shl 1) + 1;
+    Right := (i shl 1) + 2;
+
+    if (Left < n) and (ar[Left] > ar[largest]) then
+      largest := Left;
+
+    if (Right < n) and (ar[Right] > ar[largest]) then
+      largest := Right;
+
+    if largest = i then
+      Break;
+
+    temp := ar[i];
+    ar[i] := ar[largest];
+    ar[largest] := temp;
+
+    i := largest;
+  end;
+end;
+
+procedure sift_down(var ar: TRealArray; n: Integer);
+var
+  i, largest, Left, Right: Integer;
+  temp: Real;
+begin
+  i := 0;
+  while True do
+  begin
+    largest := i;
+    Left := (i shl 1) + 1;
+    Right := (i shl 1) + 2;
+
+    if (Left < n) and (ar[Left] > ar[largest]) then
+      largest := Left;
+
+    if (Right < n) and (ar[Right] > ar[largest]) then
+      largest := Right;
+
+    if largest = i then
+      Break;
+
+    temp := ar[i];
+    ar[i] := ar[largest];
+    ar[largest] := temp;
+
+    i := largest;
+  end;
+end;
+
+procedure sift_down(var ar: TCharArray; n: Integer);
+var
+  i, largest, Left, Right: Integer;
+  temp: AnsiChar;
+begin
+  i := 0;
+  while True do
+  begin
+    largest := i;
+    Left := (i shl 1) + 1;
+    Right := (i shl 1) + 2;
+
+    if (Left < n) and (ar[Left] > ar[largest]) then
+      largest := Left;
+
+    if (Right < n) and (ar[Right] > ar[largest]) then
+      largest := Right;
+
+    if largest = i then
+      Break;
+
+    temp := ar[i];
+    ar[i] := ar[largest];
+    ar[largest] := temp;
+
+    i := largest;
+  end;
+end;
+
+procedure sift_down1(var a: TIntArray; s: UInt32);
+var
+  i, largest, Left, Right, temp: Integer;
+begin
+  i := 0;
+  while True do
+  begin
+    largest := i;
+    Left := (i shl 1) + 1;
+    Right := (i shl 1) + 2;
+
+    if (Left < s) and (a[Left] > a[largest]) then
+      largest := Left;
+
+    if (Right < s) and (a[Right] > a[largest]) then
+      largest := Right;
+
+    if largest = i then
+      Break;
+
+    temp := a[i];
+    a[i] := a[largest];
+    a[largest] := temp;
+
+    i := largest;
+  end;
+end;
+
+procedure heapsort1(var m: TIntArray);
+var
+  s, temp: Integer;
+  i: UInt32;
+begin
+  // Этап 1: Построение кучи
+  for i := 1 to High(m) do
+    sift_up(m, i);
+
+  // Этап 2: Сортировка
+  s := Length(m);
+  while s > 1 do
+  begin
+    // Меняем местами корень (максимум) и последний элемент
+    temp := m[0];
+    m[0] := m[s - 1];
+    m[s - 1] := temp;
+
+    // Уменьшаем размер кучи
+    Dec(s);
+
+    // Восстанавливаем кучу
+    sift_down1(m, s);
+  end;
+end;
+
+procedure sift_down1(var a: TRealArray; s: UInt32);
+var
+  i, largest, Left, Right: Integer;
+  temp: Real;
+begin
+  i := 0;
+  while True do
+  begin
+    largest := i;
+    Left := (i shl 1) + 1;
+    Right := (i shl 1) + 2;
+
+    if (Left < s) and (a[Left] > a[largest]) then
+      largest := Left;
+
+    if (Right < s) and (a[Right] > a[largest]) then
+      largest := Right;
+
+    if largest = i then
+      Break;
+
+    temp := a[i];
+    a[i] := a[largest];
+    a[largest] := temp;
+
+    i := largest;
+  end;
+end;
+
+procedure heapsort1(var m: TRealArray);
+var
+  s: Integer;
+  temp: Real;
+  i: UInt32;
+begin
+  for i := 1 to High(m) do
+    sift_up(m, i);
+
+  s := Length(m);
+  while s > 1 do
+  begin
+    temp := m[0];
+    m[0] := m[s - 1];
+    m[s - 1] := temp;
+
+    Dec(s);
+    sift_down1(m, s);
+  end;
+end;
+
+procedure sift_down1(var a: TCharArray; s: UInt32);
+var
+  i, largest, Left, Right: Integer;
+  temp: AnsiChar;
+begin
+  i := 0;
+  while True do
+  begin
+    largest := i;
+    Left := (i shl 1) + 1;
+    Right := (i shl 1) + 2;
+
+    if (Left < s) and (a[Left] > a[largest]) then
+      largest := Left;
+
+    if (Right < s) and (a[Right] > a[largest]) then
+      largest := Right;
+
+    if largest = i then
+      Break;
+
+    temp := a[i];
+    a[i] := a[largest];
+    a[largest] := temp;
+
+    i := largest;
+  end;
+end;
+
+procedure heapsort1(var m: TCharArray);
+var
+  s: Integer;
+  temp: AnsiChar;
+  i: UInt32;
+begin
+  for i := 1 to High(m) do
+    sift_up(m, i);
+
+  s := Length(m);
+  while s > 1 do
+  begin
+    temp := m[0];
+    m[0] := m[s - 1];
+    m[s - 1] := temp;
+
+    Dec(s);
+    sift_down1(m, s);
+  end;
+end;
+
+// Процедура sift_down2 с i-го элемента для TIntArray
+procedure sift_down2(var ar: TIntArray; n, i: Integer); overload;
+var
+  k, k1: Integer;
+  x: Integer;
+begin
+  x := ar[i];
+  k := (i shl 1) + 1;  // левый ребенок
+
+  while k < n do
+  begin
+    k1 := k + 1;  // правый ребенок
+
+    // Выбираем большего из детей
+    if (k1 < n) and (ar[k1] > ar[k]) then
+      k := k1;
+
+    // Если ребенок больше сохраненного значения
+    if x < ar[k] then
+    begin
+      ar[i] := ar[k];
+      i := k;
+      k := (i shl 1) + 1;
+    end
+    else
+      Break;
+  end;
+
+  ar[i] := x;
+end;
+
+// Процедура heapsort2 для TIntArray
+procedure heapsort2(var ar: TIntArray); overload;
+var
+  n, i, temp: Integer;
+begin
+  n := Length(ar);
+
+  // Этап 1: Построение кучи через sift_down
+  for i := (n shr 1) - 1 downto 0 do
+    sift_down2(ar, n, i);
+
+  // Этап 2: Сортировка
+  for i := n - 1 downto 1 do
+  begin
+    // Меняем корень (максимум) с последним элементом
+    temp := ar[0];
+    ar[0] := ar[i];
+    ar[i] := temp;
+
+    // Восстанавливаем кучу
+    sift_down2(ar, i, 0);
+  end;
+end;
+
+// Процедура sift_down2 с i-го элемента для TRealArray
+procedure sift_down2(var ar: TRealArray; n, i: Integer); overload;
+var
+  k, k1: Integer;
+  x: Real;
+begin
+  x := ar[i];
+  k := (i shl 1) + 1;
+
+  while k < n do
+  begin
+    k1 := k + 1;
+
+    if (k1 < n) and (ar[k1] > ar[k]) then
+      k := k1;
+
+    if x < ar[k] then
+    begin
+      ar[i] := ar[k];
+      i := k;
+      k := (i shl 1) + 1;
+    end
+    else
+      Break;
+  end;
+
+  ar[i] := x;
+end;
+
+// Процедура heapsort2 для TRealArray
+procedure heapsort2(var ar: TRealArray); overload;
+var
+  n, i: Integer;
+  temp: Real;
+begin
+  n := Length(ar);
+
+  for i := (n shr 1) - 1 downto 0 do
+    sift_down2(ar, n, i);
+
+  for i := n - 1 downto 1 do
+  begin
+    temp := ar[0];
+    ar[0] := ar[i];
+    ar[i] := temp;
+
+    sift_down2(ar, i, 0);
+  end;
+end;
+
+// Процедура sift_down2 с i-го элемента для TCharArray
+procedure sift_down2(var ar: TCharArray; n, i: Integer); overload;
+var
+  k, k1: Integer;
+  x: AnsiChar;
+begin
+  x := ar[i];
+  k := (i shl 1) + 1;
+
+  while k < n do
+  begin
+    k1 := k + 1;
+
+    if (k1 < n) and (ar[k1] > ar[k]) then
+      k := k1;
+
+    if x < ar[k] then
+    begin
+      ar[i] := ar[k];
+      i := k;
+      k := (i shl 1) + 1;
+    end
+    else
+      Break;
+  end;
+
+  ar[i] := x;
+end;
+
+// Процедура heapsort2 для TCharArray
+procedure heapsort2(var ar: TCharArray); overload;
+var
+  n, i: Integer;
+  temp: AnsiChar;
+begin
+  n := Length(ar);
+
+  for i := (n shr 1) - 1 downto 0 do
+    sift_down2(ar, n, i);
+
+  for i := n - 1 downto 1 do
+  begin
+    temp := ar[0];
+    ar[0] := ar[i];
+    ar[i] := temp;
+
+    sift_down2(ar, i, 0);
+  end;
 end;
 
 end.

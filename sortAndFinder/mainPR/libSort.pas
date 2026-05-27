@@ -5,6 +5,7 @@ interface
 uses
   System.SysUtils,
   service,
+  math,
   windows;
 
 // ======================================
@@ -96,6 +97,27 @@ procedure heapsort1(var m: TRealArray); overload;
 
 procedure sift_down1(var a: TCharArray; s: UInt32); overload;
 procedure heapsort1(var m: TCharArray); overload;
+
+procedure sift_down2(var ar: TIntArray; n, i: Integer); overload;
+procedure heapsort2(var ar: TIntArray); overload;
+
+procedure sift_down2(var ar: TRealArray; n, i: Integer); overload;
+procedure heapsort2(var ar: TRealArray); overload;
+
+procedure sift_down2(var ar: TCharArray; n, i: Integer); overload;
+procedure heapsort2(var ar: TCharArray); overload;
+
+procedure SuperSort(var ar: TIntArray; L: Integer; R: Integer); overload;
+function FindMin(var ar: TIntArray): Integer; overload;
+function FindMax(var ar: TIntArray): Integer; overload;
+
+procedure SuperSort(var ar: TCharArray; L: Integer; R: Integer); overload;
+function FindMin(var ar: TCharArray): Integer; overload;
+function FindMax(var ar: TCharArray): Integer; overload;
+
+procedure SuperSort(var Ar: TRealArray; L, R: Real; Digits: Integer = 3); overload;
+function FindMin(var ar: TRealArray): real; overload;
+function FindMax(var ar: TRealArray): real; overload;
 
 implementation
 
@@ -1061,41 +1083,45 @@ begin
   end;
 end;
 
-
-procedure sift_down2(var ar: TIntArray; n, i: Integer);
+// Процедура sift_down2 с i-го элемента для TIntArray
+procedure sift_down2(var ar: TIntArray; n, i: Integer); overload;
 var
-  largest, left, right, temp: Integer;
+  k, k1: Integer;
+  x: Integer;
 begin
-  while True do
+  x := ar[i];
+  k := (i shl 1) + 1;  // левый ребенок
+
+  while k < n do
   begin
-    largest := i;
-    left := (i shl 1) + 1;
-    right := (i shl 1) + 2;
+    k1 := k + 1;  // правый ребенок
 
-    if (left < n) and (ar[left] > ar[largest]) then
-      largest := left;
+    // Выбираем большего из детей
+    if (k1 < n) and (ar[k1] > ar[k]) then
+      k := k1;
 
-    if (right < n) and (ar[right] > ar[largest]) then
-      largest := right;
-
-    if largest = i then
+    // Если ребенок больше сохраненного значения
+    if x < ar[k] then
+    begin
+      ar[i] := ar[k];
+      i := k;
+      k := (i shl 1) + 1;
+    end
+    else
       Break;
-
-    temp := ar[i];
-    ar[i] := ar[largest];
-    ar[largest] := temp;
-
-    i := largest;
   end;
+
+  ar[i] := x;
 end;
 
-procedure heapsort2(var ar: TIntArray);
+// Процедура heapsort2 для TIntArray
+procedure heapsort2(var ar: TIntArray); overload;
 var
   n, i, temp: Integer;
 begin
   n := Length(ar);
 
-  // Этап 1: Построение кучи через sift_down (от последнего родителя к корню)
+  // Этап 1: Построение кучи через sift_down
   for i := (n shr 1) - 1 downto 0 do
     sift_down2(ar, n, i);
 
@@ -1109,6 +1135,293 @@ begin
 
     // Восстанавливаем кучу
     sift_down2(ar, i, 0);
+  end;
+end;
+
+// Процедура sift_down2 с i-го элемента для TRealArray
+procedure sift_down2(var ar: TRealArray; n, i: Integer); overload;
+var
+  k, k1: Integer;
+  x: Real;
+begin
+  x := ar[i];
+  k := (i shl 1) + 1;
+
+  while k < n do
+  begin
+    k1 := k + 1;
+
+    if (k1 < n) and (ar[k1] > ar[k]) then
+      k := k1;
+
+    if x < ar[k] then
+    begin
+      ar[i] := ar[k];
+      i := k;
+      k := (i shl 1) + 1;
+    end
+    else
+      Break;
+  end;
+
+  ar[i] := x;
+end;
+
+// Процедура heapsort2 для TRealArray
+procedure heapsort2(var ar: TRealArray); overload;
+var
+  n, i: Integer;
+  temp: Real;
+begin
+  n := Length(ar);
+
+  for i := (n shr 1) - 1 downto 0 do
+    sift_down2(ar, n, i);
+
+  for i := n - 1 downto 1 do
+  begin
+    temp := ar[0];
+    ar[0] := ar[i];
+    ar[i] := temp;
+
+    sift_down2(ar, i, 0);
+  end;
+end;
+
+// Процедура sift_down2 с i-го элемента для TCharArray
+procedure sift_down2(var ar: TCharArray; n, i: Integer); overload;
+var
+  k, k1: Integer;
+  x: AnsiChar;
+begin
+  x := ar[i];
+  k := (i shl 1) + 1;
+
+  while k < n do
+  begin
+    k1 := k + 1;
+
+    if (k1 < n) and (ar[k1] > ar[k]) then
+      k := k1;
+
+    if x < ar[k] then
+    begin
+      ar[i] := ar[k];
+      i := k;
+      k := (i shl 1) + 1;
+    end
+    else
+      Break;
+  end;
+
+  ar[i] := x;
+end;
+
+// Процедура heapsort2 для TCharArray
+procedure heapsort2(var ar: TCharArray); overload;
+var
+  n, i: Integer;
+  temp: AnsiChar;
+begin
+  n := Length(ar);
+
+  for i := (n shr 1) - 1 downto 0 do
+    sift_down2(ar, n, i);
+
+  for i := n - 1 downto 1 do
+  begin
+    temp := ar[0];
+    ar[0] := ar[i];
+    ar[i] := temp;
+
+    sift_down2(ar, i, 0);
+  end;
+end;
+
+
+function FindMax(var ar: TIntArray): Integer; overload;
+var
+  i: Integer;
+begin
+  Result := low(Integer);
+  for i := 0 to high(ar) do
+  begin
+    if (ar[i] > Result) then
+      Result := ar[i];
+  end;
+end;
+
+function FindMin(var ar: TIntArray): Integer; overload;
+var
+  i: Integer;
+begin
+  Result := High(Integer);
+  for i := 0 to high(ar) do
+  begin
+    if (ar[i] < Result) then
+      Result := ar[i];
+  end;
+end;
+
+// Процедура с выделением доп.памяти.
+procedure SuperSort(var ar: TIntArray; L: Integer; R: Integer); overload;
+var
+  addedArray: TIntArray;
+  n, i, shift, j: UInt32;
+begin
+  // n := Length(ar);
+  setLength(addedArray, R - L + 1);
+
+  for i := 0 to high(ar) do
+  begin
+    // writeln(i);
+    Inc(addedArray[ar[i] - L]);
+  end;
+
+  shift := 0;
+
+  for i := 0 to R - L do
+  begin
+    // writeln(i);
+    for j := 1 to addedArray[i] do
+    begin
+      // writeln(i, ' ', j, ' ', shift, ' ');
+      ar[j + shift - 1] := i + L;
+    end;
+    Inc(shift, addedArray[i]);
+
+  end;
+end;
+
+function FindMax(var ar: TCharArray): Integer; overload;
+var
+  i: Integer;
+begin
+  Result := low(Integer);
+  for i := 0 to high(ar) do
+  begin
+    if (ord(ar[i]) > Result) then
+      Result := ord(ar[i]);
+  end;
+end;
+
+function FindMin(var ar: TCharArray): Integer; overload;
+var
+  i: Integer;
+begin
+  Result := High(Integer);
+  for i := 0 to high(ar) do
+  begin
+    if (ord(ar[i]) < Result) then
+      Result := ord(ar[i]);
+  end;
+end;
+
+// Процедура с выделением доп.памяти.
+procedure SuperSort(var ar: TCharArray; L: Integer; R: Integer); overload;
+var
+  addedArray: TIntArray;
+  n, i, shift, j: UInt32;
+begin
+  // n := Length(ar);
+  setLength(addedArray, R - L + 1);
+
+  for i := 0 to high(ar) do
+  begin
+    // writeln(i);
+    Inc(addedArray[ord(ar[i]) - L]);
+  end;
+
+  shift := 0;
+
+  for i := 0 to R - L do
+  begin
+    // writeln(i);
+    for j := 1 to addedArray[i] do
+    begin
+      // writeln(i, ' ', j, ' ', shift, ' ');
+      ar[j + shift - 1] := AnsiChar(i + L);
+    end;
+    Inc(shift, addedArray[i]);
+
+  end;
+end;
+
+// Вспомогательная функция для масштабирования
+function ScaleToInt(Value: Real; Digits: Integer): Integer;
+begin
+  Result := Round(Value * IntPower(10, Digits));
+end;
+
+// Процедура сортировки для вещественных чисел
+procedure SuperSort(var Ar: TRealArray; L, R: Real; Digits: Integer = 3); overload;
+var
+  CountArray: TIntArray;
+  i, j, Shift, Index, ScaledVal: Integer;
+  Scale: Real;
+  IntL, IntR: Integer;
+begin
+  if Length(Ar) = 0 then Exit;
+
+  Scale := IntPower(10, Digits);
+  IntL := ScaleToInt(L, Digits);
+  IntR := ScaleToInt(R, Digits);
+
+  // Выделяем память под массив подсчёта
+  SetLength(CountArray, IntR - IntL + 1);
+
+  // Инициализация (на всякий случай, хотя SetLength обычно обнуляет)
+  for i := 0 to High(CountArray) do
+    CountArray[i] := 0;
+
+  // 1. Подсчёт вхождений
+  for i := 0 to High(Ar) do
+  begin
+    ScaledVal := ScaleToInt(Ar[i], Digits);
+
+    // Проверка границ: если значение выходит за [L, R], пропускаем или обрабатываем ошибку
+    if (ScaledVal < IntL) or (ScaledVal > IntR) then
+      Continue;
+
+    Index := ScaledVal - IntL;
+    Inc(CountArray[Index]);
+  end;
+
+  // 2. Восстановление отсортированного массива
+  Shift := 0;
+  for i := 0 to High(CountArray) do
+  begin
+    for j := 1 to CountArray[i] do
+    begin
+      // Обратное масштабирование: (индекс + сдвиг) / 10^digits
+      Ar[Shift] := (i + IntL) / Scale;
+      Inc(Shift);
+    end;
+  end;
+end;
+
+
+function FindMax(var ar: TRealArray): real; overload;
+var
+  i: Integer;
+begin
+  Result := low(Integer);
+  for i := 0 to high(ar) do
+  begin
+    if (ar[i] > Result) then
+      Result := ar[i];
+  end;
+end;
+
+function FindMin(var ar: TRealArray): real; overload;
+var
+  i: Integer;
+begin
+  Result := High(Integer);
+  for i := 0 to high(ar) do
+  begin
+    if (ar[i] < Result) then
+      Result := ar[i];
   end;
 end;
 

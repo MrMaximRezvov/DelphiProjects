@@ -316,6 +316,55 @@ begin
         WriteLn('Выполнение завершено успешно.');
         WriteLn('Время выполнения: ', ElapsedMs:0:3, ' ms');
       end
+
+      else if SameText(Cmd, 'heap_sift_down') then
+      begin
+        QueryPerformanceCounter(StartTime);
+
+        if G_Type = 0 then
+          BuildHeap(IntArr, Length(IntArr))
+        else if G_Type = 1 then
+          BuildHeap(RealArr, Length(RealArr))
+        else if G_Type = 2 then
+          BuildHeap(CharArr, Length(CharArr));
+
+        QueryPerformanceCounter(EndTime);
+        ElapsedMs := ((EndTime - StartTime) * 1000.0) / QueryFreq;
+        WriteLn('Выполнение завершено успешно.');
+        WriteLn('Время выполнения: ', ElapsedMs:0:3, ' ms');
+      end
+      else if SameText(Cmd, 'heapsort2') then
+      begin
+        QueryPerformanceCounter(StartTime);
+
+        if G_Type = 0 then
+          heapsort2(IntArr)
+        else if G_Type = 1 then
+          heapsort2(RealArr)
+        else if G_Type = 2 then
+          heapsort2(CharArr);
+
+        QueryPerformanceCounter(EndTime);
+        ElapsedMs := ((EndTime - StartTime) * 1000.0) / QueryFreq;
+        WriteLn('Выполнение завершено успешно.');
+        WriteLn('Время выполнения: ', ElapsedMs:0:3, ' ms');
+      end
+      else if SameText(Cmd, 'supersort') then
+      begin
+        QueryPerformanceCounter(StartTime);
+
+        if G_Type = 0 then
+          SuperSort(IntArr, FindMin(IntArr), FindMax(IntArr))
+           else if G_Type = 1 then
+           SuperSort(RealArr, FindMin(RealArr), FindMax(RealArr))
+        else if G_Type = 2 then
+          SuperSort(CharArr, 0, 255);
+
+        QueryPerformanceCounter(EndTime);
+        ElapsedMs := ((EndTime - StartTime) * 1000.0) / QueryFreq;
+        WriteLn('Выполнение завершено успешно.');
+        WriteLn('Время выполнения: ', ElapsedMs:0:3, ' ms');
+      end
       else
         WriteLn('Команда не распознана.');
 
